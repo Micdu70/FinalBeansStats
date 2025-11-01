@@ -30,7 +30,7 @@
 
 Programme simple pour générer des statistiques pour le jeu FinalBeans. Lit les logs du jeu pour suivre votre progression.
 
-![FinalBeans Stats Light Theme](https://raw.githubusercontent.com/Micdu70/FinalBeansStats/main/Resources/splash.png)
+![FinalBeans Season 2 Artwork](https://raw.githubusercontent.com/Micdu70/FinalBeansStats/main/Properties/FS2_Artwork.png)
 
 # Table des matières
   - [**Téléchargement**](#téléchargement)

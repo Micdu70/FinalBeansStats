@@ -30,7 +30,7 @@
 
 Simple program to generate stats for the game FinalBeans. Reads the games log file to track how you are doing.
 
-![FinalBeans Stats Welcome Logo](https://raw.githubusercontent.com/Micdu70/FinalBeansStats/main/Resources/splash.png)
+![FinalBeans Season 2 Artwork](https://raw.githubusercontent.com/Micdu70/FinalBeansStats/main/Properties/FS2_Artwork.png)
 
 # Table of Contents
   - [**Download**](#download)
