@@ -1,0 +1,1279 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9DDF7BD8-3C77-43D4-A229-F79CE082C6E8}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>FinalBeansStats</RootNamespace>
+    <AssemblyName>FinalBeansStats</AssemblyName>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>false</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <ApplicationIcon>fbstats.ico</ApplicationIcon>
+    <LangVersion>7.3</LangVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;Debug</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowedReferenceRelatedFileExtensions>.allowedextension</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>embedded</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowedReferenceRelatedFileExtensions>.allowedextension</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleaseUpdate|AnyCPU' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>embedded</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE;AllowUpdate</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowedReferenceRelatedFileExtensions>.allowedextension</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;Debug</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowedReferenceRelatedFileExtensions>.allowedextension</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>embedded</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowedReferenceRelatedFileExtensions>.allowedextension</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'ReleaseUpdate|x64' ">
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>embedded</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE;AllowUpdate</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <Prefer32bit>false</Prefer32bit>
+    <AllowedReferenceRelatedFileExtensions>.allowedextension</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Controls\ImageComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Graph.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\Grid.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\RoundLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TimerAbsolute.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\TransparentLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Entities\ApiWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Entities\GameStateWatcher.cs" />
+    <Compile Include="Entities\ImageItem.cs" />
+    <Compile Include="Entities\Json.cs" />
+    <Compile Include="Entities\LevelType.cs" />
+    <Compile Include="Entities\LineReader.cs" />
+    <Compile Include="Entities\LevelTimeLimit.cs" />
+    <Compile Include="Entities\Multilingual.cs" />
+    <Compile Include="Entities\PersonalBestLog.cs" />
+    <Compile Include="Entities\Profiles.cs" />
+    <Compile Include="Entities\ServerConnectionLog.cs" />
+    <Compile Include="Entities\ServerPingWatcher.cs" />
+    <Compile Include="Entities\StatSummary.cs" />
+    <Compile Include="Entities\Toast.cs" />
+    <Compile Include="Entities\ToastBuilder.cs" />
+    <Compile Include="Entities\ToastManager.cs" />
+    <Compile Include="Entities\ToastThemeBuilder.cs" />
+    <Compile Include="Entities\UserSettings.cs" />
+    <Compile Include="Entities\Utils.cs" />
+    <Compile Include="Enums\Enums.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EditShows.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\EditShows.Designer.cs">
+      <DependentUpon>EditShows.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EditProfiles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\EditProfiles.Designer.cs">
+      <DependentUpon>EditProfiles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FilterCustomRange.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\FilterCustomRange.Designer.cs">
+      <DependentUpon>FilterCustomRange.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DownloadProgress.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\DownloadProgress.Designer.cs">
+      <DependentUpon>DownloadProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\EunmaToast.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\EunmaToast.Designer.cs">
+      <DependentUpon>EunmaToast.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ChangePlayerName.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\ChangePlayerName.Designer.cs">
+      <DependentUpon>ChangePlayerName.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LevelStatsDisplay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\LevelStatsDisplay.Designer.cs">
+      <DependentUpon>LevelStatsDisplay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\InitFinalBeansStats.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\InitFinalBeansStats.Designer.cs">
+      <DependentUpon>InitFinalBeansStats.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LevelDetails.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\LevelDetails.Designer.cs">
+      <DependentUpon>LevelDetails.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Overlay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Overlay.Designer.cs">
+      <DependentUpon>Overlay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Settings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Settings.Designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SplashForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\SplashForm.Designer.cs">
+      <DependentUpon>SplashForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Stats.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\Stats.Designer.cs">
+      <DependentUpon>Stats.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entities\LogFileWatcher.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Entities\LevelStats.cs" />
+    <Compile Include="Entities\ZipWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\WinStatsDisplay.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\WinStatsDisplay.Designer.cs">
+      <DependentUpon>WinStatsDisplay.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Views\EditShows.resx">
+      <DependentUpon>EditShows.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\EditProfiles.resx">
+      <DependentUpon>EditProfiles.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\FilterCustomRange.resx">
+      <DependentUpon>FilterCustomRange.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\DownloadProgress.resx">
+      <DependentUpon>DownloadProgress.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\EunmaToast.resx">
+      <DependentUpon>EunmaToast.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\ChangePlayerName.resx">
+      <DependentUpon>ChangePlayerName.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\LevelStatsDisplay.resx">
+      <DependentUpon>LevelStatsDisplay.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\InitFinalBeansStats.resx">
+      <DependentUpon>InitFinalBeansStats.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\LevelDetails.resx">
+      <DependentUpon>LevelDetails.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Overlay.resx">
+      <DependentUpon>Overlay.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Settings.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\SplashForm.resx">
+      <DependentUpon>SplashForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\Stats.resx">
+      <DependentUpon>Stats.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\WinStatsDisplay.resx">
+      <DependentUpon>WinStatsDisplay.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\font\PretendardJP-Medium.ttf" />
+    <EmbeddedResource Include="Resources\font\TitanOne-Regular.ttf" />
+    <EmbeddedResource Include="Resources\font\NotoSansSC-Regular.otf" />
+    <EmbeddedResource Include="Resources\overlay\background.png" />
+    <EmbeddedResource Include="Resources\overlay\tab_unselected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\player_icon.png" />
+    <None Include="Resources\pc_icon.png" />
+    <None Include="Resources\ps_icon.png" />
+    <None Include="Resources\xbox_icon.png" />
+    <None Include="Resources\switch_icon.png" />
+    <None Include="Resources\mobile_icon.png" />
+    <None Include="Resources\stat_icon.png" />
+    <None Include="Resources\stat_gray_icon.png" />
+    <None Include="Resources\main_icon.png" />
+    <None Include="Resources\main_120_icon.png" />
+    <None Include="Resources\reddit_icon.png" />
+    <None Include="Resources\roll_off_club_icon.png" />
+    <None Include="Resources\lost_temple_analyzer_icon.png" />
+    <None Include="Resources\export.png" />
+    <None Include="Resources\export_gray.png" />
+    <None Include="Resources\delete.png" />
+    <None Include="Resources\delete_gray.png" />
+    <None Include="Resources\move.png" />
+    <None Include="Resources\move_gray.png" />
+    <None Include="Resources\update.png" />
+    <None Include="Resources\update_gray.png" />
+    <None Include="Resources\fall.ico" />
+    <None Include="Resources\fall2.ico" />
+    <None Include="Resources\medal_silver.png" />
+    <None Include="Resources\medal_silver_original.png" />
+    <None Include="Resources\medal_silver_grid_icon.png" />
+    <None Include="Resources\medal_pink.png" />
+    <None Include="Resources\medal_pink_original.png" />
+    <None Include="Resources\medal_pink_grid_icon.png" />
+    <None Include="Resources\medal_gold.png" />
+    <None Include="Resources\medal_gold_original.png" />
+    <None Include="Resources\medal_gold_grid_icon.png" />
+    <None Include="Resources\medal_eliminated.png" />
+    <None Include="Resources\medal_eliminated_original.png" />
+    <None Include="Resources\medal_eliminated_grid_icon.png" />
+    <None Include="Resources\medal_bronze.png" />
+    <None Include="Resources\medal_bronze_original.png" />
+    <None Include="Resources\medal_bronze_grid_icon.png" />
+    <None Include="Resources\number_0.png" />
+    <None Include="Resources\number_1.png" />
+    <None Include="Resources\number_2.png" />
+    <None Include="Resources\number_3.png" />
+    <None Include="Resources\number_4.png" />
+    <None Include="Resources\number_5.png" />
+    <None Include="Resources\number_6.png" />
+    <None Include="Resources\number_7.png" />
+    <None Include="Resources\number_8.png" />
+    <None Include="Resources\number_9.png" />
+    <None Include="Resources\number_10.png" />
+    <None Include="Resources\github_icon.png" />
+    <None Include="Resources\github_gray_icon.png" />
+    <None Include="Resources\github_update_icon.png" />
+    <None Include="Resources\github_update_gray_icon.png" />
+    <None Include="Resources\profile_icon.png" />
+    <None Include="Resources\profile_gray_icon.png" />
+    <None Include="Resources\profile2_icon.png" />
+    <None Include="Resources\profile2_linked_icon.png" />
+    <None Include="Resources\profile2_unlinked_icon.png" />
+    <None Include="Resources\filter_icon.png" />
+    <None Include="Resources\filter_gray_icon.png" />
+    <None Include="Resources\final_icon.png" />
+    <None Include="Resources\final_gray_icon.png" />
+    <None Include="Resources\setting_icon.png" />
+    <None Include="Resources\setting_gray_icon.png" />
+    <None Include="Resources\splash.png" />
+    <None Include="Resources\crown_icon.png" />
+    <None Include="Resources\crown_grid_icon.png" />
+    <None Include="Resources\shards_icon.png" />
+    <None Include="Resources\shards_grid_icon.png" />
+    <None Include="Resources\kudos_icon.png" />
+    <None Include="Resources\clock_icon.png" />
+    <None Include="Resources\clock_gray_icon.png" />
+    <None Include="Resources\language_icon.png" />
+    <None Include="Resources\checkmark_icon.png" />
+    <None Include="Resources\uncheckmark_icon.png" />
+    <None Include="Resources\round_icon.png" />
+    <None Include="Resources\round_gray_icon.png" />
+    <None Include="Resources\show_icon.png" />
+    <None Include="Resources\ping_100_icon.png" />
+    <None Include="Resources\ping_200_icon.png" />
+    <None Include="Resources\report_icon.png" />
+    <None Include="Resources\position_ne_off_icon.png" />
+    <None Include="Resources\position_nw_off_icon.png" />
+    <None Include="Resources\position_se_off_icon.png" />
+    <None Include="Resources\position_sw_off_icon.png" />
+    <None Include="Resources\position_ne_on_icon.png" />
+    <None Include="Resources\position_nw_on_icon.png" />
+    <None Include="Resources\position_se_on_icon.png" />
+    <None Include="Resources\position_sw_on_icon.png" />
+    <None Include="Resources\switch_lock_icon.png" />
+    <None Include="Resources\switch_unlock_icon.png" />
+    <None Include="Resources\link_icon.png" />
+    <None Include="Resources\link_on_icon.png" />
+    <None Include="Resources\link_gray_icon.png" />
+    <None Include="Resources\transform_icon.png" />
+    <None Include="Resources\transform_gray_icon.png" />
+    <None Include="Resources\refresh_icon.png" />
+    <None Include="Resources\bar_plot_icon.png" />
+    <None Include="Resources\bar_plot_gray_icon.png" />
+    <None Include="Resources\bar_plot_teal_icon.png" />
+    <None Include="Resources\calendar_icon.png" />
+    <None Include="Resources\calendar_gray_icon.png" />
+    <None Include="Resources\calendar_off_icon.png" />
+    <None Include="Resources\calendar_on_icon.png" />
+    <None Include="Resources\casual_show_icon.png" />
+    <None Include="Resources\lollipop_plot_icon.png" />
+    <None Include="Resources\lollipop_plot_gray_icon.png" />
+    <None Include="Resources\lollipop_plot_teal_icon.png" />
+    <None Include="Resources\scatter_plot_icon.png" />
+    <None Include="Resources\scatter_plot_gray_icon.png" />
+    <None Include="Resources\scatter_plot_teal_icon.png" />
+    <None Include="Resources\shutdown_gray_icon.png" />
+    <None Include="Resources\shutdown_icon.png" />
+    <None Include="Resources\left_button_icon.png" />
+    <None Include="Resources\right_button_icon.png" />
+    <None Include="Resources\first_button_icon.png" />
+    <None Include="Resources\last_button_icon.png" />
+    <None Include="Resources\loading_1.png" />
+    <None Include="Resources\loading_2.png" />
+    <None Include="Resources\loading_3.png" />
+    <None Include="Resources\loading_4.png" />
+    <None Include="Resources\loading_5.png" />
+    <None Include="Resources\loading_6.png" />
+    <None Include="Resources\loading_7.png" />
+    <None Include="Resources\loading_8.png" />
+    <None Include="Resources\loading_9.png" />
+    <None Include="Resources\loading_10.png" />
+    <None Include="Resources\loading_1_dark.png" />
+    <None Include="Resources\loading_2_dark.png" />
+    <None Include="Resources\loading_3_dark.png" />
+    <None Include="Resources\loading_4_dark.png" />
+    <None Include="Resources\loading_5_dark.png" />
+    <None Include="Resources\loading_6_dark.png" />
+    <None Include="Resources\loading_7_dark.png" />
+    <None Include="Resources\loading_8_dark.png" />
+    <None Include="Resources\loading_9_dark.png" />
+    <None Include="Resources\loading_10_dark.png" />
+    <None Include="Resources\round_icon\icon_Unknown.png" />
+    <None Include="Resources\round_icon\icon_Unknown_big.png" />
+    <None Include="Resources\round_icon\creative\icon_Creative.png" />
+    <None Include="Resources\round_icon\creative\icon_Gauntlet.png" />
+    <None Include="Resources\round_icon\final\icon_Blast_Ball.png" />
+    <None Include="Resources\round_icon\final\icon_FallMountain.png" />
+    <None Include="Resources\round_icon\final\icon_Hex-A-Ring.png" />
+    <None Include="Resources\round_icon\final\icon_Hex-A-Terrestrial.png" />
+    <None Include="Resources\round_icon\final\icon_HexAGone.png" />
+    <None Include="Resources\round_icon\final\icon_JumpShowdown.png" />
+    <None Include="Resources\round_icon\final\icon_Kraken_Slam.png" />
+    <None Include="Resources\round_icon\final\icon_LostTemple.png" />
+    <None Include="Resources\round_icon\final\icon_RollOff.png" />
+    <None Include="Resources\round_icon\final\icon_RoyalFumble.png" />
+    <None Include="Resources\round_icon\final\icon_ThinIce.png" />
+    <None Include="Resources\round_icon\final\icon_TipToeFinale.png" />
+    <None Include="Resources\round_icon\hunt\icon_Airtime.png" />
+    <None Include="Resources\round_icon\hunt\icon_Bean_Hill_Zone.png" />
+    <None Include="Resources\round_icon\hunt\icon_Bounce_Party.png" />
+    <None Include="Resources\round_icon\hunt\icon_BubbleTrouble.png" />
+    <None Include="Resources\round_icon\hunt\icon_ButtonBashers.png" />
+    <None Include="Resources\round_icon\hunt\icon_Frantic_Factory.png" />
+    <None Include="Resources\round_icon\hunt\icon_HoopsieLegends.png" />
+    <None Include="Resources\round_icon\hunt\icon_Hoop_Chute.png" />
+    <None Include="Resources\round_icon\hunt\icon_Leading_Light.png" />
+    <None Include="Resources\round_icon\hunt\icon_PegwinPoolParty.png" />
+    <None Include="Resources\round_icon\hunt\icon_TailTag.png" />
+    <None Include="Resources\round_icon\hunt\icon_Volleyfall.png" />
+    <None Include="Resources\round_icon\invisibeans\icon_Sweet_Thieves.png" />
+    <None Include="Resources\round_icon\invisibeans\icon_Treat_Thieves.png" />
+    <None Include="Resources\round_icon\logic\icon_Pixel_Painters.png" />
+    <None Include="Resources\round_icon\logic\icon_PerfectMatch.png" />
+    <None Include="Resources\round_icon\logic\icon_SumFruit.png" />
+    <None Include="Resources\round_icon\race\icon_BigFans.png" />
+    <None Include="Resources\round_icon\race\icon_CosmicHighway.png" />
+    <None Include="Resources\round_icon\race\icon_DizzyHeights.png" />
+    <None Include="Resources\round_icon\race\icon_DoorDash.png" />
+    <None Include="Resources\round_icon\race\icon_FreezyPeak.png" />
+    <None Include="Resources\round_icon\race\icon_FruitChute.png" />
+    <None Include="Resources\round_icon\race\icon_Full_Tilt.png" />
+    <None Include="Resources\round_icon\race\icon_GateCrash.png" />
+    <None Include="Resources\round_icon\race\icon_HitParade.png" />
+    <None Include="Resources\round_icon\race\icon_KnightFever.png" />
+    <None Include="Resources\round_icon\race\icon_LilyLeapers.png" />
+    <None Include="Resources\round_icon\race\icon_Party_Promenade.png" />
+    <None Include="Resources\round_icon\race\icon_Pipe_Dream.png" />
+    <None Include="Resources\round_icon\race\icon_Puzzle_Path.png" />
+    <None Include="Resources\round_icon\race\icon_RollOn.png" />
+    <None Include="Resources\round_icon\race\icon_SeeSaw.png" />
+    <None Include="Resources\round_icon\race\icon_ShortCircuit.png" />
+    <None Include="Resources\round_icon\race\icon_SkiFall.png" />
+    <None Include="Resources\round_icon\race\icon_SkylineStumble.png" />
+    <None Include="Resources\round_icon\race\icon_SlimeClimb.png" />
+    <None Include="Resources\round_icon\race\icon_SpaceRace.png" />
+    <None Include="Resources\round_icon\race\icon_Speed_Circuit.png" />
+    <None Include="Resources\round_icon\race\icon_Speed_Slider.png" />
+    <None Include="Resources\round_icon\race\icon_Starchart.png" />
+    <None Include="Resources\round_icon\race\icon_TheSlimescraper.png" />
+    <None Include="Resources\round_icon\race\icon_TheWhirlygig.png" />
+    <None Include="Resources\round_icon\race\icon_TipToe.png" />
+    <None Include="Resources\round_icon\race\icon_Track_Attack.png" />
+    <None Include="Resources\round_icon\race\icon_TreetopTumble.png" />
+    <None Include="Resources\round_icon\race\icon_TundraRun.png" />
+    <None Include="Resources\round_icon\race\icon_WallGuys.png" />
+    <None Include="Resources\round_icon\survival\icon_BigShots.png" />
+    <None Include="Resources\round_icon\survival\icon_Blastlantis.png" />
+    <None Include="Resources\round_icon\survival\icon_BlockParty.png" />
+    <None Include="Resources\round_icon\survival\icon_HoverboardHeroes.png" />
+    <None Include="Resources\round_icon\survival\icon_Hyperdrive_Heroes.png" />
+    <None Include="Resources\round_icon\survival\icon_JumpClub.png" />
+    <None Include="Resources\round_icon\survival\icon_RollOut.png" />
+    <None Include="Resources\round_icon\survival\icon_SnowballSurvival.png" />
+    <None Include="Resources\round_icon\survival\icon_StompinGround.png" />
+    <None Include="Resources\round_icon\survival\icon_The_Swiveller.png" />
+    <None Include="Resources\round_icon\team\icon_Basketfall.png" />
+    <None Include="Resources\round_icon\team\icon_EggScramble.png" />
+    <None Include="Resources\round_icon\team\icon_EggSiege.png" />
+    <None Include="Resources\round_icon\team\icon_FallBall.png" />
+    <None Include="Resources\round_icon\team\icon_Hoarders.png" />
+    <None Include="Resources\round_icon\team\icon_HoopsieDaisy.png" />
+    <None Include="Resources\round_icon\team\icon_Jinxed.png" />
+    <None Include="Resources\round_icon\team\icon_PegwinPursuit.png" />
+    <None Include="Resources\round_icon\team\icon_PowerTrip.png" />
+    <None Include="Resources\round_icon\team\icon_RocknRoll.png" />
+    <None Include="Resources\round_icon\team\icon_SnowyScrap.png" />
+    <None Include="Resources\round_icon\team\icon_TeamTailTag.png" />
+    <None Include="Resources\round_icon\creative\icon_Creative_big.png" />
+    <None Include="Resources\round_icon\creative\icon_Gauntlet_big.png" />
+    <None Include="Resources\round_icon\final\icon_Blast_Ball_big.png" />
+    <None Include="Resources\round_icon\final\icon_FallMountain_big.png" />
+    <None Include="Resources\round_icon\final\icon_Hex-A-Ring_big.png" />
+    <None Include="Resources\round_icon\final\icon_Hex-A-Terrestrial_big.png" />
+    <None Include="Resources\round_icon\final\icon_HexAGone_big.png" />
+    <None Include="Resources\round_icon\final\icon_JumpShowdown_big.png" />
+    <None Include="Resources\round_icon\final\icon_Kraken_Slam_big.png" />
+    <None Include="Resources\round_icon\final\icon_LostTemple_big.png" />
+    <None Include="Resources\round_icon\final\icon_RollOff_big.png" />
+    <None Include="Resources\round_icon\final\icon_RoyalFumble_big.png" />
+    <None Include="Resources\round_icon\final\icon_ThinIce_big.png" />
+    <None Include="Resources\round_icon\final\icon_TipToeFinale_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_Airtime_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_Bean_Hill_Zone_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_Bounce_Party_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_BubbleTrouble_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_ButtonBashers_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_Frantic_Factory_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_HoopsieLegends_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_Hoop_Chute_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_Leading_Light_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_PegwinPoolParty_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_TailTag_big.png" />
+    <None Include="Resources\round_icon\hunt\icon_Volleyfall_big.png" />
+    <None Include="Resources\round_icon\invisibeans\icon_Sweet_Thieves_big.png" />
+    <None Include="Resources\round_icon\invisibeans\icon_Treat_Thieves_big.png" />
+    <None Include="Resources\round_icon\logic\icon_PerfectMatch_big.png" />
+    <None Include="Resources\round_icon\logic\icon_Pixel_Painters_big.png" />
+    <None Include="Resources\round_icon\logic\icon_SumFruit_big.png" />
+    <None Include="Resources\round_icon\race\icon_BigFans_big.png" />
+    <None Include="Resources\round_icon\race\icon_CosmicHighway_big.png" />
+    <None Include="Resources\round_icon\race\icon_DizzyHeights_big.png" />
+    <None Include="Resources\round_icon\race\icon_DoorDash_big.png" />
+    <None Include="Resources\round_icon\race\icon_FreezyPeak_big.png" />
+    <None Include="Resources\round_icon\race\icon_FruitChute_big.png" />
+    <None Include="Resources\round_icon\race\icon_Full_Tilt_big.png" />
+    <None Include="Resources\round_icon\race\icon_GateCrash_big.png" />
+    <None Include="Resources\round_icon\race\icon_HitParade_big.png" />
+    <None Include="Resources\round_icon\race\icon_KnightFever_big.png" />
+    <None Include="Resources\round_icon\race\icon_LilyLeapers_big.png" />
+    <None Include="Resources\round_icon\race\icon_Party_Promenade_big.png" />
+    <None Include="Resources\round_icon\race\icon_Pipe_Dream_big.png" />
+    <None Include="Resources\round_icon\race\icon_Puzzle_Path_big.png" />
+    <None Include="Resources\round_icon\race\icon_RollOn_big.png" />
+    <None Include="Resources\round_icon\race\icon_SeeSaw_big.png" />
+    <None Include="Resources\round_icon\race\icon_ShortCircuit_big.png" />
+    <None Include="Resources\round_icon\race\icon_SkiFall_big.png" />
+    <None Include="Resources\round_icon\race\icon_SkylineStumble_big.png" />
+    <None Include="Resources\round_icon\race\icon_SlimeClimb_big.png" />
+    <None Include="Resources\round_icon\race\icon_SpaceRace_big.png" />
+    <None Include="Resources\round_icon\race\icon_Speed_Circuit_big.png" />
+    <None Include="Resources\round_icon\race\icon_Speed_Slider_big.png" />
+    <None Include="Resources\round_icon\race\icon_Starchart_big.png" />
+    <None Include="Resources\round_icon\race\icon_TheSlimescraper_big.png" />
+    <None Include="Resources\round_icon\race\icon_TheWhirlygig_big.png" />
+    <None Include="Resources\round_icon\race\icon_TipToe_big.png" />
+    <None Include="Resources\round_icon\race\icon_Track_Attack_big.png" />
+    <None Include="Resources\round_icon\race\icon_TreetopTumble_big.png" />
+    <None Include="Resources\round_icon\race\icon_TundraRun_big.png" />
+    <None Include="Resources\round_icon\race\icon_WallGuys_big.png" />
+    <None Include="Resources\round_icon\survival\icon_BigShots_big.png" />
+    <None Include="Resources\round_icon\survival\icon_Blastlantis_big.png" />
+    <None Include="Resources\round_icon\survival\icon_BlockParty_big.png" />
+    <None Include="Resources\round_icon\survival\icon_HoverboardHeroes_big.png" />
+    <None Include="Resources\round_icon\survival\icon_Hyperdrive_Heroes_big.png" />
+    <None Include="Resources\round_icon\survival\icon_JumpClub_big.png" />
+    <None Include="Resources\round_icon\survival\icon_RollOut_big.png" />
+    <None Include="Resources\round_icon\survival\icon_SnowballSurvival_big.png" />
+    <None Include="Resources\round_icon\survival\icon_StompinGround_big.png" />
+    <None Include="Resources\round_icon\survival\icon_The_Swiveller_big.png" />
+    <None Include="Resources\round_icon\team\icon_Basketfall_big.png" />
+    <None Include="Resources\round_icon\team\icon_EggScramble_big.png" />
+    <None Include="Resources\round_icon\team\icon_EggSiege_big.png" />
+    <None Include="Resources\round_icon\team\icon_FallBall_big.png" />
+    <None Include="Resources\round_icon\team\icon_Hoarders_big.png" />
+    <None Include="Resources\round_icon\team\icon_HoopsieDaisy_big.png" />
+    <None Include="Resources\round_icon\team\icon_Jinxed_big.png" />
+    <None Include="Resources\round_icon\team\icon_PegwinPursuit_big.png" />
+    <None Include="Resources\round_icon\team\icon_PowerTrip_big.png" />
+    <None Include="Resources\round_icon\team\icon_RocknRoll_big.png" />
+    <None Include="Resources\round_icon\team\icon_SnowyScrap_big.png" />
+    <None Include="Resources\round_icon\team\icon_TeamTailTag_big.png" />
+    <None Include="Resources\overlay\background_candycane.png" />
+    <None Include="Resources\overlay\background_coffee.png" />
+    <None Include="Resources\overlay\background_helter_skelter.png" />
+    <None Include="Resources\overlay\background_hex_a_thon.png" />
+    <None Include="Resources\overlay\background_ill_be_slime.png" />
+    <None Include="Resources\overlay\background_mockingbird.png" />
+    <None Include="Resources\overlay\background_monarch.png" />
+    <None Include="Resources\overlay\background_newlove.png" />
+    <None Include="Resources\overlay\background_parade_guy.png" />
+    <None Include="Resources\overlay\background_party_pegwin.png" />
+    <None Include="Resources\overlay\background_penguin.png" />
+    <None Include="Resources\overlay\background_suits_you.png" />
+    <None Include="Resources\overlay\background_sunny_guys.png" />
+    <None Include="Resources\overlay\background_super_mario_bros.png" />
+    <None Include="Resources\overlay\background_super_mario_bros_3.png" />
+    <None Include="Resources\overlay\background_ta_da.png" />
+    <None Include="Resources\overlay\background_timeattack.png" />
+    <None Include="Resources\overlay\background_wallpaper_01.png" />
+    <None Include="Resources\overlay\background_wallpaper_02.png" />
+    <None Include="Resources\overlay\background_wallpaper_03.png" />
+    <None Include="Resources\overlay\background_watermelon.png" />
+    <None Include="Resources\overlay\background_dove.png" />
+    <None Include="Resources\overlay\tab_selected.png" />
+    <None Include="Resources\overlay\tab_unselected_candycane.png" />
+    <None Include="Resources\overlay\tab_unselected_coffee.png" />
+    <None Include="Resources\overlay\tab_unselected_dove.png" />
+    <None Include="Resources\overlay\tab_unselected_helter_skelter.png" />
+    <None Include="Resources\overlay\tab_unselected_hex_a_thon.png" />
+    <None Include="Resources\overlay\tab_unselected_ill_be_slime.png" />
+    <None Include="Resources\overlay\tab_unselected_mockingbird.png" />
+    <None Include="Resources\overlay\tab_unselected_monarch.png" />
+    <None Include="Resources\overlay\tab_unselected_newlove.png" />
+    <None Include="Resources\overlay\tab_unselected_parade_guy.png" />
+    <None Include="Resources\overlay\tab_unselected_party_pegwin.png" />
+    <None Include="Resources\overlay\tab_unselected_penguin.png" />
+    <None Include="Resources\overlay\tab_unselected_suits_you.png" />
+    <None Include="Resources\overlay\tab_unselected_sunny_guys.png" />
+    <None Include="Resources\overlay\tab_unselected_super_mario_bros.png" />
+    <None Include="Resources\overlay\tab_unselected_super_mario_bros_3.png" />
+    <None Include="Resources\overlay\tab_unselected_ta_da.png" />
+    <None Include="Resources\overlay\tab_unselected_timeattack.png" />
+    <None Include="Resources\overlay\tab_unselected_watermelon.png" />
+    <None Include="Resources\overlay\tab_unselected_wallpaper_01.png" />
+    <None Include="Resources\overlay\tab_unselected_wallpaper_02.png" />
+    <None Include="Resources\overlay\tab_unselected_wallpaper_03.png" />
+    <None Include="Resources\country_icon\AD.png" />
+    <None Include="Resources\country_icon\AE.png" />
+    <None Include="Resources\country_icon\AF.png" />
+    <None Include="Resources\country_icon\AG.png" />
+    <None Include="Resources\country_icon\AI.png" />
+    <None Include="Resources\country_icon\AL.png" />
+    <None Include="Resources\country_icon\AM.png" />
+    <None Include="Resources\country_icon\AN.png" />
+    <None Include="Resources\country_icon\AO.png" />
+    <None Include="Resources\country_icon\AQ.png" />
+    <None Include="Resources\country_icon\AR.png" />
+    <None Include="Resources\country_icon\AS.png" />
+    <None Include="Resources\country_icon\AT.png" />
+    <None Include="Resources\country_icon\AU.png" />
+    <None Include="Resources\country_icon\AW.png" />
+    <None Include="Resources\country_icon\AX.png" />
+    <None Include="Resources\country_icon\AZ.png" />
+    <None Include="Resources\country_icon\BA.png" />
+    <None Include="Resources\country_icon\BB.png" />
+    <None Include="Resources\country_icon\BD.png" />
+    <None Include="Resources\country_icon\BE.png" />
+    <None Include="Resources\country_icon\BF.png" />
+    <None Include="Resources\country_icon\BG.png" />
+    <None Include="Resources\country_icon\BH.png" />
+    <None Include="Resources\country_icon\BI.png" />
+    <None Include="Resources\country_icon\BJ.png" />
+    <None Include="Resources\country_icon\BL.png" />
+    <None Include="Resources\country_icon\BM.png" />
+    <None Include="Resources\country_icon\BN.png" />
+    <None Include="Resources\country_icon\BO.png" />
+    <None Include="Resources\country_icon\BR.png" />
+    <None Include="Resources\country_icon\BS.png" />
+    <None Include="Resources\country_icon\BT.png" />
+    <None Include="Resources\country_icon\BW.png" />
+    <None Include="Resources\country_icon\BY.png" />
+    <None Include="Resources\country_icon\BZ.png" />
+    <None Include="Resources\country_icon\CA.png" />
+    <None Include="Resources\country_icon\CC.png" />
+    <None Include="Resources\country_icon\CD.png" />
+    <None Include="Resources\country_icon\CF.png" />
+    <None Include="Resources\country_icon\CG.png" />
+    <None Include="Resources\country_icon\CH.png" />
+    <None Include="Resources\country_icon\CI.png" />
+    <None Include="Resources\country_icon\CK.png" />
+    <None Include="Resources\country_icon\CL.png" />
+    <None Include="Resources\country_icon\CM.png" />
+    <None Include="Resources\country_icon\CN.png" />
+    <None Include="Resources\country_icon\CO.png" />
+    <None Include="Resources\country_icon\CR.png" />
+    <None Include="Resources\country_icon\CU.png" />
+    <None Include="Resources\country_icon\CV.png" />
+    <None Include="Resources\country_icon\CW.png" />
+    <None Include="Resources\country_icon\CX.png" />
+    <None Include="Resources\country_icon\CY.png" />
+    <None Include="Resources\country_icon\CZ.png" />
+    <None Include="Resources\country_icon\DE.png" />
+    <None Include="Resources\country_icon\DJ.png" />
+    <None Include="Resources\country_icon\DK.png" />
+    <None Include="Resources\country_icon\DM.png" />
+    <None Include="Resources\country_icon\DO.png" />
+    <None Include="Resources\country_icon\DZ.png" />
+    <None Include="Resources\country_icon\EC.png" />
+    <None Include="Resources\country_icon\EE.png" />
+    <None Include="Resources\country_icon\EG.png" />
+    <None Include="Resources\country_icon\EH.png" />
+    <None Include="Resources\country_icon\ER.png" />
+    <None Include="Resources\country_icon\ES.png" />
+    <None Include="Resources\country_icon\ET.png" />
+    <None Include="Resources\country_icon\EU.png" />
+    <None Include="Resources\country_icon\FI.png" />
+    <None Include="Resources\country_icon\FJ.png" />
+    <None Include="Resources\country_icon\FK.png" />
+    <None Include="Resources\country_icon\FM.png" />
+    <None Include="Resources\country_icon\FO.png" />
+    <None Include="Resources\country_icon\FR.png" />
+    <None Include="Resources\country_icon\GA.png" />
+    <None Include="Resources\country_icon\GB.png" />
+    <None Include="Resources\country_icon\GD.png" />
+    <None Include="Resources\country_icon\GE.png" />
+    <None Include="Resources\country_icon\GG.png" />
+    <None Include="Resources\country_icon\GH.png" />
+    <None Include="Resources\country_icon\GI.png" />
+    <None Include="Resources\country_icon\GL.png" />
+    <None Include="Resources\country_icon\GM.png" />
+    <None Include="Resources\country_icon\GN.png" />
+    <None Include="Resources\country_icon\GQ.png" />
+    <None Include="Resources\country_icon\GR.png" />
+    <None Include="Resources\country_icon\GS.png" />
+    <None Include="Resources\country_icon\GT.png" />
+    <None Include="Resources\country_icon\GU.png" />
+    <None Include="Resources\country_icon\GW.png" />
+    <None Include="Resources\country_icon\GY.png" />
+    <None Include="Resources\country_icon\HK.png" />
+    <None Include="Resources\country_icon\HN.png" />
+    <None Include="Resources\country_icon\HR.png" />
+    <None Include="Resources\country_icon\HT.png" />
+    <None Include="Resources\country_icon\HU.png" />
+    <None Include="Resources\country_icon\IC.png" />
+    <None Include="Resources\country_icon\ID.png" />
+    <None Include="Resources\country_icon\IE.png" />
+    <None Include="Resources\country_icon\IL.png" />
+    <None Include="Resources\country_icon\IM.png" />
+    <None Include="Resources\country_icon\IN.png" />
+    <None Include="Resources\country_icon\IQ.png" />
+    <None Include="Resources\country_icon\IR.png" />
+    <None Include="Resources\country_icon\IS.png" />
+    <None Include="Resources\country_icon\IT.png" />
+    <None Include="Resources\country_icon\JE.png" />
+    <None Include="Resources\country_icon\JM.png" />
+    <None Include="Resources\country_icon\JO.png" />
+    <None Include="Resources\country_icon\JP.png" />
+    <None Include="Resources\country_icon\KE.png" />
+    <None Include="Resources\country_icon\KG.png" />
+    <None Include="Resources\country_icon\KH.png" />
+    <None Include="Resources\country_icon\KI.png" />
+    <None Include="Resources\country_icon\KM.png" />
+    <None Include="Resources\country_icon\KN.png" />
+    <None Include="Resources\country_icon\KP.png" />
+    <None Include="Resources\country_icon\KR.png" />
+    <None Include="Resources\country_icon\KW.png" />
+    <None Include="Resources\country_icon\KY.png" />
+    <None Include="Resources\country_icon\KZ.png" />
+    <None Include="Resources\country_icon\LA.png" />
+    <None Include="Resources\country_icon\LB.png" />
+    <None Include="Resources\country_icon\LC.png" />
+    <None Include="Resources\country_icon\LI.png" />
+    <None Include="Resources\country_icon\LK.png" />
+    <None Include="Resources\country_icon\LR.png" />
+    <None Include="Resources\country_icon\LS.png" />
+    <None Include="Resources\country_icon\LT.png" />
+    <None Include="Resources\country_icon\LU.png" />
+    <None Include="Resources\country_icon\LV.png" />
+    <None Include="Resources\country_icon\LY.png" />
+    <None Include="Resources\country_icon\MA.png" />
+    <None Include="Resources\country_icon\MC.png" />
+    <None Include="Resources\country_icon\MD.png" />
+    <None Include="Resources\country_icon\ME.png" />
+    <None Include="Resources\country_icon\MF.png" />
+    <None Include="Resources\country_icon\MG.png" />
+    <None Include="Resources\country_icon\MH.png" />
+    <None Include="Resources\country_icon\MK.png" />
+    <None Include="Resources\country_icon\ML.png" />
+    <None Include="Resources\country_icon\MM.png" />
+    <None Include="Resources\country_icon\MN.png" />
+    <None Include="Resources\country_icon\MO.png" />
+    <None Include="Resources\country_icon\MP.png" />
+    <None Include="Resources\country_icon\MQ.png" />
+    <None Include="Resources\country_icon\MR.png" />
+    <None Include="Resources\country_icon\MS.png" />
+    <None Include="Resources\country_icon\MT.png" />
+    <None Include="Resources\country_icon\MU.png" />
+    <None Include="Resources\country_icon\MV.png" />
+    <None Include="Resources\country_icon\MW.png" />
+    <None Include="Resources\country_icon\MX.png" />
+    <None Include="Resources\country_icon\MY.png" />
+    <None Include="Resources\country_icon\MZ.png" />
+    <None Include="Resources\country_icon\NA.png" />
+    <None Include="Resources\country_icon\NC.png" />
+    <None Include="Resources\country_icon\NE.png" />
+    <None Include="Resources\country_icon\NF.png" />
+    <None Include="Resources\country_icon\NG.png" />
+    <None Include="Resources\country_icon\NI.png" />
+    <None Include="Resources\country_icon\NL.png" />
+    <None Include="Resources\country_icon\NO.png" />
+    <None Include="Resources\country_icon\NP.png" />
+    <None Include="Resources\country_icon\NR.png" />
+    <None Include="Resources\country_icon\NU.png" />
+    <None Include="Resources\country_icon\NZ.png" />
+    <None Include="Resources\country_icon\OM.png" />
+    <None Include="Resources\country_icon\PA.png" />
+    <None Include="Resources\country_icon\PE.png" />
+    <None Include="Resources\country_icon\PF.png" />
+    <None Include="Resources\country_icon\PG.png" />
+    <None Include="Resources\country_icon\PH.png" />
+    <None Include="Resources\country_icon\PK.png" />
+    <None Include="Resources\country_icon\PL.png" />
+    <None Include="Resources\country_icon\PN.png" />
+    <None Include="Resources\country_icon\PR.png" />
+    <None Include="Resources\country_icon\PS.png" />
+    <None Include="Resources\country_icon\PT.png" />
+    <None Include="Resources\country_icon\PW.png" />
+    <None Include="Resources\country_icon\PY.png" />
+    <None Include="Resources\country_icon\QA.png" />
+    <None Include="Resources\country_icon\RE.png" />
+    <None Include="Resources\country_icon\RO.png" />
+    <None Include="Resources\country_icon\RS.png" />
+    <None Include="Resources\country_icon\RU.png" />
+    <None Include="Resources\country_icon\RW.png" />
+    <None Include="Resources\country_icon\SA.png" />
+    <None Include="Resources\country_icon\SB.png" />
+    <None Include="Resources\country_icon\SC.png" />
+    <None Include="Resources\country_icon\SD.png" />
+    <None Include="Resources\country_icon\SE.png" />
+    <None Include="Resources\country_icon\SG.png" />
+    <None Include="Resources\country_icon\SH.png" />
+    <None Include="Resources\country_icon\SI.png" />
+    <None Include="Resources\country_icon\SK.png" />
+    <None Include="Resources\country_icon\SL.png" />
+    <None Include="Resources\country_icon\SM.png" />
+    <None Include="Resources\country_icon\SN.png" />
+    <None Include="Resources\country_icon\SO.png" />
+    <None Include="Resources\country_icon\SR.png" />
+    <None Include="Resources\country_icon\SS.png" />
+    <None Include="Resources\country_icon\ST.png" />
+    <None Include="Resources\country_icon\SV.png" />
+    <None Include="Resources\country_icon\SY.png" />
+    <None Include="Resources\country_icon\SZ.png" />
+    <None Include="Resources\country_icon\TC.png" />
+    <None Include="Resources\country_icon\TD.png" />
+    <None Include="Resources\country_icon\TF.png" />
+    <None Include="Resources\country_icon\TG.png" />
+    <None Include="Resources\country_icon\TH.png" />
+    <None Include="Resources\country_icon\TJ.png" />
+    <None Include="Resources\country_icon\TK.png" />
+    <None Include="Resources\country_icon\TL.png" />
+    <None Include="Resources\country_icon\TM.png" />
+    <None Include="Resources\country_icon\TN.png" />
+    <None Include="Resources\country_icon\TO.png" />
+    <None Include="Resources\country_icon\TR.png" />
+    <None Include="Resources\country_icon\TT.png" />
+    <None Include="Resources\country_icon\TV.png" />
+    <None Include="Resources\country_icon\TW.png" />
+    <None Include="Resources\country_icon\TZ.png" />
+    <None Include="Resources\country_icon\UA.png" />
+    <None Include="Resources\country_icon\UG.png" />
+    <None Include="Resources\country_icon\US.png" />
+    <None Include="Resources\country_icon\UY.png" />
+    <None Include="Resources\country_icon\UZ.png" />
+    <None Include="Resources\country_icon\VA.png" />
+    <None Include="Resources\country_icon\VC.png" />
+    <None Include="Resources\country_icon\VE.png" />
+    <None Include="Resources\country_icon\VG.png" />
+    <None Include="Resources\country_icon\VI.png" />
+    <None Include="Resources\country_icon\VN.png" />
+    <None Include="Resources\country_icon\VU.png" />
+    <None Include="Resources\country_icon\WF.png" />
+    <None Include="Resources\country_icon\WS.png" />
+    <None Include="Resources\country_icon\YE.png" />
+    <None Include="Resources\country_icon\YT.png" />
+    <None Include="Resources\country_icon\ZA.png" />
+    <None Include="Resources\country_icon\ZM.png" />
+    <None Include="Resources\country_icon\ZW.png" />
+    <None Include="Resources\country_icon\UNKNOWN.png" />
+    <None Include="Resources\country_icon\AD_SHINY.png" />
+    <None Include="Resources\country_icon\AE_SHINY.png" />
+    <None Include="Resources\country_icon\AF_SHINY.png" />
+    <None Include="Resources\country_icon\AG_SHINY.png" />
+    <None Include="Resources\country_icon\AI_SHINY.png" />
+    <None Include="Resources\country_icon\AL_SHINY.png" />
+    <None Include="Resources\country_icon\AM_SHINY.png" />
+    <None Include="Resources\country_icon\AN_SHINY.png" />
+    <None Include="Resources\country_icon\AO_SHINY.png" />
+    <None Include="Resources\country_icon\AQ_SHINY.png" />
+    <None Include="Resources\country_icon\AR_SHINY.png" />
+    <None Include="Resources\country_icon\AS_SHINY.png" />
+    <None Include="Resources\country_icon\AT_SHINY.png" />
+    <None Include="Resources\country_icon\AU_SHINY.png" />
+    <None Include="Resources\country_icon\AW_SHINY.png" />
+    <None Include="Resources\country_icon\AX_SHINY.png" />
+    <None Include="Resources\country_icon\AZ_SHINY.png" />
+    <None Include="Resources\country_icon\BA_SHINY.png" />
+    <None Include="Resources\country_icon\BB_SHINY.png" />
+    <None Include="Resources\country_icon\BD_SHINY.png" />
+    <None Include="Resources\country_icon\BE_SHINY.png" />
+    <None Include="Resources\country_icon\BF_SHINY.png" />
+    <None Include="Resources\country_icon\BG_SHINY.png" />
+    <None Include="Resources\country_icon\BH_SHINY.png" />
+    <None Include="Resources\country_icon\BI_SHINY.png" />
+    <None Include="Resources\country_icon\BJ_SHINY.png" />
+    <None Include="Resources\country_icon\BL_SHINY.png" />
+    <None Include="Resources\country_icon\BM_SHINY.png" />
+    <None Include="Resources\country_icon\BN_SHINY.png" />
+    <None Include="Resources\country_icon\BO_SHINY.png" />
+    <None Include="Resources\country_icon\BR_SHINY.png" />
+    <None Include="Resources\country_icon\BS_SHINY.png" />
+    <None Include="Resources\country_icon\BT_SHINY.png" />
+    <None Include="Resources\country_icon\BW_SHINY.png" />
+    <None Include="Resources\country_icon\BY_SHINY.png" />
+    <None Include="Resources\country_icon\BZ_SHINY.png" />
+    <None Include="Resources\country_icon\CA_SHINY.png" />
+    <None Include="Resources\country_icon\CC_SHINY.png" />
+    <None Include="Resources\country_icon\CD_SHINY.png" />
+    <None Include="Resources\country_icon\CF_SHINY.png" />
+    <None Include="Resources\country_icon\CG_SHINY.png" />
+    <None Include="Resources\country_icon\CH_SHINY.png" />
+    <None Include="Resources\country_icon\CI_SHINY.png" />
+    <None Include="Resources\country_icon\CK_SHINY.png" />
+    <None Include="Resources\country_icon\CL_SHINY.png" />
+    <None Include="Resources\country_icon\CM_SHINY.png" />
+    <None Include="Resources\country_icon\CN_SHINY.png" />
+    <None Include="Resources\country_icon\CO_SHINY.png" />
+    <None Include="Resources\country_icon\CR_SHINY.png" />
+    <None Include="Resources\country_icon\CU_SHINY.png" />
+    <None Include="Resources\country_icon\CV_SHINY.png" />
+    <None Include="Resources\country_icon\CW_SHINY.png" />
+    <None Include="Resources\country_icon\CX_SHINY.png" />
+    <None Include="Resources\country_icon\CY_SHINY.png" />
+    <None Include="Resources\country_icon\CZ_SHINY.png" />
+    <None Include="Resources\country_icon\DE_SHINY.png" />
+    <None Include="Resources\country_icon\DJ_SHINY.png" />
+    <None Include="Resources\country_icon\DK_SHINY.png" />
+    <None Include="Resources\country_icon\DM_SHINY.png" />
+    <None Include="Resources\country_icon\DO_SHINY.png" />
+    <None Include="Resources\country_icon\DZ_SHINY.png" />
+    <None Include="Resources\country_icon\EC_SHINY.png" />
+    <None Include="Resources\country_icon\EE_SHINY.png" />
+    <None Include="Resources\country_icon\EG_SHINY.png" />
+    <None Include="Resources\country_icon\EH_SHINY.png" />
+    <None Include="Resources\country_icon\ER_SHINY.png" />
+    <None Include="Resources\country_icon\ES_SHINY.png" />
+    <None Include="Resources\country_icon\ET_SHINY.png" />
+    <None Include="Resources\country_icon\EU_SHINY.png" />
+    <None Include="Resources\country_icon\FI_SHINY.png" />
+    <None Include="Resources\country_icon\FJ_SHINY.png" />
+    <None Include="Resources\country_icon\FK_SHINY.png" />
+    <None Include="Resources\country_icon\FM_SHINY.png" />
+    <None Include="Resources\country_icon\FO_SHINY.png" />
+    <None Include="Resources\country_icon\FR_SHINY.png" />
+    <None Include="Resources\country_icon\GA_SHINY.png" />
+    <None Include="Resources\country_icon\GB_SHINY.png" />
+    <None Include="Resources\country_icon\GD_SHINY.png" />
+    <None Include="Resources\country_icon\GE_SHINY.png" />
+    <None Include="Resources\country_icon\GG_SHINY.png" />
+    <None Include="Resources\country_icon\GH_SHINY.png" />
+    <None Include="Resources\country_icon\GI_SHINY.png" />
+    <None Include="Resources\country_icon\GL_SHINY.png" />
+    <None Include="Resources\country_icon\GM_SHINY.png" />
+    <None Include="Resources\country_icon\GN_SHINY.png" />
+    <None Include="Resources\country_icon\GQ_SHINY.png" />
+    <None Include="Resources\country_icon\GR_SHINY.png" />
+    <None Include="Resources\country_icon\GS_SHINY.png" />
+    <None Include="Resources\country_icon\GT_SHINY.png" />
+    <None Include="Resources\country_icon\GU_SHINY.png" />
+    <None Include="Resources\country_icon\GW_SHINY.png" />
+    <None Include="Resources\country_icon\GY_SHINY.png" />
+    <None Include="Resources\country_icon\HK_SHINY.png" />
+    <None Include="Resources\country_icon\HN_SHINY.png" />
+    <None Include="Resources\country_icon\HR_SHINY.png" />
+    <None Include="Resources\country_icon\HT_SHINY.png" />
+    <None Include="Resources\country_icon\HU_SHINY.png" />
+    <None Include="Resources\country_icon\IC_SHINY.png" />
+    <None Include="Resources\country_icon\ID_SHINY.png" />
+    <None Include="Resources\country_icon\IE_SHINY.png" />
+    <None Include="Resources\country_icon\IL_SHINY.png" />
+    <None Include="Resources\country_icon\IM_SHINY.png" />
+    <None Include="Resources\country_icon\IN_SHINY.png" />
+    <None Include="Resources\country_icon\IQ_SHINY.png" />
+    <None Include="Resources\country_icon\IR_SHINY.png" />
+    <None Include="Resources\country_icon\IS_SHINY.png" />
+    <None Include="Resources\country_icon\IT_SHINY.png" />
+    <None Include="Resources\country_icon\JE_SHINY.png" />
+    <None Include="Resources\country_icon\JM_SHINY.png" />
+    <None Include="Resources\country_icon\JO_SHINY.png" />
+    <None Include="Resources\country_icon\JP_SHINY.png" />
+    <None Include="Resources\country_icon\KE_SHINY.png" />
+    <None Include="Resources\country_icon\KG_SHINY.png" />
+    <None Include="Resources\country_icon\KH_SHINY.png" />
+    <None Include="Resources\country_icon\KI_SHINY.png" />
+    <None Include="Resources\country_icon\KM_SHINY.png" />
+    <None Include="Resources\country_icon\KN_SHINY.png" />
+    <None Include="Resources\country_icon\KP_SHINY.png" />
+    <None Include="Resources\country_icon\KR_SHINY.png" />
+    <None Include="Resources\country_icon\KW_SHINY.png" />
+    <None Include="Resources\country_icon\KY_SHINY.png" />
+    <None Include="Resources\country_icon\KZ_SHINY.png" />
+    <None Include="Resources\country_icon\LA_SHINY.png" />
+    <None Include="Resources\country_icon\LB_SHINY.png" />
+    <None Include="Resources\country_icon\LC_SHINY.png" />
+    <None Include="Resources\country_icon\LI_SHINY.png" />
+    <None Include="Resources\country_icon\LK_SHINY.png" />
+    <None Include="Resources\country_icon\LR_SHINY.png" />
+    <None Include="Resources\country_icon\LS_SHINY.png" />
+    <None Include="Resources\country_icon\LT_SHINY.png" />
+    <None Include="Resources\country_icon\LU_SHINY.png" />
+    <None Include="Resources\country_icon\LV_SHINY.png" />
+    <None Include="Resources\country_icon\LY_SHINY.png" />
+    <None Include="Resources\country_icon\MA_SHINY.png" />
+    <None Include="Resources\country_icon\MC_SHINY.png" />
+    <None Include="Resources\country_icon\MD_SHINY.png" />
+    <None Include="Resources\country_icon\ME_SHINY.png" />
+    <None Include="Resources\country_icon\MF_SHINY.png" />
+    <None Include="Resources\country_icon\MG_SHINY.png" />
+    <None Include="Resources\country_icon\MH_SHINY.png" />
+    <None Include="Resources\country_icon\MK_SHINY.png" />
+    <None Include="Resources\country_icon\ML_SHINY.png" />
+    <None Include="Resources\country_icon\MM_SHINY.png" />
+    <None Include="Resources\country_icon\MN_SHINY.png" />
+    <None Include="Resources\country_icon\MO_SHINY.png" />
+    <None Include="Resources\country_icon\MP_SHINY.png" />
+    <None Include="Resources\country_icon\MQ_SHINY.png" />
+    <None Include="Resources\country_icon\MR_SHINY.png" />
+    <None Include="Resources\country_icon\MS_SHINY.png" />
+    <None Include="Resources\country_icon\MT_SHINY.png" />
+    <None Include="Resources\country_icon\MU_SHINY.png" />
+    <None Include="Resources\country_icon\MV_SHINY.png" />
+    <None Include="Resources\country_icon\MW_SHINY.png" />
+    <None Include="Resources\country_icon\MX_SHINY.png" />
+    <None Include="Resources\country_icon\MY_SHINY.png" />
+    <None Include="Resources\country_icon\MZ_SHINY.png" />
+    <None Include="Resources\country_icon\NA_SHINY.png" />
+    <None Include="Resources\country_icon\NC_SHINY.png" />
+    <None Include="Resources\country_icon\NE_SHINY.png" />
+    <None Include="Resources\country_icon\NF_SHINY.png" />
+    <None Include="Resources\country_icon\NG_SHINY.png" />
+    <None Include="Resources\country_icon\NI_SHINY.png" />
+    <None Include="Resources\country_icon\NL_SHINY.png" />
+    <None Include="Resources\country_icon\NO_SHINY.png" />
+    <None Include="Resources\country_icon\NP_SHINY.png" />
+    <None Include="Resources\country_icon\NR_SHINY.png" />
+    <None Include="Resources\country_icon\NU_SHINY.png" />
+    <None Include="Resources\country_icon\NZ_SHINY.png" />
+    <None Include="Resources\country_icon\OM_SHINY.png" />
+    <None Include="Resources\country_icon\PA_SHINY.png" />
+    <None Include="Resources\country_icon\PE_SHINY.png" />
+    <None Include="Resources\country_icon\PF_SHINY.png" />
+    <None Include="Resources\country_icon\PG_SHINY.png" />
+    <None Include="Resources\country_icon\PH_SHINY.png" />
+    <None Include="Resources\country_icon\PK_SHINY.png" />
+    <None Include="Resources\country_icon\PL_SHINY.png" />
+    <None Include="Resources\country_icon\PN_SHINY.png" />
+    <None Include="Resources\country_icon\PR_SHINY.png" />
+    <None Include="Resources\country_icon\PS_SHINY.png" />
+    <None Include="Resources\country_icon\PT_SHINY.png" />
+    <None Include="Resources\country_icon\PW_SHINY.png" />
+    <None Include="Resources\country_icon\PY_SHINY.png" />
+    <None Include="Resources\country_icon\QA_SHINY.png" />
+    <None Include="Resources\country_icon\RE_SHINY.png" />
+    <None Include="Resources\country_icon\RO_SHINY.png" />
+    <None Include="Resources\country_icon\RS_SHINY.png" />
+    <None Include="Resources\country_icon\RU_SHINY.png" />
+    <None Include="Resources\country_icon\RW_SHINY.png" />
+    <None Include="Resources\country_icon\SA_SHINY.png" />
+    <None Include="Resources\country_icon\SB_SHINY.png" />
+    <None Include="Resources\country_icon\SC_SHINY.png" />
+    <None Include="Resources\country_icon\SD_SHINY.png" />
+    <None Include="Resources\country_icon\SE_SHINY.png" />
+    <None Include="Resources\country_icon\SG_SHINY.png" />
+    <None Include="Resources\country_icon\SH_SHINY.png" />
+    <None Include="Resources\country_icon\SI_SHINY.png" />
+    <None Include="Resources\country_icon\SK_SHINY.png" />
+    <None Include="Resources\country_icon\SL_SHINY.png" />
+    <None Include="Resources\country_icon\SM_SHINY.png" />
+    <None Include="Resources\country_icon\SN_SHINY.png" />
+    <None Include="Resources\country_icon\SO_SHINY.png" />
+    <None Include="Resources\country_icon\SR_SHINY.png" />
+    <None Include="Resources\country_icon\SS_SHINY.png" />
+    <None Include="Resources\country_icon\ST_SHINY.png" />
+    <None Include="Resources\country_icon\SV_SHINY.png" />
+    <None Include="Resources\country_icon\SY_SHINY.png" />
+    <None Include="Resources\country_icon\SZ_SHINY.png" />
+    <None Include="Resources\country_icon\TC_SHINY.png" />
+    <None Include="Resources\country_icon\TD_SHINY.png" />
+    <None Include="Resources\country_icon\TF_SHINY.png" />
+    <None Include="Resources\country_icon\TG_SHINY.png" />
+    <None Include="Resources\country_icon\TH_SHINY.png" />
+    <None Include="Resources\country_icon\TJ_SHINY.png" />
+    <None Include="Resources\country_icon\TK_SHINY.png" />
+    <None Include="Resources\country_icon\TL_SHINY.png" />
+    <None Include="Resources\country_icon\TM_SHINY.png" />
+    <None Include="Resources\country_icon\TN_SHINY.png" />
+    <None Include="Resources\country_icon\TO_SHINY.png" />
+    <None Include="Resources\country_icon\TR_SHINY.png" />
+    <None Include="Resources\country_icon\TT_SHINY.png" />
+    <None Include="Resources\country_icon\TV_SHINY.png" />
+    <None Include="Resources\country_icon\TW_SHINY.png" />
+    <None Include="Resources\country_icon\TZ_SHINY.png" />
+    <None Include="Resources\country_icon\UA_SHINY.png" />
+    <None Include="Resources\country_icon\UG_SHINY.png" />
+    <None Include="Resources\country_icon\US_SHINY.png" />
+    <None Include="Resources\country_icon\UY_SHINY.png" />
+    <None Include="Resources\country_icon\UZ_SHINY.png" />
+    <None Include="Resources\country_icon\VA_SHINY.png" />
+    <None Include="Resources\country_icon\VC_SHINY.png" />
+    <None Include="Resources\country_icon\VE_SHINY.png" />
+    <None Include="Resources\country_icon\VG_SHINY.png" />
+    <None Include="Resources\country_icon\VI_SHINY.png" />
+    <None Include="Resources\country_icon\VN_SHINY.png" />
+    <None Include="Resources\country_icon\VU_SHINY.png" />
+    <None Include="Resources\country_icon\WF_SHINY.png" />
+    <None Include="Resources\country_icon\WS_SHINY.png" />
+    <None Include="Resources\country_icon\YE_SHINY.png" />
+    <None Include="Resources\country_icon\YT_SHINY.png" />
+    <None Include="Resources\country_icon\ZA_SHINY.png" />
+    <None Include="Resources\country_icon\ZM_SHINY.png" />
+    <None Include="Resources\country_icon\ZW_SHINY.png" />
+    <None Include="Resources\country_icon\UNKNOWN_SHINY.png" />
+    <None Include="Resources\notify_sound\notify_sound_01.wav" />
+    <None Include="Resources\notify_sound\notify_sound_02.wav" />
+    <None Include="Resources\notify_sound\notify_sound_03.wav" />
+    <None Include="Resources\notify_sound\notify_sound_04.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Fody" Version="6.9.3">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="LiteDB" Version="5.0.21" />
+    <PackageReference Include="MetroModernUI" Version="1.4.0" />
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.10" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
+    <PackageReference Include="Microsoft.Win32.Primitives" Version="4.3.0" />
+    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="ScottPlot" Version="4.1.74" />
+    <PackageReference Include="ScottPlot.WinForms" Version="4.1.74" />
+    <PackageReference Include="SteamKit2" Version="2.5.0" />
+    <PackageReference Include="System.AppContext" Version="4.3.0" />
+    <PackageReference Include="System.Buffers" Version="4.6.1" />
+    <PackageReference Include="System.Collections" Version="4.3.0" />
+    <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
+    <PackageReference Include="System.Console" Version="4.3.1" />
+    <PackageReference Include="System.Diagnostics.Debug" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.10" />
+    <PackageReference Include="System.Diagnostics.Tools" Version="4.3.0" />
+    <PackageReference Include="System.Diagnostics.Tracing" Version="4.3.0" />
+    <PackageReference Include="System.Drawing.Common" Version="9.0.10" />
+    <PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Globalization" Version="4.3.0" />
+    <PackageReference Include="System.Globalization.Calendars" Version="4.3.0" />
+    <PackageReference Include="System.IO" Version="4.3.0" />
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+    <PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem" Version="4.3.0" />
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
+    <PackageReference Include="System.Linq.Expressions" Version="4.3.0" />
+    <PackageReference Include="System.Memory" Version="4.6.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+    <PackageReference Include="System.Net.Primitives" Version="4.3.1" />
+    <PackageReference Include="System.Net.Sockets" Version="4.3.0" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.6.1" />
+    <PackageReference Include="System.ObjectModel" Version="4.3.0" />
+    <PackageReference Include="System.Reflection" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
+    <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
+    <PackageReference Include="System.Runtime.Handles" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
+    <PackageReference Include="System.Runtime.Numerics" Version="4.3.0" />
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
+    <PackageReference Include="System.Security.Cryptography.Encoding" Version="4.3.0" />
+    <PackageReference Include="System.Security.Cryptography.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
+    <PackageReference Include="System.Text.Encoding" Version="4.3.0" />
+    <PackageReference Include="System.Text.Encoding.Extensions" Version="4.3.0" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="9.0.10" />
+    <PackageReference Include="System.Text.Json" Version="9.0.10" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
+    <PackageReference Include="System.Threading" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+    <PackageReference Include="System.Threading.Timer" Version="4.3.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.6.1" />
+    <PackageReference Include="System.Xml.ReaderWriter" Version="4.3.1" />
+    <PackageReference Include="System.Xml.XDocument" Version="4.3.0" />
+    <PackageReference Include="Trinet.Core.IO.Ntfs">
+      <Version>4.1.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="fbstats.ico" />
+    <None Include="Resources\main_48_icon.png" />
+    <None Include="Resources\fb_website_icon.png" />
+    <None Include="Resources\x_icon.png" />
+    <None Include="Resources\overlay\tab_unselected_frightful_final_ween.png" />
+    <None Include="Resources\overlay\background_frightful_final_ween.png" />
+    <None Include="Resources\overlay\tab_unselected_finalbeans_logo.png" />
+    <None Include="Resources\overlay\background_finalbeans_logo.png" />
+    <None Include="Resources\trello_logo.png" />
+    <None Include="Resources\discord_logo.png" />
+    <None Include="Resources\crown.ico" />
+    <None Include="Resources\finalbeans_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8.1">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8.1 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
