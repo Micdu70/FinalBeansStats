@@ -35,7 +35,7 @@ namespace FinalBeansStats {
         }
 
         private void txtPlayerName_TextChanged(object sender, EventArgs e) {
-            this.btnSave.Enabled = !string.IsNullOrWhiteSpace(this.txtPlayerName.Text) && this.txtPlayerName.Text.Length > 0;
+            this.btnSave.Enabled = !string.IsNullOrWhiteSpace(this.txtPlayerName.Text);
         }
 
         private void txtPlayerName_Validating(object sender, CancelEventArgs e) {

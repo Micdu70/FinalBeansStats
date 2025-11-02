@@ -18,7 +18,7 @@ namespace FinalBeansStats {
             this.txtPlayerName.Text = !string.IsNullOrWhiteSpace(this.CurrentSettings.PlayerName) && this.CurrentSettings.PlayerName.Length > 20
                                       ? this.CurrentSettings.PlayerName.Remove(20)
                                       : this.CurrentSettings.PlayerName ?? string.Empty;
-            this.btnSave.Enabled = !string.IsNullOrWhiteSpace(this.txtPlayerName.Text) && this.txtPlayerName.Text.Length > 0;
+            this.btnSave.Enabled = !string.IsNullOrWhiteSpace(this.txtPlayerName.Text);
             this.SetTheme(Stats.CurrentTheme);
             this.ChangeLanguage();
         }
@@ -28,7 +28,7 @@ namespace FinalBeansStats {
         }
 
         private void txtPlayerName_TextChanged(object sender, EventArgs e) {
-            this.btnSave.Enabled = !string.IsNullOrWhiteSpace(this.txtPlayerName.Text) && this.txtPlayerName.Text.Length > 0;
+            this.btnSave.Enabled = !string.IsNullOrWhiteSpace(this.txtPlayerName.Text);
         }
 
         private void txtPlayerName_Validating(object sender, CancelEventArgs e) {
