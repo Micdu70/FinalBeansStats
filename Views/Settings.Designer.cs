@@ -1301,6 +1301,7 @@
             this.txtGameExeLocation.UseSelectable = true;
             this.txtGameExeLocation.WaterMarkColor = System.Drawing.Color.FromArgb(((int)(((byte)(109)))), ((int)(((byte)(109)))), ((int)(((byte)(109)))));
             this.txtGameExeLocation.WaterMarkFont = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Pixel);
+            this.txtGameExeLocation.TextChanged += new System.EventHandler(this.txtGameExeLocation_TextChanged);
             // 
             // btnGameExeLocationBrowse
             // 
@@ -1327,6 +1328,7 @@
             this.chkLaunchGameOnStart.Text = "Auto-launch FinalBeans on tracker";
             this.chkLaunchGameOnStart.UseCustomForeColor = true;
             this.chkLaunchGameOnStart.UseSelectable = true;
+            this.chkLaunchGameOnStart.Visible = false;
             this.chkLaunchGameOnStart.CheckedChanged += new System.EventHandler(this.CheckBox_CheckedChanged);
             this.chkLaunchGameOnStart.Enter += new System.EventHandler(this.CheckBox_MouseEnter);
             this.chkLaunchGameOnStart.Leave += new System.EventHandler(this.CheckBox_MouseLeave);

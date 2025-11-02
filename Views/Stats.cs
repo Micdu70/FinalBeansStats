@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,7 +19,6 @@ using LiteDB;
 using MetroFramework;
 using MetroFramework.Components;
 using MetroFramework.Controls;
-using Newtonsoft.Json.Linq;
 using Trinet.Core.IO.Ntfs;
 
 namespace FinalBeansStats {
@@ -1978,7 +1978,7 @@ namespace FinalBeansStats {
 
                                 MetroMessageBox.Show(this, $"{Environment.NewLine}" +
                                                            $"{string.Join("", changeLog)}" +
-                                                           $"{Environment.NewLine}" +
+                                                           $"{Environment.NewLine}{Environment.NewLine}" +
                                                            $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}" +
                                                            $"{Environment.NewLine}" +
                                                            $"{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
@@ -3893,13 +3893,13 @@ namespace FinalBeansStats {
             }
         }
 
-        private void LaunchGame(bool ignoreExisting) {
+        private void LaunchGame(bool isSilent) {
             try {
                 if (!string.IsNullOrEmpty(this.CurrentSettings.GameExeLocation) && File.Exists(this.CurrentSettings.GameExeLocation)) {
                     Process[] processes = Process.GetProcesses();
                     string finalBeansProcessName = Path.GetFileNameWithoutExtension(this.CurrentSettings.GameExeLocation);
                     if (processes.Select(t => t.ProcessName).Any(name => string.Equals(name, finalBeansProcessName, StringComparison.OrdinalIgnoreCase))) {
-                        if (!ignoreExisting) {
+                        if (!isSilent) {
                             MetroMessageBox.Show(this, Multilingual.GetWord("message_finalbeans_already_running"),
                                 Multilingual.GetWord("message_already_running_caption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
@@ -3912,7 +3912,7 @@ namespace FinalBeansStats {
                         Process.Start(this.CurrentSettings.GameExeLocation);
                         this.WindowState = FormWindowState.Minimized;
                     }
-                } else {
+                } else if (!isSilent) {
                     MetroMessageBox.Show(this, Multilingual.GetWord("message_register_exe"),
                         Multilingual.GetWord("message_register_exe_caption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -3954,7 +3954,7 @@ namespace FinalBeansStats {
 
                                 if (line.StartsWith("[Subsystems] Discovering subsystems at path ", StringComparison.OrdinalIgnoreCase)) {
                                     int index = line.IndexOf(" at path ", StringComparison.OrdinalIgnoreCase) + 9;
-                                    int index2 = line.IndexOf("FinalBeans_Data", StringComparison.OrdinalIgnoreCase);
+                                    int index2 = line.LastIndexOf("FinalBeans_Data", StringComparison.OrdinalIgnoreCase);
                                     gamePath = Path.Combine(line.Substring(index, index2 - index), "FinalBeans.exe");
                                     if (File.Exists(gamePath)) { return gamePath; }
                                 }
@@ -3966,8 +3966,21 @@ namespace FinalBeansStats {
                 // Else try to get the game path from the launcher (settings file)
                 filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "finalbeanslauncher", "settings.json");
                 if (File.Exists(filePath)) {
-                    gamePath = Path.Combine(JObject.Parse(File.ReadAllText(filePath))["installPath"].ToString(), "FinalBeans.exe");
-                    if (File.Exists(gamePath)) { return gamePath; }
+                    using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                        using (var sr = new StreamReader(fs)) {
+                            string line;
+                            while ((line = sr.ReadLine()) != null) {
+                                if (line.IndexOf("\"installPath\":", StringComparison.OrdinalIgnoreCase) != -1) {
+                                    MatchCollection mc = Regex.Matches(line, @"""([^""]*)""");
+                                    if (mc.Count == 1) break; // "installPath" value is null
+
+                                    gamePath = Path.Combine(mc[1].ToString().Replace("\"", ""), "FinalBeans.exe");
+                                    if (File.Exists(gamePath)) { return gamePath; }
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             } catch (Exception ex) {
                 MetroMessageBox.Show(this, ex.ToString(), $"{Multilingual.GetWord("message_program_error_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Error);

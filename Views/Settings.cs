@@ -251,6 +251,7 @@ namespace FinalBeansStats {
             }
 
             this.txtGameExeLocation.Text = this.CurrentSettings.GameExeLocation;
+            this.chkLaunchGameOnStart.Visible = !string.IsNullOrEmpty(this.txtGameExeLocation.Text);
             this.chkLaunchGameOnStart.Checked = this.CurrentSettings.AutoLaunchGameOnStartup;
             this.chkIgnoreLevelTypeWhenSorting.Checked = this.CurrentSettings.IgnoreLevelTypeWhenSorting;
             this.chkRecordEscapeDuringAGame.Checked = this.CurrentSettings.RecordEscapeDuringAGame;
@@ -668,21 +669,27 @@ namespace FinalBeansStats {
             }
         }
 
+        private void txtGameExeLocation_TextChanged(object sender, EventArgs e) {
+            this.chkLaunchGameOnStart.Visible = !string.IsNullOrEmpty(this.txtGameExeLocation.Text);
+        }
+
         private void btnGameExeLocationBrowse_Click(object sender, EventArgs e) {
             this.BeginInvoke((MethodInvoker)delegate {
                 try {
                     using (OpenFileDialog openFile = new OpenFileDialog()) {
-                        FileInfo currentExeLocation = new FileInfo(this.txtGameExeLocation.Text);
-                        if (currentExeLocation.Directory.Exists) {
-                            openFile.InitialDirectory = currentExeLocation.Directory.FullName;
+                        if (!string.IsNullOrEmpty(this.txtGameExeLocation.Text)) {
+                            FileInfo currentExeLocation = new FileInfo(this.txtGameExeLocation.Text);
+                            if (currentExeLocation.Directory.Exists) {
+                                openFile.InitialDirectory = currentExeLocation.Directory.FullName;
+                            }
                         }
                         openFile.Filter = Multilingual.GetWord("settings_finalbeans_exe_openfile_filter", this.DisplayLang);
                         openFile.FileName = Multilingual.GetWord("settings_finalbeans_exe_openfile_name", this.DisplayLang);
                         openFile.Title = Multilingual.GetWord("settings_finalbeans_exe_openfile_title", this.DisplayLang);
 
                         if (openFile.ShowDialog(this) == DialogResult.OK) {
-                            if (openFile.FileName.IndexOf("FinalBeans", StringComparison.OrdinalIgnoreCase) >= 0) {
-                                txtGameExeLocation.Text = openFile.FileName;
+                            if (openFile.FileName.EndsWith("FinalBeans.exe", StringComparison.OrdinalIgnoreCase)) {
+                                this.txtGameExeLocation.Text = openFile.FileName;
                             } else {
                                 MetroMessageBox.Show(this, Multilingual.GetWord("message_wrong_selected_file", this.DisplayLang), Multilingual.GetWord("message_wrong_selected_file_caption", this.DisplayLang), MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
