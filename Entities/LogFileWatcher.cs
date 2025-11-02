@@ -957,6 +957,7 @@ namespace FinalBeansStats {
                     }
                     if (line.Line.LastIndexOf($" has won", StringComparison.OrdinalIgnoreCase) != -1) {
                         logRound.Info.Position = 1;
+                        logRound.Info.Tier = 1;
                         logRound.Info.Crown = true;
                     } else {
                         logRound.FindingPosition = true;

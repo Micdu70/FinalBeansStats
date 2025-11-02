@@ -252,7 +252,7 @@ namespace FinalBeansStats {
         private readonly object dbTaskLock = new object();
         public List<Task> dbTasks = new List<Task>();
 
-        private readonly int currentDbVersion = 0;
+        private readonly int currentDbVersion = 1;
 
         public readonly string[] PublicShowIdList = {
             "fb_main_show",
@@ -1439,7 +1439,18 @@ namespace FinalBeansStats {
         private void UpdateDatabaseVersion() {
             for (int version = this.CurrentSettings.Version_FB; version < currentDbVersion; version++) {
                 switch (version) {
-                    default: break;
+                    case 0: {
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             select ri).ToList();
+
+                            foreach (RoundInfo ri in roundInfoList) {
+                                if (ri.Crown) ri.Tier = 1;
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.StatsDB.Commit();
+                            break;
+                        }
                 }
             }
             if (this.CurrentSettings.Version_FB < currentDbVersion) {
