@@ -116,7 +116,11 @@ namespace FinalBeansStats {
         public static MetroThemeStyle CurrentTheme = MetroThemeStyle.Light;
         public static bool InstalledEmojiFont;
 
-        public static bool IsSpectating = false;
+        public static DateTime LastGameDate = DateTime.MinValue;
+        public static string LastShowNameId = null;
+        public static string LastRoundId = null;
+        public static string LastRoundName = null;
+
         public static bool InShow = false;
         public static bool EndedShow = false;
 
@@ -1444,6 +1448,22 @@ namespace FinalBeansStats {
                                                              select ri).ToList();
 
                             foreach (RoundInfo ri in roundInfoList) {
+                                if (ri.RoundId.StartsWith("round_tunnel_race", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_tunnel_race";
+                                } else if (ri.RoundId.StartsWith("round_tunnel_final", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_tunnel_final";
+                                    ri.IsFinal = true;
+                                } else if (ri.RoundId.StartsWith("round_tunnel", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_tunnel";
+                                } else if (ri.RoundId.StartsWith("round_hoverboardsurvival2", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_hoverboardsurvival2";
+                                } else if (ri.RoundId.StartsWith("round_hoverboardsurvival", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_hoverboardsurvival";
+                                } else if (ri.RoundId.StartsWith("round_egg_grab_02", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_egg_grab_02";
+                                } else if (ri.RoundId.StartsWith("round_egg_grab", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_egg_grab";
+                                }
                                 if (ri.Crown) ri.Tier = 1;
                             }
                             this.StatsDB.BeginTrans();
@@ -4281,7 +4301,7 @@ namespace FinalBeansStats {
         }
 
         private void mlReportBug_Click(object sender, EventArgs e) {
-            Process.Start("https://github.com/Micdu70/FinalBeansStats/issues/new");
+            Process.Start("https://github.com/Micdu70/FinalBeansStats/issues/new?template=bug_report.yml");
         }
 
         public void menuStats_Click(object sender, EventArgs e) {

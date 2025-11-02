@@ -254,7 +254,8 @@ namespace FinalBeansStats {
             this.chkLaunchGameOnStart.Visible = !string.IsNullOrEmpty(this.txtGameExeLocation.Text);
             this.chkLaunchGameOnStart.Checked = this.CurrentSettings.AutoLaunchGameOnStartup;
             this.chkIgnoreLevelTypeWhenSorting.Checked = this.CurrentSettings.IgnoreLevelTypeWhenSorting;
-            this.chkRecordEscapeDuringAGame.Checked = this.CurrentSettings.RecordEscapeDuringAGame;
+            this.chkRecordEscapeDuringAGame.Visible = false; // Hide this option because
+            this.chkRecordEscapeDuringAGame.Checked = true; // It MUST be checked to be able to save game stats
 
             if (!string.IsNullOrEmpty(this.CurrentSettings.OverlayFontSerialized)) {
                 this.overlayFontSerialized = this.CurrentSettings.OverlayFontSerialized;
@@ -610,8 +611,7 @@ namespace FinalBeansStats {
             }
 
             this.CurrentSettings.IgnoreLevelTypeWhenSorting = this.chkIgnoreLevelTypeWhenSorting.Checked;
-            // this.CurrentSettings.RecordEscapeDuringAGame = this.chkRecordEscapeDuringAGame.Checked;
-            this.CurrentSettings.RecordEscapeDuringAGame = true; // "true" is mandatory to be able to save game stats
+            this.CurrentSettings.RecordEscapeDuringAGame = this.chkRecordEscapeDuringAGame.Checked;
             this.CurrentSettings.GameExeLocation = this.txtGameExeLocation.Text;
             this.CurrentSettings.AutoLaunchGameOnStartup = this.chkLaunchGameOnStart.Checked;
 

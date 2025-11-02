@@ -44,8 +44,11 @@ namespace FinalBeansStats {
         public bool isPrivateLobby;
         public bool currentlyInParty;
         public int selectedShowIndex;
-        public string currentShowName;
+        public DateTime lastGameDate;
+        public string currentShowNameId;
         public string currentSessionId;
+        public string currentRoundId;
+        public DateTime currentRoundStart;
 
         public bool toggleCountryInfoApi;
     }
@@ -209,7 +212,8 @@ namespace FinalBeansStats {
                                     this.logLines.AddRange(currentLines);
                                     currentLines.Clear();
                                 }
-                            } else if (line.Line.IndexOf("[StateMainMenu] No server address specified, attempting to matchmake", StringComparison.OrdinalIgnoreCase) != -1
+                            } else if (line.Line.IndexOf("[LobbyManager] Show selected index: ", StringComparison.OrdinalIgnoreCase) != -1
+                                       || line.Line.IndexOf("[StateMainMenu] No server address specified, attempting to matchmake", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StatePrivateLobby with FGClient.StateConnectToGame", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[StateDisconnectingFromServer] Shutting down game and resetting scene to reconnect", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StatePrivateLobby with FGClient.StateMainMenu", StringComparison.OrdinalIgnoreCase) != -1
@@ -220,7 +224,7 @@ namespace FinalBeansStats {
                                 lastDate = line.Date;
                             } else if (this.StatsForm.CurrentSettings.AutoChangeProfile && line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateMainMenu with FGClient.StateGameLoading", StringComparison.OrdinalIgnoreCase) != -1) {
                                 if (Stats.InShow && !Stats.EndedShow) {
-                                    this.StatsForm.SetLinkedProfileMenu(this.threadLocalVariable.Value.currentShowName, this.threadLocalVariable.Value.isPrivateLobby);
+                                    this.StatsForm.SetLinkedProfileMenu(this.threadLocalVariable.Value.currentShowNameId, this.threadLocalVariable.Value.isPrivateLobby);
                                 }
                             } else if (this.StatsForm.CurrentSettings.PreventOverlayMouseClicks && line.Line.IndexOf("[GameSession] Changing state from Countdown to Playing", StringComparison.OrdinalIgnoreCase) != -1) {
                                 if (Stats.InShow && !Stats.EndedShow) {
@@ -297,33 +301,42 @@ namespace FinalBeansStats {
             }
         }
 
-        private string GetShowIdFromLastGamesDir(DateTime showStart) {
+        private string GetShowNameIdFromLastGamesDir(DateTime gameStartedDate) {
             try {
-                string date = showStart.ToLocalTime().ToString("yyyy-MM-dd_HH-mm-ss");
-                string[] files = Directory.GetFiles(Path.Combine(this.logPath, "lastGames"), $"*{date}.txt");
-                if (files.Length == 0) {
-                    date = showStart.AddSeconds(-1).ToLocalTime().ToString("yyyy-MM-dd_HH-mm-ss");
-                    files = Directory.GetFiles(Path.Combine(this.logPath, "lastGames"), $"*{date}.txt");
+                if (gameStartedDate != Stats.LastGameDate) {
+                    Stats.LastGameDate = gameStartedDate;
+                    string date = gameStartedDate.ToLocalTime().ToString("yyyy-MM-dd_HH-mm-ss");
+                    string[] files = Directory.GetFiles(Path.Combine(this.logPath, "lastGames"), $"*{date}.txt");
+                    if (files.Length == 0) {
+                        date = gameStartedDate.AddSeconds(-1).ToLocalTime().ToString("yyyy-MM-dd_HH-mm-ss");
+                        files = Directory.GetFiles(Path.Combine(this.logPath, "lastGames"), $"*{date}.txt");
+                    }
+                    string fileName = Path.GetFileNameWithoutExtension(files[0]);
+                    int index = fileName.IndexOf($" - {date}");
+                    string ltmName = fileName.Substring(0, index);
+                    Stats.LastShowNameId = Regex.Replace($"fb_{ltmName.ToLower()}", "[^0-9a-z_]", "_");
                 }
-                string fileName = Path.GetFileNameWithoutExtension(files[0]);
-                int index = fileName.IndexOf($" - {date}");
-                string ltmName = fileName.Substring(0, index);
-                return Regex.Replace($"fb_{ltmName.ToLower()}", "[^0-9a-z_]", "_");
+                return Stats.LastShowNameId;
             } catch {
-                return this.threadLocalVariable.Value.selectedShowIndex == 0 ? "fb_main_show" : "fb_ltm";
+                return null;
             }
         }
 
         private string VerifiedRoundId(string roundId) {
-            if (string.IsNullOrEmpty(roundId)) { return null; }
-
-            string[] knownRoundIds = this.StatsForm.StatLookup.Keys.ToArray();
-            foreach (string knownRoundId in knownRoundIds) {
-                if (roundId.StartsWith(knownRoundId, StringComparison.OrdinalIgnoreCase)) {
-                    return knownRoundId;
+            if (!string.Equals(roundId, Stats.LastRoundId)) {
+                Stats.LastRoundId = roundId;
+                string[] knownRoundIds = this.StatsForm.StatLookup.Keys.ToArray();
+                Array.Sort(knownRoundIds);
+                Array.Reverse(knownRoundIds);
+                foreach (string knownRoundId in knownRoundIds) {
+                    if (roundId.StartsWith(knownRoundId, StringComparison.OrdinalIgnoreCase)) {
+                        Stats.LastRoundName = knownRoundId;
+                        return Stats.LastRoundName;
+                    }
                 }
+                Stats.LastRoundName = roundId;
             }
-            return roundId;
+            return Stats.LastRoundName;
         }
 
         private bool IsRealFinalRound(int roundNum, string roundId, string showId) {
@@ -602,8 +615,11 @@ namespace FinalBeansStats {
             this.threadLocalVariable.Value.isPrivateLobby = false;
             this.threadLocalVariable.Value.currentlyInParty = false;
             this.threadLocalVariable.Value.selectedShowIndex = 0;
-            this.threadLocalVariable.Value.currentShowName = string.Empty;
+            this.threadLocalVariable.Value.lastGameDate = DateTime.MinValue;
+            this.threadLocalVariable.Value.currentShowNameId = string.Empty;
             this.threadLocalVariable.Value.currentSessionId = string.Empty;
+            this.threadLocalVariable.Value.currentRoundId = string.Empty;
+            this.threadLocalVariable.Value.currentRoundStart = DateTime.MinValue;
         }
 
         private void UpdateServerConnectionLog(string session, string show) {
@@ -714,7 +730,6 @@ namespace FinalBeansStats {
                                 if (string.IsNullOrEmpty(round[i].Name)) {
                                     round.RemoveAt(i);
                                     logRound.Info = null;
-                                    Stats.IsSpectating = false;
                                     Stats.InShow = false;
                                     Stats.EndedShow = true;
                                     return true;
@@ -731,58 +746,43 @@ namespace FinalBeansStats {
                                 if (round[i].Start == DateTime.MinValue) {
                                     round[i].Start = round[i].End;
                                 }
-                                if (i < (round.Count - 1)) {
-                                    //
-                                    // No elimination info in FinalBeans logs
-                                    // so we check if the player has a finish time for qualification
-                                    //
-                                    if (!round[i].Finish.HasValue) {
-                                        if (i > 0 && !round[i - 1].Qualified) {
-                                            for (int j = round.Count - 1; j >= i; j--) {
-                                                round.RemoveAt(j);
-                                            }
-                                            logRound.Info = null;
-                                            Stats.IsSpectating = false;
-                                            Stats.InShow = false;
-                                            Stats.EndedShow = true;
-                                            return true;
+                                //
+                                // No proper elimination info in FinalBeans logs
+                                // so check if the player was in 'Spectator' mode
+                                //
+                                // If 'Spectator' trigger at round start => [don't save this round info]
+                                // If 'Spectator' trigger during round => player NOT qualified [save this round info]
+                                // Else => player (likely) qualified [save this round info]
+                                //
+                                if (i == (round.Count - 1)) {
+                                    for (int j = i; j >= 0; j--) {
+                                        if (round[j].NotParticipated) {
+                                            round.RemoveAt(j);
+                                            break;
                                         }
-                                        round[i].Qualified = false;
-                                    } else {
-                                        round[i].Qualified = true;
+                                        round[j].Qualified = round[j].Finish.HasValue;
+                                        for (int k = j; k > 0; k--) {
+                                            if (!round[k - 1].Finish.HasValue) {
+                                                round[k - 1].Finish = round[k - 1].End;
+                                            }
+                                            round[k - 1].Qualified = true;
+                                        }
+                                        round[j].ShowEnd = showEnd;
                                     }
-                                } else if (!round[i].Finish.HasValue) {
-                                    if (i > 0 && !round[i - 1].Qualified) {
-                                        round.RemoveAt(i);
-                                        logRound.Info = null;
-                                        Stats.IsSpectating = false;
-                                        Stats.InShow = false;
-                                        Stats.EndedShow = true;
-                                        return true;
-                                    }
-                                    round[i].Qualified = false;
-                                } else {
-                                    round[i].Qualified = true;
-                                }
-                                round[i].ShowEnd = showEnd;
-                                if (round.Count > 1 && (i + 1) != round.Count) {
-                                    round[i].IsFinal = false;
+                                    //
+                                    // No "SessionId" info in FinalBeans logs
+                                    //
+                                    // this.StatsForm.UpdateServerConnectionLog(this.threadLocalVariable.Value.currentSessionId, false);
+                                    logRound.Info = null;
+                                    Stats.InShow = false;
+                                    Stats.EndedShow = true;
+                                    return true;
                                 }
                             }
-                            //
-                            // No "SessionId" info in FinalBeans logs
-                            //
-                            // this.StatsForm.UpdateServerConnectionLog(this.threadLocalVariable.Value.currentSessionId, false);
-                            logRound.Info = null;
-                            Stats.IsSpectating = false;
-                            Stats.InShow = false;
-                            Stats.EndedShow = true;
-                            return true;
                         }
                     }
                 }
                 logRound.Info = null;
-                Stats.IsSpectating = false;
                 Stats.InShow = false;
                 Stats.EndedShow = true;
             } else if ((index = line.Line.IndexOf("[LobbyManager] Show selected index: ", StringComparison.OrdinalIgnoreCase)) != -1) {
@@ -802,7 +802,6 @@ namespace FinalBeansStats {
                         logRound.Info = null;
                     }
                 }
-                Stats.IsSpectating = false;
                 Stats.EndedShow = false;
 
                 this.threadLocalVariable.Value.isPrivateLobby = line.Line.IndexOf("StatePrivateLobby", StringComparison.OrdinalIgnoreCase) != -1
@@ -817,8 +816,23 @@ namespace FinalBeansStats {
 
                 round.Clear();
             } else if ((index = line.Line.IndexOf("ROUNDMANAGER - SELECTED ROUND ", StringComparison.OrdinalIgnoreCase)) != -1) {
+                if (logRound.Info != null) {
+                    if (logRound.Info.End == DateTime.MinValue) {
+                        logRound.Info.End = line.Date;
+                    }
+                    logRound.Info.Playing = false;
+                }
+
+                this.threadLocalVariable.Value.currentRoundId = line.Line.Substring(index + 30);
+                this.threadLocalVariable.Value.currentRoundStart = line.Date;
+
+                logRound.FindingPosition = false;
+            } else if (line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateMainMenu with FGClient.StateGameLoading", StringComparison.OrdinalIgnoreCase) != -1) {
+                this.threadLocalVariable.Value.lastGameDate = line.Date;
+            } else if (line.Line.IndexOf("[StateGameLoading] Starting intro cameras", StringComparison.OrdinalIgnoreCase) != -1) {
                 if (line.Date > Stats.LastRoundLoad) {
                     Stats.LastRoundLoad = line.Date;
+                    Stats.InShow = true;
                     Stats.SucceededPlayerNames.Clear();
                     Stats.SucceededPlayerIds.Clear();
                     Stats.EliminatedPlayerIds.Clear();
@@ -850,49 +864,24 @@ namespace FinalBeansStats {
                     }
                 }
 
-                if (logRound.Info != null) {
-                    if (logRound.Info.End == DateTime.MinValue) {
-                        logRound.Info.End = line.Date;
-                    }
-                    logRound.Info.Playing = false;
-                }
-
                 logRound.Info = new RoundInfo {
                     PrivateLobby = this.threadLocalVariable.Value.isPrivateLobby,
                     InParty = this.threadLocalVariable.Value.currentlyInParty,
-                    RoundId = line.Line.Substring(index + 30),
-                    Start = line.Date
+                    ShowNameId = this.GetShowNameIdFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate),
+                    RoundId = this.threadLocalVariable.Value.currentRoundId,
+                    Start = this.threadLocalVariable.Value.currentRoundStart
                 };
-
-                logRound.FindingPosition = false;
 
                 round.Add(logRound.Info);
 
-                if (round.Count > 1) {
-                    logRound.Info.ShowNameId = logRound.Info.ShowNameId ?? this.threadLocalVariable.Value.currentShowName;
-                    logRound.Info.Round = !Stats.EndedShow ? round.Count : Stats.SavedRoundCount + round.Count;
-                    logRound.Info.IsTeam = this.IsTeamException(logRound.Info.RoundId);
-                    logRound.Info.Name = this.VerifiedRoundId(logRound.Info.RoundId);
+                logRound.Info.ShowNameId = logRound.Info.ShowNameId ?? (this.threadLocalVariable.Value.selectedShowIndex == 0 ? "fb_main_show" : "fb_ltm");
+                this.threadLocalVariable.Value.currentShowNameId = logRound.Info.ShowNameId;
 
-                    if (this.IsRealFinalRound(logRound.Info.Round, logRound.Info.RoundId, logRound.Info.ShowNameId)) {
-                        logRound.Info.IsFinal = true;
-                    } else if (this.IsModeException(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
-                        logRound.Info.IsFinal = this.IsModeFinalException(logRound.Info.RoundId);
-                    } else {
-                        logRound.Info.IsFinal = this.StatsForm.StatLookup.TryGetValue(logRound.Info.Name, out LevelStats levelStats) && levelStats.IsFinal;
-                    }
-
-                    logRound.CountingPlayers = true;
-                    logRound.GetCurrentPlayerID = true; // But currently useless for FinalBeans logs
-                    logRound.CurrentPlayerID = 1;       // Because all players are having "playerId: 1" in FinalBeans logs
-                }
-            } else if (logRound.Info != null && line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateMainMenu with FGClient.StateGameLoading", StringComparison.OrdinalIgnoreCase) != -1) {
-                this.threadLocalVariable.Value.currentShowName = this.GetShowIdFromLastGamesDir(line.Date);
-
-                logRound.Info.ShowNameId = logRound.Info.ShowNameId ?? this.threadLocalVariable.Value.currentShowName;
-                logRound.Info.Round = !Stats.EndedShow ? round.Count : Stats.SavedRoundCount + round.Count;
-                logRound.Info.IsTeam = this.IsTeamException(logRound.Info.RoundId);
                 logRound.Info.Name = this.VerifiedRoundId(logRound.Info.RoundId);
+
+                logRound.Info.IsTeam = this.IsTeamException(logRound.Info.RoundId);
+
+                logRound.Info.Round = !Stats.EndedShow ? round.Count : Stats.SavedRoundCount + round.Count;
 
                 if (this.IsRealFinalRound(logRound.Info.Round, logRound.Info.RoundId, logRound.Info.ShowNameId)) {
                     logRound.Info.IsFinal = true;
@@ -902,13 +891,12 @@ namespace FinalBeansStats {
                     logRound.Info.IsFinal = this.StatsForm.StatLookup.TryGetValue(logRound.Info.Name, out LevelStats levelStats) && levelStats.IsFinal;
                 }
 
-                Stats.InShow = true;
                 logRound.CountingPlayers = true;
                 logRound.GetCurrentPlayerID = true; // But currently useless for FinalBeans logs
-                logRound.CurrentPlayerID = 1;       // Because all players are having "playerId: 1" info in FinalBeans logs
+                logRound.CurrentPlayerID = 1;       // Because all players are having "playerId: 1" in FinalBeans logs
             } else if (logRound.Info != null && logRound.CountingPlayers && line.Line.IndexOf("[CameraDirector] Adding Spectator target", StringComparison.OrdinalIgnoreCase) != -1) {
                 //
-                // "[CameraDirector] Adding Spectator target" in FinalBeans logs means a "remote" player will play
+                // "[CameraDirector] Adding Spectator target" in FinalBeans logs means a "remote" player is present (playing -OR- spectating, we can't tell...)
                 //
                 logRound.Info.Players++;
                 logRound.Info.PlayersPc++;
@@ -931,13 +919,13 @@ namespace FinalBeansStats {
                 logRound.Info.PlayersPc++;
                 if (line.Date > Stats.LastPlayersCount) {
                     Stats.LastPlayersCount = line.Date;
-                    // Set "playerId" of the player to '0' (unused value) to check if we have been eliminated in a previous round
+                    // Set "playerId" of the player to '0' (unused value) to check if we have been eliminated in previous round
                     if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(0)) {
                         Stats.ReadyPlayerIds.Add(0, "win");
                     }
                 }
-            } else if (line.Date > Stats.LastRoundLoad && line.Line.IndexOf("[GameSession] Changing state from Precountdown to Countdown", StringComparison.OrdinalIgnoreCase) != -1) {
-                Stats.IsSpectating = !Stats.ReadyPlayerIds.ContainsKey(0);
+            } else if (logRound.Info != null && line.Line.IndexOf("[GameSession] Changing state from Precountdown to Countdown", StringComparison.OrdinalIgnoreCase) != -1) {
+                logRound.Info.NotParticipated = !Stats.ReadyPlayerIds.ContainsKey(0);
             } else if (logRound.Info != null && line.Line.IndexOf("[GameSession] Changing state from Countdown to Playing", StringComparison.OrdinalIgnoreCase) != -1) {
                 logRound.Info.Start = line.Date;
                 logRound.Info.Playing = true;
@@ -993,7 +981,7 @@ namespace FinalBeansStats {
                     }
                     logRound.Info.Playing = false;
                 }
-            } else if (logRound.Info != null && !Stats.IsSpectating && !Stats.EndedShow && logRound.FindingPosition && (index = line.Line.IndexOf("[ClientGameSession] NumPlayersAchievingObjective=")) != -1) {
+            } else if (logRound.Info != null && !Stats.EndedShow && logRound.FindingPosition && (index = line.Line.IndexOf("[ClientGameSession] NumPlayersAchievingObjective=")) != -1) {
                 int position = int.Parse(line.Line.Substring(index + 49));
                 if (position > 0) {
                     logRound.FindingPosition = false;

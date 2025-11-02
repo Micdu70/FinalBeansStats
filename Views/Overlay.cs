@@ -1107,16 +1107,16 @@ namespace FinalBeansStats {
                     } else if (end != DateTime.MinValue) {
                         TimeSpan time = end - start;
                         this.lblFinish.TextRight = (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Crown) ? $"{Multilingual.GetWord("overlay_position_win")}! {time:m\\:ss\\.fff}" :
-                                                   (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && (!(!Stats.IsSpectating && Stats.InShow && !Stats.EndedShow))) ? $"{Multilingual.GetWord("overlay_position_eliminated")}! {time:m\\:ss\\.fff}" :
+                                                   (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && (!(Stats.InShow && !Stats.EndedShow && !this.lastRound.NotParticipated))) ? $"{Multilingual.GetWord("overlay_position_eliminated")}! {time:m\\:ss\\.fff}" :
                                                    $"{time:m\\:ss\\.fff}";
-                        this.lblFinish.ForeColor = this.lastRound.Crown || (!Stats.IsSpectating && Stats.InShow && !Stats.EndedShow) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
+                        this.lblFinish.ForeColor = this.lastRound.Crown || (Stats.InShow && !Stats.EndedShow && !this.lastRound.NotParticipated) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
                     } else if (this.lastRound.Playing) {
                         bool isOverRunningTime = runningTime.TotalMinutes >= maxRunningTime || !Stats.IsGameRunning;
                         this.lblFinish.TextRight = isOverRunningTime ? "-" : $"{runningTime:m\\:ss}";
-                        this.lblFinish.ForeColor = isOverRunningTime ? Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness) : ((!Stats.IsSpectating && !Stats.EndedShow) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness));
+                        this.lblFinish.ForeColor = isOverRunningTime ? Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness) : ((!Stats.EndedShow && !this.lastRound.NotParticipated) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness));
                     } else {
                         this.lblFinish.TextRight = "-";
-                        this.lblFinish.ForeColor = (!Stats.IsSpectating && Stats.InShow && !Stats.EndedShow) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
+                        this.lblFinish.ForeColor = (Stats.InShow && !Stats.EndedShow && !this.lastRound.NotParticipated) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
                     }
                 }
             }

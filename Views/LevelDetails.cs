@@ -527,6 +527,7 @@ namespace FinalBeansStats {
             ((Grid)sender).Columns["Profile"].Visible = false;
             ((Grid)sender).Columns["InParty"].Visible = false;
             ((Grid)sender).Columns["PrivateLobby"].Visible = false;
+            ((Grid)sender).Columns["NotParticipated"].Visible = false;
             ((Grid)sender).Columns["Qualified"].Visible = false;
             ((Grid)sender).Columns["IsFinal"].Visible = false;
             ((Grid)sender).Columns["IsTeam"].Visible = false;
@@ -920,6 +921,7 @@ namespace FinalBeansStats {
                         MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
                     this.gridDetails.Enabled = false;
                     this.spinnerTransition.Start();
+                    this.BackMaxSize = 0;
                     this.mpsSpinner01.Visible = true;
                     lock (this.StatsForm.StatsDB) {
                         Task.Run(() => {
@@ -957,6 +959,7 @@ namespace FinalBeansStats {
                                 this.gridDetails.Enabled = true;
                                 this.spinnerTransition.Stop();
                                 this.mpsSpinner01.Visible = false;
+                                this.BackMaxSize = 32;
 
                                 this.StatsForm.ResetStats();
                                 Stats.IsOverlayRoundInfoNeedRefresh = true;
@@ -979,6 +982,7 @@ namespace FinalBeansStats {
                     if (moveShows.ShowDialog(this) == DialogResult.OK) {
                         this.gridDetails.Enabled = false;
                         this.spinnerTransition.Start();
+                        this.BackMaxSize = 0;
                         this.mpsSpinner01.Visible = true;
                         int fromProfileId = this.StatsForm.GetCurrentProfileId();
                         int toProfileId = moveShows.SelectedProfileId;
@@ -1009,6 +1013,7 @@ namespace FinalBeansStats {
                                     this.gridDetails.Enabled = true;
                                     this.spinnerTransition.Stop();
                                     this.mpsSpinner01.Visible = false;
+                                    this.BackMaxSize = 32;
 
                                     this.StatsForm.ResetStats();
                                     Stats.IsOverlayRoundInfoNeedRefresh = true;
@@ -1030,6 +1035,7 @@ namespace FinalBeansStats {
                             MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
                         this.gridDetails.Enabled = false;
                         this.spinnerTransition.Start();
+                        this.BackMaxSize = 0;
                         this.mpsSpinner01.Visible = true;
                         lock (this.StatsForm.StatsDB) {
                             Task.Run(() => {
@@ -1042,6 +1048,7 @@ namespace FinalBeansStats {
                                             this.StatsForm.PersonalBestLogCache.Remove(pbLog);
                                         }
                                     }
+                                    ri.Qualified = false;
                                     ri.Finish = null;
                                     this.StatsForm.RoundDetails.Update(ri);
                                     this.StatsForm.StatsDB.Commit();
@@ -1049,9 +1056,10 @@ namespace FinalBeansStats {
                                 this.StatsForm.RunDatabaseTask(deleteFinishTimeTask, false);
                             }).ContinueWith(prevTask => {
                                 this.BeginInvoke((MethodInvoker)delegate {
+                                    this.gridDetails.Enabled = true;
                                     this.spinnerTransition.Stop();
                                     this.mpsSpinner01.Visible = false;
-                                    this.gridDetails.Enabled = true;
+                                    this.BackMaxSize = 32;
 
                                     this.StatsForm.ResetStats();
                                     Stats.IsOverlayRoundInfoNeedRefresh = true;
