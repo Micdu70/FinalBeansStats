@@ -636,22 +636,29 @@ namespace FinalBeansStats {
                 if (info.PrivateLobby || !info.Finish.HasValue) return;
 
                 string levelId = info.Name;
-                if (!this.StatsForm.StatLookup.TryGetValue(levelId, out LevelStats currentLevel) || (currentLevel.BestRecordType != BestRecordType.Fastest)) return;
+                if (!LevelStats.ALL.TryGetValue(levelId, out LevelStats currentLevel) || (currentLevel.BestRecordType != BestRecordType.Fastest)) return;
 
                 if (!this.StatsForm.ExistsPersonalBestLog(info.Finish.Value)) {
-                    string showId = !string.Equals(info.ShowNameId, "fb_main_show") ? "fb_ltm" : "fb_main_show";
-
                     List<RoundInfo> roundInfoList = new List<RoundInfo>();
-                    roundInfoList = this.StatsForm.AllStats.FindAll(r => !r.PrivateLobby &&
-                                                                         !string.IsNullOrEmpty(r.ShowNameId) &&
-                                                                         string.Equals(r.ShowNameId, showId) &&
-                                                                         string.Equals(r.Name, levelId) &&
-                                                                         r.Finish.HasValue);
+                    if (string.Equals(info.ShowNameId, "fb_main_show")) {
+                        roundInfoList = this.StatsForm.AllStats.FindAll(r => !r.PrivateLobby &&
+                                                                             !string.IsNullOrEmpty(r.ShowNameId) &&
+                                                                             string.Equals(r.ShowNameId, "fb_main_show") &&
+                                                                             string.Equals(r.Name, levelId) &&
+                                                                             r.Finish.HasValue);
+                    } else {
+                        roundInfoList = this.StatsForm.AllStats.FindAll(r => !r.PrivateLobby &&
+                                                                             !string.IsNullOrEmpty(r.ShowNameId) &&
+                                                                             !string.Equals(r.ShowNameId, "fb_main_show") &&
+                                                                             string.Equals(r.Name, levelId) &&
+                                                                             r.Finish.HasValue);
+                    }
 
                     double currentPb = roundInfoList.Count > 0 ? roundInfoList.Min(r => (r.Finish.Value - r.Start).TotalMilliseconds) : 0;
                     double currentRecord = (info.Finish.Value - info.Start).TotalMilliseconds;
                     bool isNewPb = currentPb == 0 || currentRecord < currentPb;
 
+                    string showId = !string.Equals(info.ShowNameId, "fb_main_show") ? "fb_ltm" : "fb_main_show";
                     this.StatsForm.InsertPersonalBestLog(info.Finish.Value, showId, levelId, currentRecord, isNewPb);
                     if (this.StatsForm.CurrentSettings.NotifyPersonalBest && isNewPb) {
                         this.OnPersonalBestNotification?.Invoke(showId, levelId, currentPb, currentRecord);
