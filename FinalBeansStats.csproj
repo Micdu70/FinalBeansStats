@@ -127,6 +127,7 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Entities\DarkModeCS.cs" />
     <Compile Include="Controls\ImageComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -149,6 +150,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Entities\GameStateWatcher.cs" />
+    <Compile Include="Controls\Messenger.cs" />
     <Compile Include="Entities\ImageItem.cs" />
     <Compile Include="Entities\Json.cs" />
     <Compile Include="Entities\LevelType.cs" />
@@ -1275,5 +1277,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -18,7 +18,7 @@ namespace FinalBeansStats {
         private IContainer components;
         private SaveFileDialog _saveFile;
         private ToolStripMenuItem ExportItemCsv, ExportItemHtml, ExportItemBbcode, ExportItemMd;
-        public ToolStripMenuItem DeleteShows, MoveShows, DeleteFinishTime;
+        public ToolStripMenuItem DeleteShows, MoveShows, DeleteLastRound, DeleteFinishTime;
         public ToolStripSeparator MenuSeparator1, MenuSeparator2;
         private bool IsEditOnEnter, readOnly;
         private bool? allowUpdate, allowNew, allowDelete;
@@ -391,7 +391,8 @@ namespace FinalBeansStats {
                         fs.Close();
                     }
 
-                    MessageBox.Show(this, $"{Multilingual.GetWord("message_save_csv")}{Environment.NewLine}({this._saveFile.FileName})", Multilingual.GetWord("message_save_csv_caption"), MessageBoxButtons.OK);
+                    Messenger.MessageBox($"{Multilingual.GetWord("message_save_csv")}{Environment.NewLine}({this._saveFile.FileName})", Multilingual.GetWord("message_save_csv_caption"),
+                        MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
                 }
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
@@ -427,7 +428,8 @@ namespace FinalBeansStats {
                 sb.Append("</table>");
                 Clipboard.SetText(sb.ToString(), TextDataFormat.Text);
 
-                MessageBox.Show(this, Multilingual.GetWord("message_save_html"), Multilingual.GetWord("message_save_html_caption"), MessageBoxButtons.OK);
+                Messenger.MessageBox(Multilingual.GetWord("message_save_html"), Multilingual.GetWord("message_save_html_caption"),
+                    MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
             }
@@ -462,7 +464,8 @@ namespace FinalBeansStats {
                 sb.Append("[/table]");
                 Clipboard.SetText(sb.ToString(), TextDataFormat.Text);
 
-                MessageBox.Show(this, Multilingual.GetWord("message_save_bbcode"), Multilingual.GetWord("message_save_bbcode_caption"), MessageBoxButtons.OK);
+                Messenger.MessageBox(Multilingual.GetWord("message_save_bbcode"), Multilingual.GetWord("message_save_bbcode_caption"),
+                    MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
             }
@@ -499,7 +502,8 @@ namespace FinalBeansStats {
 
                 Clipboard.SetText(sb.ToString(), TextDataFormat.Text);
 
-                MessageBox.Show(this, Multilingual.GetWord("message_save_markdown"), Multilingual.GetWord("message_save_markdown_caption"), MessageBoxButtons.OK);
+                Messenger.MessageBox(Multilingual.GetWord("message_save_markdown"), Multilingual.GetWord("message_save_markdown_caption"),
+                    MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
             }
@@ -703,7 +707,8 @@ namespace FinalBeansStats {
             object rec = null;
             foreach (object o in array) { rec = o; break; }
             DataTable dt = new DataTable();
-            if (rec == null) { return dt; }
+            if (rec == null) return dt;
+
             PropertyInfo[] properties = rec.GetType().GetProperties();
             dt.Columns.Add(".", rec.GetType());
             foreach (PropertyInfo pi in properties) {

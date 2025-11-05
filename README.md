@@ -89,7 +89,6 @@ FinalBeansStats is open source, meaning anyone can view the code, so download it
 ## Usage
   - Extract zip to it's own folder
   - Run the program while playing FinalBeans to see new stats.
-  - Only updates after a show has been completed and results are given.
 
 
 ### Main Window

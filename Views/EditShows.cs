@@ -140,31 +140,29 @@ namespace FinalBeansStats {
         }
 
         private void btnEditShowsSave_Click(object sender, EventArgs e) {
+            this.Visible = false;
             switch (this.FunctionFlag) {
                 case "add":
                     if (this.UseLinkedProfiles) {
-                        if (MetroMessageBox.Show(this,
-                                                 $"{Multilingual.GetWord("message_save_data_linked_profiles")}{Environment.NewLine}{Multilingual.GetWord("message_save_data_linked_profiles_info_prefix")} ({this.cboEditShows.SelectedItem}) {Multilingual.GetWord("message_save_data_linked_profiles_info_suffix")}",
+                        if (Messenger.MessageBox($"{Multilingual.GetWord("message_save_data_linked_profiles")}{Environment.NewLine}{Multilingual.GetWord("message_save_data_linked_profiles_info_prefix")} ({this.cboEditShows.SelectedItem}) {Multilingual.GetWord("message_save_data_linked_profiles_info_suffix")}",
                                                  $"{Multilingual.GetWord("message_save_data_caption")}",
-                                                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+                                MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                             this.DialogResult = DialogResult.OK;
                             this.Close();
                         }
                     } else {
-                        if (MetroMessageBox.Show(this,
-                                                 $"{Multilingual.GetWord("message_save_profile_prefix")} ({this.cboEditShows.SelectedItem}) {Multilingual.GetWord("message_save_profile_suffix")}",
+                        if (Messenger.MessageBox($"{Multilingual.GetWord("message_save_profile_prefix")} ({this.cboEditShows.SelectedItem}) {Multilingual.GetWord("message_save_profile_suffix")}",
                                                  $"{Multilingual.GetWord("message_save_profile_caption")}",
-                                                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+                                MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                             this.DialogResult = DialogResult.OK;
                             this.Close();
                         }
                     }
                     break;
                 case "move":
-                    if (MetroMessageBox.Show(this,
-                                             $"{Multilingual.GetWord("profile_move_select_question_prefix")} ({this.SelectedCount:N0}) {Multilingual.GetWord("profile_move_select_question_infix")} ({this.cboEditShows.SelectedItem}) {Multilingual.GetWord("profile_move_select_question_suffix")}",
+                    if (Messenger.MessageBox($"{Multilingual.GetWord("profile_move_select_question_prefix")} ({this.SelectedCount:N0}) {Multilingual.GetWord("profile_move_select_question_infix")} ({this.cboEditShows.SelectedItem}) {Multilingual.GetWord("profile_move_select_question_suffix")}",
                                              $"{Multilingual.GetWord("profile_move_select_title")}",
-                                             MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+                            MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                         this.DialogResult = DialogResult.OK;
                         this.Close();
                     }

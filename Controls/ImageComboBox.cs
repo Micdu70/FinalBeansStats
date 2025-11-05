@@ -33,7 +33,7 @@ namespace FinalBeansStats {
             }
         }
 
-        private string _name = String.Empty;
+        private string _name = string.Empty;
         public string SelectedName {
             get { return _name; }
             set {

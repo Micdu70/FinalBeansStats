@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+
 namespace FinalBeansStats {
     public static class Json {
         public static JsonObject Read(string json) {
@@ -102,7 +103,7 @@ namespace FinalBeansStats {
                     do {
                         c = json[++i];
                         if (c == ':') {
-                            if (foundColon) { break; }
+                            if (foundColon) break;
                             foundColon = true;
                         }
                     } while (char.IsWhiteSpace(c) || c == ':');

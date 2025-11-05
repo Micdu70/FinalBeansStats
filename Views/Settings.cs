@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using MetroFramework;
 using MetroFramework.Controls;
+using static FinalBeansStats.Stats;
 
 namespace FinalBeansStats {
     public partial class Settings : MetroFramework.Forms.MetroForm {
@@ -406,8 +407,7 @@ namespace FinalBeansStats {
             Stats.CurrentLanguage = (Language)this.cboMultilingual.SelectedIndex;
             this.CurrentSettings.Multilingual = this.cboMultilingual.SelectedIndex;
             this.CurrentSettings.Theme = this.cboTheme.SelectedIndex;
-            Stats.CurrentTheme = this.cboTheme.SelectedIndex == 0 ? MetroThemeStyle.Light :
-                this.cboTheme.SelectedIndex == 1 ? MetroThemeStyle.Dark : MetroThemeStyle.Default;
+            Stats.CurrentTheme = this.cboTheme.SelectedIndex == 0 ? MetroThemeStyle.Light : MetroThemeStyle.Dark;
 
             this.CurrentSettings.IpGeolocationService = this.IpGeolocationService;
             if (string.IsNullOrEmpty(this.txtIPinfoToken.Text)) {
@@ -691,7 +691,8 @@ namespace FinalBeansStats {
                             if (openFile.FileName.EndsWith("FinalBeans.exe", StringComparison.OrdinalIgnoreCase)) {
                                 this.txtGameExeLocation.Text = openFile.FileName;
                             } else {
-                                MetroMessageBox.Show(this, Multilingual.GetWord("message_wrong_selected_file", this.DisplayLang), Multilingual.GetWord("message_wrong_selected_file_caption", this.DisplayLang), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                Messenger.MessageBox(Multilingual.GetWord("message_wrong_selected_file", this.DisplayLang), Multilingual.GetWord("message_wrong_selected_file_caption", this.DisplayLang),
+                                    MsgIcon.Error, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                             }
                         }
                     }
@@ -729,7 +730,8 @@ namespace FinalBeansStats {
                         this.overlayFontSerialized = new FontConverter().ConvertToString(this.lblOverlayFontExample.Font);
                     }
                 } catch {
-                    MetroMessageBox.Show(this, $"{Multilingual.GetWord("settings_font_need_to_be_installed_message")}", $"{Multilingual.GetWord("settings_font_need_to_be_installed_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Messenger.MessageBox($"{Multilingual.GetWord("settings_font_need_to_be_installed_message")}", $"{Multilingual.GetWord("settings_font_need_to_be_installed_caption")}",
+                        MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                 }
             });
         }
@@ -1048,9 +1050,9 @@ namespace FinalBeansStats {
             this.btnCheckUpdates.Width = TextRenderer.MeasureText(this.btnCheckUpdates.Text, this.btnCheckUpdates.Font).Width + 30;
             this.lblthirdpartyLicences.Font = Overlay.GetMainFont(18);
 #if AllowUpdate
-            this.lblVersion.Text = $"{Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)}";
+            this.lblVersion.Text = $@"{Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)}";
 #else
-            this.lblVersion.Text = $"{Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)} ({Multilingual.GetWord("main_manual_update_version")})";
+            this.lblVersion.Text = $@"{Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)} ({Multilingual.GetWord("main_manual_update_version")})";
             this.chkAutoUpdate.Visible = false;
 #endif
             Stats.CurrentLanguage = tempLanguage;
@@ -1154,6 +1156,9 @@ namespace FinalBeansStats {
             if (sender.Equals(this.lbltpl4)) {
                 this.OpenLink(@"https://github.com/ScottPlot/ScottPlot/blob/main/LICENSE");
             }
+            if (sender.Equals(this.lbltpl5)) {
+                this.OpenLink(@"https://github.com/BlueMystical/Dark-Mode-Forms/blob/main/LICENSE");
+            }
             if (sender.Equals(this.linkIPinfoToken)) {
                 this.OpenLink(@"https://ipinfo.io/missingauth");
             }
@@ -1170,34 +1175,42 @@ namespace FinalBeansStats {
 
         private void btnCheckUpdates_Click(object sender, EventArgs e) {
 #if AllowUpdate
-            using (ZipWebClient web = new ZipWebClient()) {
-                string assemblyInfo = web.DownloadString(@"https://raw.githubusercontent.com/Micdu70/FinalBeansStats/main/Properties/AssemblyInfo.cs");
-                int index = assemblyInfo.IndexOf("AssemblyVersion(");
-                if (index > 0) {
-                    int indexEnd = assemblyInfo.IndexOf("\")", index);
-                    Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
-                    Version newVersion = new Version(assemblyInfo.Substring(index + 17, indexEnd - index - 17));
-                    if (newVersion > currentVersion) {
-                        if (MetroMessageBox.Show(this,
-                                                 $"{Multilingual.GetWord("message_update_question_prefix")} [ v{newVersion.ToString(2)} ] {Multilingual.GetWord("message_update_question_suffix")}",
+            using (ApiWebClient web = new ApiWebClient()) {
+                try {
+                    string json = web.DownloadString(Utils.FINALBEANSSTATS_LATEST_RELEASE_API);
+                    LatestReleaseApiInfo latestReleaseApi = System.Text.Json.JsonSerializer.Deserialize<LatestReleaseApiInfo>(json);
+                    if (!string.IsNullOrEmpty(latestReleaseApi.name)) {
+                        Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
+                        Version newVersion = new Version(latestReleaseApi.name);
+                        if (newVersion > currentVersion) {
+                            string downloadUrl = null;
+                            foreach (var asset in latestReleaseApi.assets) {
+                                if (asset.browser_download_url.EndsWith("FinalBeansStats.zip", StringComparison.OrdinalIgnoreCase)) {
+                                    downloadUrl = asset.browser_download_url;
+                                    break;
+                                }
+                            }
+                            if (Messenger.MessageBox($"{Multilingual.GetWord("message_update_question_prefix")} [ v{newVersion.ToString(2)} ] {Multilingual.GetWord("message_update_question_suffix")}",
+                                                     $"{Multilingual.GetWord("message_update_question_caption")}",
+                                                     MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
+                                this.Hide();
+                                Stats.IsExitingForUpdate = true;
+                                this.StatsForm.Stats_ExitProgram(this, null);
+                                this.StatsForm.UpdateProgram(downloadUrl);
+                            }
+                        } else {
+                            Messenger.MessageBox($"{Multilingual.GetWord("message_update_latest_version")}" +
+                                                 $"{Environment.NewLine}{Environment.NewLine}" +
+                                                 $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}{Environment.NewLine}{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
                                                  $"{Multilingual.GetWord("message_update_question_caption")}",
-                                                 MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
-                            this.Hide();
-                            Stats.IsExitingForUpdate = true;
-                            this.StatsForm.Stats_ExitProgram(this, null);
-                            this.StatsForm.UpdateProgram(web);
+                                MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                         }
                     } else {
-                        MetroMessageBox.Show(this,
-                            $"{Multilingual.GetWord("message_update_latest_version")}" +
-                            $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}" +
-                            $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}{Environment.NewLine}{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
-                            $"{Multilingual.GetWord("message_update_question_caption")}",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Messenger.MessageBox($"{Multilingual.GetWord("message_update_not_determine_version")}", $"{Multilingual.GetWord("message_update_error_caption")}",
+                            MsgIcon.Error, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                     }
-                } else {
-                    MetroMessageBox.Show(this, $"{Multilingual.GetWord("message_update_not_determine_version")}", $"{Multilingual.GetWord("message_update_error_caption")}",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                } catch {
+                    // ignored
                 }
             }
 #endif

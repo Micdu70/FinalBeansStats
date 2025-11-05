@@ -8,10 +8,12 @@ namespace FinalBeansStats {
         public int Profile { get; set; }
         public string RoundId { get; set; }
         public string Name { get; set; }
+        public bool LastRound { get; set; }
         public int ShowID { get; set; }
+        public string ShowName { get; set; }
         public string ShowNameId { get; set; }
         public int Round { get; set; }
-        public bool NotParticipated { get; set; }
+        public bool Participating { get; set; }
         public int Position { get; set; }
         public int? Score { get; set; }
         public int Tier { get; set; }

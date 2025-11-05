@@ -16,7 +16,8 @@ namespace FinalBeansStats {
         public static readonly string FINALBEANSSTATS_LEVEL_TIME_LIMIT_DB_URL = "https://raw.githubusercontent.com/Micdu70/FinalBeansStats/refs/heads/main/LevelTimeLimitDB.json";
         public static readonly string FINALBEANSSTATS_UPCOMING_SHOW_DB_URL = "https://raw.githubusercontent.com/Micdu70/FinalBeansStats/refs/heads/main/UpcomingShowDB.json";
         public static readonly string FINALBEANSSTATS_RELEASES_CHANGELOG_URL = "https://raw.githubusercontent.com/Micdu70/FinalBeansStats/refs/heads/main/CHANGELOG.md";
-        public static readonly string FINALBEANSSTATS_RELEASES_LATEST_DOWNLOAD_URL = "https://github.com/Micdu70/FinalBeansStats/releases/latest/download/FinalBeansStats.zip";
+        public static readonly string FINALBEANSSTATS_LATEST_RELEASE_API = "https://api.github.com/repos/Micdu70/FinalBeansStats/releases/latest";
+        public static readonly string FINALBEANSSTATS_LATEST_RELEASE_DOWNLOAD_URL = "https://github.com/Micdu70/FinalBeansStats/releases/latest/download/FinalBeansStats.zip";
         private static readonly string IP2C_ORG_URL = "https://ip2c.org/"; // $"{IP2C_ORG_URL}{ip}"
         private static readonly string IPINFO_IO_URL = "https://ipinfo.io/"; // $"{IPINFO_IO_URL}{ip}/json" or $"{IPINFO_IO_URL}{ip}?token="
         private static readonly string IPAPI_COM_URL = "http://ip-api.com/json/"; // $"{IPAPI_COM_URL}{ip}"
@@ -274,7 +275,8 @@ namespace FinalBeansStats {
         }
 
         public static string GetCountryCode(string ip) {
-            if (string.IsNullOrEmpty(ip)) { return string.Empty; }
+            if (string.IsNullOrEmpty(ip)) return string.Empty;
+
             try {
                 string countryCode;
                 switch (Stats.IpGeolocationService) {
@@ -310,7 +312,8 @@ namespace FinalBeansStats {
         }
 
         public static string GetCountryInfo(string ip) {
-            if (string.IsNullOrEmpty(ip)) { return string.Empty; }
+            if (string.IsNullOrEmpty(ip)) return string.Empty;
+
             try {
                 string[] rtnValue;
                 string countryInfo;

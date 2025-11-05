@@ -1107,16 +1107,16 @@ namespace FinalBeansStats {
                     } else if (end != DateTime.MinValue) {
                         TimeSpan time = end - start;
                         this.lblFinish.TextRight = (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Crown) ? $"{Multilingual.GetWord("overlay_position_win")}! {time:m\\:ss\\.fff}" :
-                                                   (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && (!(Stats.InShow && !Stats.EndedShow && !this.lastRound.NotParticipated))) ? $"{Multilingual.GetWord("overlay_position_eliminated")}! {time:m\\:ss\\.fff}" :
+                                                   (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && (!(Stats.InShow && !Stats.EndedShow && this.lastRound.Participating))) ? $"{Multilingual.GetWord("overlay_position_eliminated")}! {time:m\\:ss\\.fff}" :
                                                    $"{time:m\\:ss\\.fff}";
-                        this.lblFinish.ForeColor = this.lastRound.Crown || (Stats.InShow && !Stats.EndedShow && !this.lastRound.NotParticipated) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
+                        this.lblFinish.ForeColor = this.lastRound.Crown || (Stats.InShow && !Stats.EndedShow && this.lastRound.Participating) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
                     } else if (this.lastRound.Playing) {
                         bool isOverRunningTime = runningTime.TotalMinutes >= maxRunningTime || !Stats.IsGameRunning;
                         this.lblFinish.TextRight = isOverRunningTime ? "-" : $"{runningTime:m\\:ss}";
-                        this.lblFinish.ForeColor = isOverRunningTime ? Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness) : ((!Stats.EndedShow && !this.lastRound.NotParticipated) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness));
+                        this.lblFinish.ForeColor = isOverRunningTime ? Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness) : ((!Stats.EndedShow && this.lastRound.Participating) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness));
                     } else {
                         this.lblFinish.TextRight = "-";
-                        this.lblFinish.ForeColor = (Stats.InShow && !Stats.EndedShow && !this.lastRound.NotParticipated) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
+                        this.lblFinish.ForeColor = (Stats.InShow && !Stats.EndedShow && this.lastRound.Participating) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
                     }
                 }
             }
@@ -1187,9 +1187,9 @@ namespace FinalBeansStats {
                         if (this.StatsForm.StatLookup.TryGetValue(this.levelId, out this.levelStats)) {
                             this.levelName = this.levelStats.Name.ToUpper();
                         } else if (this.levelId.StartsWith("round_", StringComparison.OrdinalIgnoreCase)) {
-                            this.levelName = this.levelId.Substring(6).Replace('_', ' ').ToUpper();
+                            this.levelName = this.levelId.Substring(6).Replace("_", " ").ToUpper();
                         } else {
-                            this.levelName = this.levelId.Replace('_', ' ').ToUpper();
+                            this.levelName = this.levelId.Replace("_", " ").ToUpper();
                         }
 
                         this.levelType = (this.levelStats?.Type).GetValueOrDefault(LevelType.Unknown);

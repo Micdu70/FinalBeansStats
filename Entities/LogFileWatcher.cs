@@ -283,25 +283,30 @@ namespace FinalBeansStats {
             try {
                 bool isValidSemiColon, isValidDot, isValid;
                 string lastTime = DateTime.UtcNow.ToString("hh:mm:ss.fff");
-                foreach (string line in File.ReadAllLines(this.filePath)) {
-                    isValidSemiColon = line.IndexOf(":") == 2 && line.IndexOf(":", 3) == 5 && line.IndexOf(":", 6) == 12;
-                    isValidDot = line.IndexOf(".") == 2 && line.IndexOf(".", 3) == 5 && line.IndexOf(":", 6) == 12;
-                    isValid = isValidSemiColon || isValidDot;
-                    if (isValid) {
-                        lastTime = line.Substring(0, 12);
+                using (var fs = new FileStream(this.filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)) {
+                    using (var sr = new StreamReader(fs)) {
+                        string line;
+                        while ((line = sr.ReadLine()) != null) {
+                            isValidSemiColon = line.IndexOf(":") == 2 && line.IndexOf(":", 3) == 5 && line.IndexOf(":", 6) == 12;
+                            isValidDot = line.IndexOf(".") == 2 && line.IndexOf(".", 3) == 5 && line.IndexOf(":", 6) == 12;
+                            isValid = isValidSemiColon || isValidDot;
+                            if (isValid) {
+                                lastTime = line.Substring(0, 12);
+                            }
+                        }
+                    }
+                    using (var sw = new StreamWriter(fs)) {
+                        sw.WriteLine();
+                        sw.WriteLine($"{lastTime}: [GlobalGameStateClient] OnDestroy called");
+                        sw.WriteLine();
                     }
                 }
-                TextWriter tw = new StreamWriter(this.filePath, true);
-                tw.WriteLine();
-                tw.WriteLine($"{lastTime}: [GlobalGameStateClient] OnDestroy called");
-                tw.WriteLine();
-                tw.Close();
             } catch {
                 // ignored
             }
         }
 
-        private string GetShowNameIdFromLastGamesDir(DateTime gameStartedDate) {
+        private string GetShowNameFromLastGamesDir(DateTime gameStartedDate, bool returnAsId = false) {
             try {
                 if (gameStartedDate != Stats.LastGameDate) {
                     Stats.LastGameDate = gameStartedDate;
@@ -313,11 +318,16 @@ namespace FinalBeansStats {
                     }
                     string fileName = Path.GetFileNameWithoutExtension(files[0]);
                     int index = fileName.IndexOf($" - {date}");
-                    string ltmName = fileName.Substring(0, index);
-                    Stats.LastShowNameId = Regex.Replace($"fb_{ltmName.ToLower()}", "[^0-9a-z_]", "_");
+                    Stats.LastShowName = fileName.Substring(0, index);
+                    Stats.LastShowNameId = $"fb_{Regex.Replace(Stats.LastShowName.ToLower(), "[^0-9a-z_]", "_").Trim(new Char[] { '_' })}";
                 }
-                return Stats.LastShowNameId;
+                if (returnAsId) {
+                    return Stats.LastShowNameId;
+                }
+                return Stats.LastShowName;
             } catch {
+                Stats.LastShowName = null;
+                Stats.LastShowNameId = null;
                 return null;
             }
         }
@@ -341,7 +351,7 @@ namespace FinalBeansStats {
 
         private bool IsRealFinalRound(int roundNum, string roundId, string showId) {
             // FinalBeans Stuff
-            if (string.Equals(showId, "fb_skilled_speeders")) { return true; }
+            if (string.Equals(showId, "fb_skilled_speeders")) return true;
 
             // Fall Guys Stuff
             if ((showId.StartsWith("knockout_fp") && showId.EndsWith("_srs"))
@@ -656,15 +666,14 @@ namespace FinalBeansStats {
 
                 if (!this.StatsForm.ExistsPersonalBestLog(info.Finish.Value)) {
                     List<RoundInfo> roundInfoList = new List<RoundInfo>();
-                    if (string.Equals(info.ShowNameId, "fb_main_show")) {
+                    string showId = !string.Equals(info.ShowNameId, "fb_main_show") ? "fb_ltm" : "fb_main_show";
+                    if (string.Equals(showId, "fb_main_show")) {
                         roundInfoList = this.StatsForm.AllStats.FindAll(r => !r.PrivateLobby &&
-                                                                             !string.IsNullOrEmpty(r.ShowNameId) &&
                                                                              string.Equals(r.ShowNameId, "fb_main_show") &&
                                                                              string.Equals(r.Name, levelId) &&
                                                                              r.Finish.HasValue);
                     } else {
                         roundInfoList = this.StatsForm.AllStats.FindAll(r => !r.PrivateLobby &&
-                                                                             !string.IsNullOrEmpty(r.ShowNameId) &&
                                                                              !string.Equals(r.ShowNameId, "fb_main_show") &&
                                                                              string.Equals(r.Name, levelId) &&
                                                                              r.Finish.HasValue);
@@ -674,7 +683,6 @@ namespace FinalBeansStats {
                     double currentRecord = (info.Finish.Value - info.Start).TotalMilliseconds;
                     bool isNewPb = currentPb == 0 || currentRecord < currentPb;
 
-                    string showId = !string.Equals(info.ShowNameId, "fb_main_show") ? "fb_ltm" : "fb_main_show";
                     this.StatsForm.InsertPersonalBestLog(info.Finish.Value, showId, levelId, currentRecord, isNewPb);
                     if (this.StatsForm.CurrentSettings.NotifyPersonalBest && isNewPb) {
                         this.OnPersonalBestNotification?.Invoke(showId, levelId, currentPb, currentRecord);
@@ -721,23 +729,18 @@ namespace FinalBeansStats {
                     if (!string.IsNullOrEmpty(this.playerName)) {
                         //
                         // No " == [CompletedEpisodeDto] ==" (show summary) info in FinalBeans logs
-                        // "RecordEscapeDuringAGame" setting MUST always be 'true' for now
+                        //
+                        // "RecordEscapeDuringAGame" setting MUST always be 'true' to save game stats
                         //
                         if (this.StatsForm.CurrentSettings.RecordEscapeDuringAGame && !Stats.EndedShow) {
                             DateTime showStart = DateTime.MinValue;
                             DateTime showEnd = logRound.Info.End;
                             for (int i = 0; i < round.Count; i++) {
-                                if (string.IsNullOrEmpty(round[i].Name)) {
-                                    round.RemoveAt(i);
-                                    logRound.Info = null;
-                                    Stats.InShow = false;
-                                    Stats.EndedShow = true;
-                                    return true;
-                                }
                                 if (i == 0) {
                                     showStart = round[i].Start;
                                 }
                                 round[i].ShowStart = showStart;
+                                round[i].ShowEnd = showEnd;
                                 round[i].Playing = false;
                                 round[i].Round = i + 1;
                                 if (round[i].End == DateTime.MinValue) {
@@ -746,28 +749,54 @@ namespace FinalBeansStats {
                                 if (round[i].Start == DateTime.MinValue) {
                                     round[i].Start = round[i].End;
                                 }
-                                //
-                                // No proper elimination info in FinalBeans logs
-                                // so check if the player was in 'Spectator' mode
-                                //
-                                // If 'Spectator' trigger at round start => [don't save this round info]
-                                // If 'Spectator' trigger during round => player NOT qualified [save this round info]
-                                // Else => player (likely) qualified [save this round info]
-                                //
                                 if (i == (round.Count - 1)) {
                                     for (int j = i; j >= 0; j--) {
-                                        if (round[j].NotParticipated) {
+                                        if (string.IsNullOrEmpty(round[j].Name)) {
                                             round.RemoveAt(j);
-                                            break;
+                                            continue;
                                         }
+                                        //
+                                        // No proper elimination info in FinalBeans logs
+                                        // so check if "Participating" flag was set to true or not
+                                        //
+                                        // If "Participating" flag is 'false' at round start => [don't save this round info; save previous rounds only]
+                                        // Else => If player has a "Finish" time => Qualified is 'true' => [save this round info]
+                                        //         Else => Qualified is 'false' => [save this round info]
+                                        //
+                                        if (!round[j].Participating) {
+                                            // See "IMPORTANT NOTE" below
+                                            if (j < i && round.ElementAtOrDefault(j + 1) != null) {
+                                                round.RemoveAt(j + 1);
+                                            }
+                                            round.RemoveAt(j);
+                                            continue;
+                                        }
+                                        //
+                                        // IMPORTANT NOTE: When eliminated from a previous round,
+                                        //                 if player leaves the show AFTER round loaded but BEFORE the round countdown
+                                        //                 the last participated round info will NOT be CORRECT!
+                                        //                 Only current issue with that is explained below(¤¤¤)
+                                        //
                                         round[j].Qualified = round[j].Finish.HasValue;
+                                        //
+                                        // Qualification info is not always present in FinalBeans logs (mostly in "Survival" rounds)
+                                        // So no "Finish" time set when it happens (it's an issue!)
+                                        // But if the player participate to the last round
+                                        // Manually set "Finish" time / set "Qualified" flag to 'true' for any previous round
+                                        //
+                                        // (¤¤¤) NOTE: If last participated round is not correct, "Finish" time / "Qualified" flag can be wrongly set
+                                        //             for one round of the show.
+                                        //             Anyway, user can still delete "Finish" time of this round later to fix this mistake.
+                                        //
                                         for (int k = j; k > 0; k--) {
                                             if (!round[k - 1].Finish.HasValue) {
                                                 round[k - 1].Finish = round[k - 1].End;
                                             }
                                             round[k - 1].Qualified = true;
                                         }
-                                        round[j].ShowEnd = showEnd;
+                                    }
+                                    if (round.Count > 0) {
+                                        round[round.Count - 1].LastRound = true;
                                     }
                                     //
                                     // No "SessionId" info in FinalBeans logs
@@ -867,13 +896,15 @@ namespace FinalBeansStats {
                 logRound.Info = new RoundInfo {
                     PrivateLobby = this.threadLocalVariable.Value.isPrivateLobby,
                     InParty = this.threadLocalVariable.Value.currentlyInParty,
-                    ShowNameId = this.GetShowNameIdFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate),
+                    ShowName = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate),
+                    ShowNameId = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate, true),
                     RoundId = this.threadLocalVariable.Value.currentRoundId,
                     Start = this.threadLocalVariable.Value.currentRoundStart
                 };
 
                 round.Add(logRound.Info);
 
+                logRound.Info.ShowName = logRound.Info.ShowName ?? (this.threadLocalVariable.Value.selectedShowIndex == 0 ? "Main Show" : "LTM");
                 logRound.Info.ShowNameId = logRound.Info.ShowNameId ?? (this.threadLocalVariable.Value.selectedShowIndex == 0 ? "fb_main_show" : "fb_ltm");
                 this.threadLocalVariable.Value.currentShowNameId = logRound.Info.ShowNameId;
 
@@ -915,17 +946,16 @@ namespace FinalBeansStats {
                 //
                 // "[CameraDirector].UseCloseShot, current camera target type is Intro" in FinalBeans logs means YOU will play
                 //
+                logRound.Info.Participating = true;
                 logRound.Info.Players++;
                 logRound.Info.PlayersPc++;
                 if (line.Date > Stats.LastPlayersCount) {
                     Stats.LastPlayersCount = line.Date;
-                    // Set "playerId" of the player to '0' (unused value) to check if we have been eliminated in previous round
+                    // Set "playerId" of the player to '0' (unused value) to check later if we have been eliminated in previous round
                     if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(0)) {
                         Stats.ReadyPlayerIds.Add(0, "win");
                     }
                 }
-            } else if (logRound.Info != null && line.Line.IndexOf("[GameSession] Changing state from Precountdown to Countdown", StringComparison.OrdinalIgnoreCase) != -1) {
-                logRound.Info.NotParticipated = !Stats.ReadyPlayerIds.ContainsKey(0);
             } else if (logRound.Info != null && line.Line.IndexOf("[GameSession] Changing state from Countdown to Playing", StringComparison.OrdinalIgnoreCase) != -1) {
                 logRound.Info.Start = line.Date;
                 logRound.Info.Playing = true;
@@ -1111,7 +1141,7 @@ namespace FinalBeansStats {
                     }
                 }
             } else if (line.Line.IndexOf(" == [CompletedEpisodeDto] ==", StringComparison.OrdinalIgnoreCase) != -1) {
-                if (logRound.Info == null || Stats.EndedShow) { return false; }
+                if (logRound.Info == null || Stats.EndedShow) return false;
 
                 Stats.SavedRoundCount = logRound.Info.Round;
                 Stats.EndedShow = true;

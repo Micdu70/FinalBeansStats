@@ -118,11 +118,20 @@ namespace FinalBeansStats {
             showsData.Columns.Add("showId");
             showsData.Columns.Add("doNotCombineShows");
             showsData.Rows.Add("", "", "False");
+            List<string> addedShowList = new List<string>();
             foreach (string showId in this.StatsForm.PublicShowIdList) {
                 showsData.Rows.Add(Multilingual.GetShowName(showId), showId, "False");
+                addedShowList.Add(showId);
             }
             foreach (string showId in this.StatsForm.PublicShowIdList2) {
                 showsData.Rows.Add(Multilingual.GetShowName(showId), showId, "True");
+                addedShowList.Add(showId);
+            }
+            foreach (var stat in this.AllStats.FindAll(r => !addedShowList.Contains(r.ShowNameId))) {
+                if (addedShowList.Contains(stat.ShowNameId)) continue;
+
+                showsData.Rows.Add(stat.ShowName, stat.ShowNameId, "True");
+                addedShowList.Add(stat.ShowNameId);
             }
 
             showsData.DefaultView.Sort = "showName ASC";
@@ -236,13 +245,14 @@ namespace FinalBeansStats {
         private void AddPageButton_Click(object sender, EventArgs e) {
             if (this.txtAddProfile.Text.Length == 0) return;
             if (this.Profiles.Find(p => string.Equals(p.ProfileName, this.txtAddProfile.Text)) != null) {
-                MetroMessageBox.Show(this, Multilingual.GetWord("message_same_profile_name_exists"), $"{Multilingual.GetWord("message_create_profile_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Messenger.MessageBox(Multilingual.GetWord("message_same_profile_name_exists"), $"{Multilingual.GetWord("message_create_profile_caption")}",
+                    MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                 return;
             }
 
-            if (MetroMessageBox.Show(this,
-                    $"{Multilingual.GetWord("message_create_profile_prefix")} ({this.txtAddProfile.Text}) {Multilingual.GetWord("message_create_profile_suffix")}",
-                    Multilingual.GetWord("message_create_profile_caption"), MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+            if (Messenger.MessageBox($"{Multilingual.GetWord("message_create_profile_prefix")} ({this.txtAddProfile.Text}) {Multilingual.GetWord("message_create_profile_suffix")}",
+                    Multilingual.GetWord("message_create_profile_caption"),
+                    MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                 int maxId = this.Profiles.Max(p => p.ProfileId);
                 int maxOrder = this.Profiles.Max(p => p.ProfileOrder);
                 this.Profiles.Insert(0, new Profiles { ProfileId = maxId + 1, ProfileName = string.IsNullOrEmpty(this.txtAddProfile.Text) ? Utils.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks), HashTypes.MD5).Substring(0, 20) : this.txtAddProfile.Text, ProfileOrder = maxOrder + 1, LinkedShowId = string.Empty, DoNotCombineShows = false });
@@ -254,9 +264,9 @@ namespace FinalBeansStats {
 
         private void RemovePageButton_Click(object sender, EventArgs e) {
             if (this.cboProfileRemove.SelectedIndex < 0) return;
-            if (MetroMessageBox.Show(this,
-                    $"{Multilingual.GetWord("message_delete_profile_prefix")} ({this.cboProfileRemove.SelectedItem}) {Multilingual.GetWord("message_delete_profile_infix")} {Multilingual.GetWord("message_delete_profile_suffix")}",
-                    Multilingual.GetWord("message_delete_profile_caption"), MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+            if (Messenger.MessageBox($"{Multilingual.GetWord("message_delete_profile_prefix")} ({this.cboProfileRemove.SelectedItem}) {Multilingual.GetWord("message_delete_profile_infix")} {Multilingual.GetWord("message_delete_profile_suffix")}",
+                    Multilingual.GetWord("message_delete_profile_caption"),
+                    MsgIcon.Question, MessageBoxButtons.OKCancel, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.OK) {
                 string prevProfileName = string.Empty;
                 for (int i = 0; i < this.cboProfileRemove.Items.Count; i++) {
                     if (this.cboProfileRemove.Items[i].ToString() == this.cboProfileRemove.SelectedItem.ToString()) {
@@ -284,9 +294,9 @@ namespace FinalBeansStats {
             if (this.cboProfileMoveTo.SelectedIndex < 0) return;
             if (this.cboProfileMoveFrom.SelectedIndex < 0) return;
             if (this.cboProfileMoveFrom.SelectedItem.ToString() == this.cboProfileMoveTo.SelectedItem.ToString()) return;
-            if (MetroMessageBox.Show(this,
-                    $"{Multilingual.GetWord("message_move_profile_prefix")} ({this.cboProfileMoveFrom.SelectedItem}) {Multilingual.GetWord("message_move_profile_infix")} ({this.cboProfileMoveTo.SelectedItem}) {Multilingual.GetWord("message_move_profile_suffix")}",
-                    Multilingual.GetWord("message_move_profile_caption"), MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+            if (Messenger.MessageBox($"{Multilingual.GetWord("message_move_profile_prefix")} ({this.cboProfileMoveFrom.SelectedItem}) {Multilingual.GetWord("message_move_profile_infix")} ({this.cboProfileMoveTo.SelectedItem}) {Multilingual.GetWord("message_move_profile_suffix")}",
+                    Multilingual.GetWord("message_move_profile_caption"),
+                    MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                 int fromId = this.Profiles.Find(p => p.ProfileName == this.cboProfileMoveFrom.SelectedItem.ToString().Replace("&&", "&")).ProfileId;
                 int toId = this.Profiles.Find(p => p.ProfileName == this.cboProfileMoveTo.SelectedItem.ToString().Replace("&&", "&")).ProfileId;
                 List<RoundInfo> targetList = this.AllStats.FindAll(r => r.Profile == fromId);
@@ -305,12 +315,13 @@ namespace FinalBeansStats {
             if (this.txtRenameProfile.Text.Length == 0) return;
             if (this.cboProfileRename.SelectedItem.ToString().Replace("&&", "&") == this.txtRenameProfile.Text) return;
             if (this.Profiles.Find(p => string.Equals(p.ProfileName, this.txtRenameProfile.Text)) != null) {
-                MetroMessageBox.Show(this, Multilingual.GetWord("message_same_profile_name_exists"), $"{Multilingual.GetWord("message_create_profile_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Messenger.MessageBox(Multilingual.GetWord("message_same_profile_name_exists"), $"{Multilingual.GetWord("message_create_profile_caption")}",
+                    MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                 return;
             }
-            if (MetroMessageBox.Show(this,
-                    $"{Multilingual.GetWord("message_rename_profile_prefix")} ({this.cboProfileRename.SelectedItem}) {Multilingual.GetWord("message_rename_profile_infix")} ({this.txtRenameProfile.Text.Replace("&", "&&")}) {Multilingual.GetWord("message_rename_profile_suffix")}",
-                    Multilingual.GetWord("message_rename_profile_caption"), MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+            if (Messenger.MessageBox($"{Multilingual.GetWord("message_rename_profile_prefix")} ({this.cboProfileRename.SelectedItem}) {Multilingual.GetWord("message_rename_profile_infix")} ({this.txtRenameProfile.Text.Replace("&", "&&")}) {Multilingual.GetWord("message_rename_profile_suffix")}",
+                    Multilingual.GetWord("message_rename_profile_caption"),
+                    MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                 Profiles profileToUpdate = this.Profiles.Find(p => string.Equals(p.ProfileName, this.cboProfileRename.SelectedItem.ToString().Replace("&&", "&")));
                 if (profileToUpdate != null) {
                     profileToUpdate.ProfileName = string.IsNullOrEmpty(this.txtRenameProfile.Text) ? Utils.ComputeHash(BitConverter.GetBytes(DateTime.Now.Ticks), HashTypes.MD5).Substring(0, 20) : this.txtRenameProfile.Text;

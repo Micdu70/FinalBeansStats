@@ -216,6 +216,21 @@ namespace FinalBeansStats {
                     this.gridDetails.DeleteFinishTime.MouseLeave += this.gridDetails.CMenu_MouseLeave;
                     // this.gridDetails.CMenu.Items.Add(this.gridDetails.DeleteFinishTime);
 
+                    this.gridDetails.DeleteLastRound = new ToolStripMenuItem {
+                        Name = "deleteLastRound"
+                        , Size = new Size(134, 22)
+                        , Text = Multilingual.GetWord("main_delete_last_round")
+                        , ShowShortcutKeys = true
+                        , Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.delete : Properties.Resources.delete_gray
+                        , ShortcutKeys = Keys.Control | Keys.D
+                        , BackColor = this.Theme == MetroThemeStyle.Light ? Color.White : Color.FromArgb(17, 17, 17)
+                        , ForeColor = this.Theme == MetroThemeStyle.Light ? Color.Black : Color.DarkGray
+                    };
+                    this.gridDetails.DeleteLastRound.Click += this.deleteLastRound_Click;
+                    this.gridDetails.DeleteLastRound.MouseEnter += this.gridDetails.CMenu_MouseEnter;
+                    this.gridDetails.DeleteLastRound.MouseLeave += this.gridDetails.CMenu_MouseLeave;
+                    // this.gridDetails.CMenu.Items.Add(this.gridDetails.DeleteLastRound);
+
                     this.gridDetails.MenuSeparator2 = new ToolStripSeparator {
                         BackColor = this.Theme == MetroThemeStyle.Light ? Color.White : Color.FromArgb(17, 17, 17)
                         , ForeColor = this.Theme == MetroThemeStyle.Light ? Color.Black : Color.DarkGray
@@ -405,7 +420,7 @@ namespace FinalBeansStats {
                 case "ShowID":
                     sizeOfText = TextRenderer.MeasureText(columnText, this.dataGridViewCellStyle1.Font).Width;
                     break;
-                case "ShowNameId":
+                case "ShowName":
                     return 0;
                 case "Round":
                     sizeOfText = TextRenderer.MeasureText(columnText, this.dataGridViewCellStyle1.Font).Width;
@@ -527,10 +542,12 @@ namespace FinalBeansStats {
             ((Grid)sender).Columns["Profile"].Visible = false;
             ((Grid)sender).Columns["InParty"].Visible = false;
             ((Grid)sender).Columns["PrivateLobby"].Visible = false;
-            ((Grid)sender).Columns["NotParticipated"].Visible = false;
+            ((Grid)sender).Columns["LastRound"].Visible = false;
+            ((Grid)sender).Columns["Participating"].Visible = false;
             ((Grid)sender).Columns["Qualified"].Visible = false;
             ((Grid)sender).Columns["IsFinal"].Visible = false;
             ((Grid)sender).Columns["IsTeam"].Visible = false;
+            ((Grid)sender).Columns["ShowNameId"].Visible = false;
             ((Grid)sender).Columns["RoundId"].Visible = false;
             if (this.statType == StatType.Levels) {
                 ((Grid)sender).Columns.Add(new DataGridViewImageColumn { Name = "RoundIcon", ImageLayout = DataGridViewImageCellLayout.Zoom });
@@ -544,8 +561,8 @@ namespace FinalBeansStats {
                 //((Grid)sender).Setup("IsFinal", pos++, this.GetDataGridViewColumnWidth("IsFinalIcon", $"{Multilingual.GetWord("level_detail_is_final")}"), $"{Multilingual.GetWord("level_detail_is_final")}", DataGridViewContentAlignment.MiddleCenter);
             }
             ((Grid)sender).Setup("ShowID", pos++, this.GetDataGridViewColumnWidth("ShowID", $"{Multilingual.GetWord("level_detail_show_id")}"), $"{Multilingual.GetWord("level_detail_show_id")}", DataGridViewContentAlignment.MiddleRight);
-            ((Grid)sender).Setup("ShowNameId", pos++, this.GetDataGridViewColumnWidth("ShowNameId", $"{Multilingual.GetWord("level_detail_show_name_id")}"), $"{Multilingual.GetWord("level_detail_show_name_id")}", DataGridViewContentAlignment.MiddleLeft);
-            ((Grid)sender).Columns["ShowNameId"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            ((Grid)sender).Setup("ShowName", pos++, this.GetDataGridViewColumnWidth("ShowName", $"{Multilingual.GetWord("level_detail_show_name")}"), $"{Multilingual.GetWord("level_detail_show_name")}", DataGridViewContentAlignment.MiddleLeft);
+            ((Grid)sender).Columns["ShowName"].HeaderCell.Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
             ((Grid)sender).Setup("Round", pos++, this.GetDataGridViewColumnWidth("Round", $"{Multilingual.GetWord("level_detail_round")}{(this.statType == StatType.Shows ? Multilingual.GetWord("level_detail_round_suffix") : "")}"), $"{Multilingual.GetWord("level_detail_round")}{(this.statType == StatType.Shows ? Multilingual.GetWord("level_detail_round_suffix") : "")}", DataGridViewContentAlignment.MiddleRight);
             if (this.statType == StatType.Rounds) {
                 ((Grid)sender).Columns.Add(new DataGridViewImageColumn { Name = "RoundIcon", ImageLayout = DataGridViewImageCellLayout.Zoom });
@@ -637,31 +654,41 @@ namespace FinalBeansStats {
             } else if (this.statType == StatType.Shows && ((Grid)sender).Columns[e.ColumnIndex].Name == "Qualified") {
                 e.Value = !string.IsNullOrEmpty(info.Name);
             } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "Medal" && e.Value == null) {
-                if (info.Qualified) {
-                    switch (info.Tier) {
-                        case 0:
-                            ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_pink");
-                            e.Value = Properties.Resources.medal_pink_grid_icon;
-                            break;
-                        case 1:
-                            ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_gold");
-                            e.Value = Properties.Resources.medal_gold_grid_icon;
-                            break;
-                        case 2:
-                            ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_silver");
-                            e.Value = Properties.Resources.medal_silver_grid_icon;
-                            break;
-                        case 3:
-                            ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_bronze");
-                            e.Value = Properties.Resources.medal_bronze_grid_icon;
-                            break;
+                if (this.statType == StatType.Shows) {
+                    if (this.StatsForm.RoundDetails.FindOne(r => r.ShowID == info.ShowID && r.Crown) != null) {
+                        ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_gold");
+                        e.Value = Properties.Resources.medal_gold_grid_icon;
+                    } else {
+                        ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_eliminated");
+                        e.Value = Properties.Resources.medal_eliminated_grid_icon;
                     }
                 } else {
-                    ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_eliminated");
-                    e.Value = Properties.Resources.medal_eliminated_grid_icon;
+                    if (info.Qualified) {
+                        switch (info.Tier) {
+                            case 0:
+                                ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_pink");
+                                e.Value = Properties.Resources.medal_pink_grid_icon;
+                                break;
+                            case 1:
+                                ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_gold");
+                                e.Value = Properties.Resources.medal_gold_grid_icon;
+                                break;
+                            case 2:
+                                ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_silver");
+                                e.Value = Properties.Resources.medal_silver_grid_icon;
+                                break;
+                            case 3:
+                                ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_bronze");
+                                e.Value = Properties.Resources.medal_bronze_grid_icon;
+                                break;
+                        }
+                    } else {
+                        ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_eliminated");
+                        e.Value = Properties.Resources.medal_eliminated_grid_icon;
+                    }
                 }
             } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "IsFinalIcon") {
-                if (info.IsFinal || info.Qualified) {
+                if (info.IsFinal || info.Crown) {
                     ((Grid)sender).Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = Multilingual.GetWord("level_detail_success_reaching_finals");
                     e.Value = this.Theme == MetroThemeStyle.Light ? Properties.Resources.final_icon : Properties.Resources.final_gray_icon;
                 } else {
@@ -685,9 +712,10 @@ namespace FinalBeansStats {
                     e.CellStyle.ForeColor = this.Theme == MetroThemeStyle.Light ? c1 : ControlPaint.LightLight(c1);
                     e.Value = level.Name;
                 }
-            } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "ShowNameId") {
+            } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "ShowName") {
                 if (!string.IsNullOrEmpty((string)e.Value)) {
-                    e.Value = Multilingual.GetShowName(((string)e.Value).Split(';')[0]) ?? "";
+                    // e.Value = Multilingual.GetShowName(((string)e.Value).Split(';')[0]) ?? info.ShowName.Split(';')[0] ?? "";
+                    e.Value = info.ShowName.Split(';')[0] ?? "";
                 }
             } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "Position") {
                 if ((int)e.Value == 0) { e.Value = ""; }
@@ -760,11 +788,13 @@ namespace FinalBeansStats {
                     case "ShowID":
                         showCompare = one.ShowID.CompareTo(two.ShowID);
                         return showCompare != 0 ? showCompare : roundCompare;
-                    case "ShowNameId":
-                        string showNameIdOne = Multilingual.GetShowName(one.ShowNameId) ?? @" ";
-                        string showNameIdTwo = Multilingual.GetShowName(two.ShowNameId) ?? @" ";
-                        int showNameIdCompare = showNameIdOne.CompareTo(showNameIdTwo);
-                        return showNameIdCompare != 0 ? showNameIdCompare : roundCompare;
+                    case "ShowName":
+                        // string showNameOne = Multilingual.GetShowName(one.ShowName) ?? one.ShowName ?? @" ";
+                        // string showNameTwo = Multilingual.GetShowName(two.ShowName) ?? two.ShowName ?? @" ";
+                        string showNameOne = one.ShowName ?? @" ";
+                        string showNameTwo = two.ShowName ?? @" ";
+                        int showNameCompare = showNameOne.CompareTo(showNameTwo);
+                        return showNameCompare != 0 ? showNameCompare : roundCompare;
                     case "Round":
                         roundCompare = one.Round.CompareTo(two.Round);
                         return roundCompare != 0 ? roundCompare : showCompare;
@@ -817,13 +847,13 @@ namespace FinalBeansStats {
                         int scoreCompare = one.Score.GetValueOrDefault(-1).CompareTo(two.Score.GetValueOrDefault(-1));
                         return scoreCompare != 0 ? scoreCompare : showCompare == 0 ? roundCompare : showCompare;
                     case "Medal":
-                        int tierOne = one.Qualified ? one.Tier == 0 ? 4 : one.Tier : 5;
-                        int tierTwo = two.Qualified ? two.Tier == 0 ? 4 : two.Tier : 5;
+                        int tierOne = (this.statType == StatType.Shows ? (this.StatsForm.RoundDetails.FindOne(r => r.ShowID == one.ShowID && r.Crown) != null) : one.Qualified) ? one.Tier == 0 ? 4 : one.Tier : 5;
+                        int tierTwo = (this.statType == StatType.Shows ? (this.StatsForm.RoundDetails.FindOne(r => r.ShowID == two.ShowID && r.Crown) != null) : two.Qualified) ? two.Tier == 0 ? 4 : two.Tier : 5;
                         int tierCompare = tierOne.CompareTo(tierTwo);
                         return tierCompare != 0 ? tierCompare : showCompare == 0 ? roundCompare : showCompare;
                     case "IsFinalIcon":
-                        int finalsOne = one.IsFinal || one.Qualified ? 1 : 0;
-                        int finalsTwo = two.IsFinal || two.Qualified ? 1 : 0;
+                        int finalsOne = one.IsFinal || one.Crown ? 1 : 0;
+                        int finalsTwo = two.IsFinal || two.Crown ? 1 : 0;
                         return finalsOne.CompareTo(finalsTwo);
                     default:
                         int kudosCompare = one.Kudos.CompareTo(two.Kudos);
@@ -849,6 +879,9 @@ namespace FinalBeansStats {
                 if (((Grid)sender).DeleteFinishTime != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteFinishTime)) {
                     ((Grid)sender).CMenu.Items.Remove(((Grid)sender).DeleteFinishTime);
                 }
+                if (((Grid)sender).DeleteLastRound != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteLastRound)) {
+                    ((Grid)sender).CMenu.Items.Remove(((Grid)sender).DeleteLastRound);
+                }
                 if (((Grid)sender).SelectedCells.Count > 0) {
                     if (((Grid)sender).SelectedRows.Count == 1) {
                         RoundInfo info = ((Grid)sender).Rows[((DataGridView)sender).SelectedRows[0].Index].DataBoundItem as RoundInfo;
@@ -858,6 +891,13 @@ namespace FinalBeansStats {
                             }
                             if (((Grid)sender).DeleteFinishTime != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteFinishTime)) {
                                 ((Grid)sender).CMenu.Items.Add(((Grid)sender).DeleteFinishTime);
+                            }
+                        } else if (info.Round > 1 && info.LastRound) {
+                            if (((Grid)sender).MenuSeparator1 != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
+                                ((Grid)sender).CMenu.Items.Add(((Grid)sender).MenuSeparator1);
+                            }
+                            if (((Grid)sender).DeleteLastRound != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteLastRound)) {
+                                ((Grid)sender).CMenu.Items.Add(((Grid)sender).DeleteLastRound);
                             }
                         }
                     } else {
@@ -891,8 +931,12 @@ namespace FinalBeansStats {
 
         private void LevelDetails_KeyDown(object sender, KeyEventArgs e) {
             try {
-                if (this.statType == StatType.Shows && e.KeyCode == Keys.Delete) {
-                    this.DeleteShow();
+                if (e.KeyCode == Keys.Delete) {
+                    if (this.statType == StatType.Shows) {
+                        this.DeleteShow();
+                    } else {
+                        this.DeleteLastRound();
+                    }
                 }
             } catch (Exception ex) {
                 MetroMessageBox.Show(this, ex.Message, $"{Multilingual.GetWord("message_program_error_caption")}",
@@ -915,10 +959,9 @@ namespace FinalBeansStats {
         private void DeleteShow() {
             int selectedCount = this.gridDetails.SelectedRows.Count;
             if (selectedCount > 0) {
-                if (MetroMessageBox.Show(this,
-                        $@"{Multilingual.GetWord("message_delete_show_prefix")} ({selectedCount:N0}) {Multilingual.GetWord("message_delete_show_suffix")}",
+                if (Messenger.MessageBox($@"{Multilingual.GetWord("message_delete_show_prefix")} ({selectedCount:N0}) {Multilingual.GetWord("message_delete_show_suffix")}",
                         Multilingual.GetWord("message_delete_show_caption"),
-                        MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+                        MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                     this.gridDetails.Enabled = false;
                     this.spinnerTransition.Start();
                     this.BackMaxSize = 0;
@@ -1029,10 +1072,9 @@ namespace FinalBeansStats {
             if (this.statType != StatType.Shows && this.gridDetails.SelectedCells.Count > 0 && this.gridDetails.SelectedRows.Count == 1) {
                 RoundInfo ri = this.gridDetails.Rows[this.gridDetails.SelectedCells[0].RowIndex].DataBoundItem as RoundInfo;
                 if (ri.Finish.HasValue) {
-                    if (MetroMessageBox.Show(this,
-                            Multilingual.GetWord("message_delete_finish_time"),
+                    if (Messenger.MessageBox(Multilingual.GetWord("message_delete_finish_time"),
                             Multilingual.GetWord("message_delete_finish_time_caption"),
-                            MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+                            MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                         this.gridDetails.Enabled = false;
                         this.spinnerTransition.Start();
                         this.BackMaxSize = 0;
@@ -1048,6 +1090,7 @@ namespace FinalBeansStats {
                                             this.StatsForm.PersonalBestLogCache.Remove(pbLog);
                                         }
                                     }
+                                    ri.Position = 0;
                                     ri.Qualified = false;
                                     ri.Finish = null;
                                     this.StatsForm.RoundDetails.Update(ri);
@@ -1071,15 +1114,63 @@ namespace FinalBeansStats {
             }
         }
 
+        private void deleteLastRound_Click(object sender, EventArgs e) {
+            this.DeleteLastRound();
+        }
+
+        private void DeleteLastRound() {
+            if (this.statType != StatType.Shows && this.gridDetails.SelectedCells.Count > 0 && this.gridDetails.SelectedRows.Count == 1) {
+                RoundInfo ri = this.gridDetails.Rows[this.gridDetails.SelectedCells[0].RowIndex].DataBoundItem as RoundInfo;
+                if (!ri.Finish.HasValue && ri.Round > 1 && ri.LastRound) {
+                    if (Messenger.MessageBox(Multilingual.GetWord("message_delete_round"),
+                            Multilingual.GetWord("message_delete_round_caption"),
+                            MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
+                        this.gridDetails.Enabled = false;
+                        this.spinnerTransition.Start();
+                        this.BackMaxSize = 0;
+                        this.mpsSpinner01.Visible = true;
+                        lock (this.StatsForm.StatsDB) {
+                            Task.Run(() => {
+                                Task deleteLastRoundTask = new Task(() => {
+                                    List<RoundInfo> roundInfoList = (from r in this.StatsForm.RoundDetails.FindAll()
+                                                                     where r.ShowID == ri.ShowID && r.Round == (ri.Round - 1)
+                                                                     select r).ToList();
+                                    foreach (RoundInfo r in roundInfoList) {
+                                        r.LastRound = true;
+                                    }
+                                    this.StatsForm.StatsDB.BeginTrans();
+                                    this.StatsForm.RoundDetails.Update(roundInfoList);
+                                    this.StatsForm.RoundDetails.DeleteMany(r => r.ShowID == ri.ShowID && r.Round == ri.Round);
+                                    this.StatsForm.StatsDB.Commit();
+                                });
+                                this.StatsForm.RunDatabaseTask(deleteLastRoundTask, false);
+                            }).ContinueWith(prevTask => {
+                                this.BeginInvoke((MethodInvoker)delegate {
+                                    this.gridDetails.Enabled = true;
+                                    this.spinnerTransition.Stop();
+                                    this.mpsSpinner01.Visible = false;
+                                    this.BackMaxSize = 32;
+
+                                    this.StatsForm.ResetStats();
+                                    Stats.IsOverlayRoundInfoNeedRefresh = true;
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
         private void gridDetails_CellMouseEnter(object sender, DataGridViewCellEventArgs e) {
             if (!this.isScrollingStopped || e.RowIndex < 0 || e.RowIndex >= ((Grid)sender).RowCount) return;
 
             ((Grid)sender).Cursor = Cursors.Hand;
 
-            if (this.statType == StatType.Shows && ((Grid)sender).Columns[e.ColumnIndex].Name == "ShowNameId") {
+            if (this.statType == StatType.Shows && ((Grid)sender).Columns[e.ColumnIndex].Name == "ShowName") {
                 ((Grid)sender).ShowCellToolTips = false;
                 RoundInfo info = ((Grid)sender).Rows[e.RowIndex].DataBoundItem as RoundInfo;
-                string showName = Multilingual.GetShowName(info.ShowNameId.Split(';')[0]);
+                // string showName = Multilingual.GetShowName(info.ShowNameId.Split(';')[0]) ?? info.ShowName.Split(';')[0];
+                string showName = info.ShowName.Split(';')[0];
                 StringBuilder strBuilder = new StringBuilder();
                 strBuilder.Append(Environment.NewLine);
                 strBuilder.Append(info.StartLocal.ToString(Multilingual.GetWord("level_grid_date_format"), Utils.GetCultureInfo()));

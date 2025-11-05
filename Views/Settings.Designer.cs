@@ -24,7 +24,6 @@
         /// </summary>
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Settings));
-            // this.lblLogPath = new MetroFramework.Controls.MetroLabel();
             this.lblLogPathNote = new MetroFramework.Controls.MetroLabel();
             this.txtLogPath = new MetroFramework.Controls.MetroTextBox();
             this.btnSave = new MetroFramework.Controls.MetroButton();
@@ -120,6 +119,7 @@
             this.tileAbout = new MetroFramework.Controls.MetroTile();
             this.panelAbout = new MetroFramework.Controls.MetroPanel();
             this.lblupdateNote = new MetroFramework.Controls.MetroLabel();
+            this.lbltpl5 = new MetroFramework.Controls.MetroLink();
             this.lbltpl4 = new MetroFramework.Controls.MetroLink();
             this.lbltpl3 = new MetroFramework.Controls.MetroLink();
             this.lbltpl2 = new MetroFramework.Controls.MetroLink();
@@ -1595,6 +1595,7 @@
             // 
             this.panelAbout.AutoScroll = true;
             this.panelAbout.Controls.Add(this.lblupdateNote);
+            this.panelAbout.Controls.Add(this.lbltpl5);
             this.panelAbout.Controls.Add(this.lbltpl4);
             this.panelAbout.Controls.Add(this.lbltpl3);
             this.panelAbout.Controls.Add(this.lbltpl2);
@@ -1629,14 +1630,27 @@
             this.lblupdateNote.TabIndex = 14;
             this.lblupdateNote.UseCustomForeColor = true;
             // 
+            // lbltpl5
+            // 
+            this.lbltpl5.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lbltpl5.FontSize = MetroFramework.MetroLinkSize.Medium;
+            this.lbltpl5.Location = new System.Drawing.Point(12, 837);
+            this.lbltpl5.Name = "lbltpl5";
+            this.lbltpl5.Size = new System.Drawing.Size(220, 23);
+            this.lbltpl5.TabIndex = 14;
+            this.lbltpl5.Text = "Dark-Mode-Forms (Messenger)";
+            this.lbltpl5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lbltpl5.UseSelectable = true;
+            this.lbltpl5.Click += new System.EventHandler(this.link_Click);
+            // 
             // lbltpl4
             // 
             this.lbltpl4.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lbltpl4.FontSize = MetroFramework.MetroLinkSize.Medium;
-            this.lbltpl4.Location = new System.Drawing.Point(12, 836);
+            this.lbltpl4.Location = new System.Drawing.Point(12, 808);
             this.lbltpl4.Name = "lbltpl4";
-            this.lbltpl4.Size = new System.Drawing.Size(121, 23);
-            this.lbltpl4.TabIndex = 13;
+            this.lbltpl4.Size = new System.Drawing.Size(71, 23);
+            this.lbltpl4.TabIndex = 14;
             this.lbltpl4.Text = "ScottPlot";
             this.lbltpl4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lbltpl4.UseSelectable = true;
@@ -1646,9 +1660,9 @@
             // 
             this.lbltpl3.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lbltpl3.FontSize = MetroFramework.MetroLinkSize.Medium;
-            this.lbltpl3.Location = new System.Drawing.Point(12, 807);
+            this.lbltpl3.Location = new System.Drawing.Point(12, 779);
             this.lbltpl3.Name = "lbltpl3";
-            this.lbltpl3.Size = new System.Drawing.Size(121, 23);
+            this.lbltpl3.Size = new System.Drawing.Size(118, 23);
             this.lbltpl3.TabIndex = 12;
             this.lbltpl3.Text = "MetroModernUI";
             this.lbltpl3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1659,9 +1673,9 @@
             // 
             this.lbltpl2.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lbltpl2.FontSize = MetroFramework.MetroLinkSize.Medium;
-            this.lbltpl2.Location = new System.Drawing.Point(12, 778);
+            this.lbltpl2.Location = new System.Drawing.Point(12, 750);
             this.lbltpl2.Name = "lbltpl2";
-            this.lbltpl2.Size = new System.Drawing.Size(121, 23);
+            this.lbltpl2.Size = new System.Drawing.Size(42, 23);
             this.lbltpl2.TabIndex = 11;
             this.lbltpl2.Text = "Fody";
             this.lbltpl2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1672,9 +1686,9 @@
             // 
             this.lbltpl1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lbltpl1.FontSize = MetroFramework.MetroLinkSize.Medium;
-            this.lbltpl1.Location = new System.Drawing.Point(12, 751);
+            this.lbltpl1.Location = new System.Drawing.Point(12, 723);
             this.lbltpl1.Name = "lbltpl1";
-            this.lbltpl1.Size = new System.Drawing.Size(121, 23);
+            this.lbltpl1.Size = new System.Drawing.Size(98, 23);
             this.lbltpl1.TabIndex = 8;
             this.lbltpl1.Text = "Costura.Fody";
             this.lbltpl1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1685,9 +1699,9 @@
             // 
             this.lbltpl0.Cursor = System.Windows.Forms.Cursors.Hand;
             this.lbltpl0.FontSize = MetroFramework.MetroLinkSize.Medium;
-            this.lbltpl0.Location = new System.Drawing.Point(12, 724);
+            this.lbltpl0.Location = new System.Drawing.Point(12, 696);
             this.lbltpl0.Name = "lbltpl0";
-            this.lbltpl0.Size = new System.Drawing.Size(121, 23);
+            this.lbltpl0.Size = new System.Drawing.Size(52, 23);
             this.lbltpl0.TabIndex = 8;
             this.lbltpl0.Text = "LiteDB";
             this.lbltpl0.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1698,7 +1712,7 @@
             // 
             this.lblthirdpartyLicences.AutoSize = true;
             this.lblthirdpartyLicences.ForeColor = System.Drawing.Color.Teal;
-            this.lblthirdpartyLicences.Location = new System.Drawing.Point(8, 687);
+            this.lblthirdpartyLicences.Location = new System.Drawing.Point(8, 663);
             this.lblthirdpartyLicences.Name = "lblthirdpartyLicences";
             this.lblthirdpartyLicences.Size = new System.Drawing.Size(126, 19);
             this.lblthirdpartyLicences.TabIndex = 9;
@@ -1817,6 +1831,7 @@
             this.panelAbout.ResumeLayout(false);
             this.panelAbout.PerformLayout();
             this.ResumeLayout(false);
+
         }
 
         #endregion
@@ -1923,6 +1938,7 @@
         private MetroFramework.Controls.MetroLink lbltpl2;
         private MetroFramework.Controls.MetroLink lbltpl4;
         private MetroFramework.Controls.MetroLink lbltpl3;
+        private MetroFramework.Controls.MetroLink lbltpl5;
         private MetroFramework.Controls.MetroLabel lblupdateNote;
         private MetroFramework.Controls.MetroLabel lblIpGeolocationService;
         private MetroFramework.Controls.MetroComboBox cboIpGeolocationService;

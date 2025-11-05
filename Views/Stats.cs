@@ -57,6 +57,17 @@ namespace FinalBeansStats {
             }
         }
 
+        private void SetDarkModeCSForModalDialogs() {
+            DarkModeCS.ExcludeFromProcessing(control: mlReportBug);
+            DarkModeCS.ExcludeFromProcessing(control: menu);
+            DarkModeCS.ExcludeFromProcessing(control: infoStrip);
+            DarkModeCS.ExcludeFromProcessing(control: infoStrip2);
+            DarkModeCS.ExcludeFromProcessing(control: infoStrip3);
+            DarkModeCS.ExcludeFromProcessing(control: mtgIgnoreLevelTypeWhenSorting);
+            DarkModeCS.ExcludeFromProcessing(control: lblIgnoreLevelTypeWhenSorting);
+            DarkModeCS.ExcludeFromProcessing(control: gridDetails);
+        }
+
         private void SetEventWaitHandle() {
             EventWaitHandle eventWaitHandle = new EventWaitHandle(false, EventResetMode.AutoReset, "FinalBeansStatsEventWaitHandle", out bool createdNew);
             if (!createdNew) {
@@ -113,11 +124,12 @@ namespace FinalBeansStats {
         private static DateTime SeasonStart, WeekStart, DayStart;
         private static DateTime SessionStart = DateTime.UtcNow;
         public static Language CurrentLanguage;
-        public static MetroThemeStyle CurrentTheme = MetroThemeStyle.Light;
+        public static MetroThemeStyle CurrentTheme = MetroThemeStyle.Dark;
         public static bool InstalledEmojiFont;
 
         public static DateTime LastGameDate = DateTime.MinValue;
         public static string LastShowNameId = null;
+        public static string LastShowName = null;
         public static string LastRoundId = null;
         public static string LastRoundName = null;
 
@@ -213,12 +225,12 @@ namespace FinalBeansStats {
         public List<ServerConnectionLog> ServerConnectionLogCache = new List<ServerConnectionLog>();
         public List<PersonalBestLog> PersonalBestLogCache = new List<PersonalBestLog>();
         public List<LevelTimeLimit> LevelTimeLimitCache = new List<LevelTimeLimit>();
+        public readonly TextInfo textInfo;
         public readonly Overlay overlay;
         private DateTime lastAddedShow = DateTime.MinValue;
         private readonly DateTime startupTime = DateTime.UtcNow;
         private readonly int randSecond = new Random().Next(0, 30);
         private int askedPreviousShows;
-        private readonly TextInfo textInfo;
         private int currentProfile, currentLanguage;
         private Color infoStripForeColor;
         public List<ToolStripMenuItem> ProfileMenuItems = new List<ToolStripMenuItem>();
@@ -256,16 +268,25 @@ namespace FinalBeansStats {
         private readonly object dbTaskLock = new object();
         public List<Task> dbTasks = new List<Task>();
 
-        private readonly int currentDbVersion = 1;
+        /* --------------- Database version numbers --------------- */
+
+        private readonly int currentGlobalDbVersion = 0;
+
+        private readonly int currentSettingsVersionFB = 2;
+
+        /* -------------------------------------------------------- */
 
         public readonly string[] PublicShowIdList = {
+            /* Keep "fb_main_show" to the top */
             "fb_main_show",
             "fb_ltm"
         };
 
         public readonly string[] PublicShowIdList2 = {
-            "fb_frightful_final_ween"
-            // "fb_skilled_speeders"
+            /* Keep in an alphabetical order */
+            "fb_frightful_final_ween",
+            "fb_mix_it_up"
+            //"fb_skilled_speeders"
         };
 
         public void RunDatabaseTask(Task task, bool runAsync) {
@@ -285,36 +306,36 @@ namespace FinalBeansStats {
 
         private void DatabaseMigration() {
             Task migrationTask = new Task(() => {
+                if (!File.Exists($"{CURRENTDIR}data.db")) return;
+
                 if (File.Exists($"{CURRENTDIR}data_new.db")) {
                     File.SetAttributes($"{CURRENTDIR}data_new.db", FileAttributes.Normal);
                     File.Delete($"{CURRENTDIR}data_new.db");
                 }
 
-                if (File.Exists($"{CURRENTDIR}data.db")) {
-                    int sourceDbUserVersion = 0;
-                    using (var sourceDb = new LiteDatabase($@"{CURRENTDIR}data.db")) {
-                        sourceDbUserVersion = sourceDb.UserVersion;
-                        if (sourceDbUserVersion >= 0) return;
+                int sourceDbUserVersion = 0;
+                using (var sourceDb = new LiteDatabase($@"{CURRENTDIR}data.db")) {
+                    sourceDbUserVersion = sourceDb.UserVersion;
+                    if (sourceDbUserVersion >= this.currentGlobalDbVersion) return;
 
-                        using (var targetDb = new LiteDatabase($@"Filename={CURRENTDIR}data_new.db;Upgrade=true")) {
-                            string[] tableNames = { "Profiles", "RoundDetails", "UserSettings", "PersonalBestLog", "LevelTimeLimit" };
-                            foreach (var tableName in tableNames) {
-                                if (!sourceDb.CollectionExists(tableName)) continue;
-                                var sourceData = sourceDb.GetCollection(tableName).FindAll();
-                                var targetCollection = targetDb.GetCollection(tableName);
-                                targetCollection.InsertBulk(sourceData);
-                            }
-                            targetDb.UserVersion = 0;
+                    using (var targetDb = new LiteDatabase($@"Filename={CURRENTDIR}data_new.db;Upgrade=true")) {
+                        string[] tableNames = { "Profiles", "RoundDetails", "UserSettings", "PersonalBestLog", "LevelTimeLimit" };
+                        foreach (var tableName in tableNames) {
+                            if (!sourceDb.CollectionExists(tableName)) continue;
+                            var sourceData = sourceDb.GetCollection(tableName).FindAll();
+                            var targetCollection = targetDb.GetCollection(tableName);
+                            targetCollection.InsertBulk(sourceData);
                         }
+                        targetDb.UserVersion = this.currentGlobalDbVersion;
                     }
-                    if (!File.Exists($"{CURRENTDIR}data_bak_v{sourceDbUserVersion}.db")) {
-                        File.Move($"{CURRENTDIR}data.db", $"{CURRENTDIR}data_bak_v{sourceDbUserVersion}.db");
-                    } else {
-                        File.SetAttributes($"{CURRENTDIR}data.db", FileAttributes.Normal);
-                        File.Delete($"{CURRENTDIR}data.db");
-                    }
-                    File.Move($"{CURRENTDIR}data_new.db", $"{CURRENTDIR}data.db");
                 }
+                if (!File.Exists($"{CURRENTDIR}data_bak_v{sourceDbUserVersion}.db")) {
+                    File.Move($"{CURRENTDIR}data.db", $"{CURRENTDIR}data_bak_v{sourceDbUserVersion}.db");
+                } else {
+                    File.SetAttributes($"{CURRENTDIR}data.db", FileAttributes.Normal);
+                    File.Delete($"{CURRENTDIR}data.db");
+                }
+                File.Move($"{CURRENTDIR}data_new.db", $"{CURRENTDIR}data.db");
             });
             this.RunDatabaseTask(migrationTask, false);
         }
@@ -513,7 +534,7 @@ namespace FinalBeansStats {
         private Stats() {
             this.DatabaseMigration();
 
-            this.mainWndTitle = $"     {Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)}";
+            this.mainWndTitle = $@"     {Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)}";
             this.StatsDB = new LiteDatabase($@"{CURRENTDIR}data.db");
             this.StatsDB.Pragma("UTC_DATE", true);
             this.UserSettings = this.StatsDB.GetCollection<UserSettings>("UserSettings");
@@ -527,7 +548,8 @@ namespace FinalBeansStats {
                         // If "Version" > 0, it means it's an incompatible database (FallGuysStats database)
                         // Dispose the database and exit the program.
                         this.StatsDB.Dispose();
-                        MessageBox.Show($"{Multilingual.GetWord("message_incompatible_database")}", $"{Multilingual.GetWord("message_incompatible_database_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Messenger.MessageBox($"{Multilingual.GetWord("message_incompatible_database")}", $"{Multilingual.GetWord("message_incompatible_database_caption")}",
+                            MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                         Environment.Exit(0);
                     }
                 } catch {
@@ -546,6 +568,9 @@ namespace FinalBeansStats {
 #endif
 
             this.InitializeComponent();
+
+            this.SetDarkModeCSForModalDialogs();
+            DarkModeCS dm = new DarkModeCS(this);
 
             this.SetEventWaitHandle();
 
@@ -635,13 +660,13 @@ namespace FinalBeansStats {
                                     this.Profiles.Insert(new Profiles { ProfileId = profileOrder - 1, ProfileName = Multilingual.GetShowName(showId), ProfileOrder = profileOrder, LinkedShowId = showId, DoNotCombineShows = false });
                                     profileOrder--;
                                 }
-                                // this.Profiles.Insert(new Profiles { ProfileId = 5, ProfileName = Multilingual.GetWord("main_profile_custom"), ProfileOrder = 6, LinkedShowId = "private_lobbies", DoNotCombineShows = false });
-                                // this.Profiles.Insert(new Profiles { ProfileId = 4, ProfileName = Multilingual.GetWord("main_profile_squad"), ProfileOrder = 5, LinkedShowId = "squads_4player", DoNotCombineShows = false });
-                                // this.Profiles.Insert(new Profiles { ProfileId = 3, ProfileName = Multilingual.GetWord("main_profile_trio"), ProfileOrder = 4, LinkedShowId = "squads_3player_template", DoNotCombineShows = false });
-                                // this.Profiles.Insert(new Profiles { ProfileId = 2, ProfileName = Multilingual.GetWord("main_profile_duo"), ProfileOrder = 3, LinkedShowId = "squads_2player_template", DoNotCombineShows = false });
+                                //this.Profiles.Insert(new Profiles { ProfileId = 5, ProfileName = Multilingual.GetWord("main_profile_custom"), ProfileOrder = 6, LinkedShowId = "private_lobbies", DoNotCombineShows = false });
+                                //this.Profiles.Insert(new Profiles { ProfileId = 4, ProfileName = Multilingual.GetWord("main_profile_squad"), ProfileOrder = 5, LinkedShowId = "squads_4player", DoNotCombineShows = false });
+                                //this.Profiles.Insert(new Profiles { ProfileId = 3, ProfileName = Multilingual.GetWord("main_profile_trio"), ProfileOrder = 4, LinkedShowId = "squads_3player_template", DoNotCombineShows = false });
+                                //this.Profiles.Insert(new Profiles { ProfileId = 2, ProfileName = Multilingual.GetWord("main_profile_duo"), ProfileOrder = 3, LinkedShowId = "squads_2player_template", DoNotCombineShows = false });
                                 //
-                                // this.Profiles.Insert(new Profiles { ProfileId = 1, ProfileName = Multilingual.GetShowName("fb_ltm"), ProfileOrder = 2, LinkedShowId = "fb_ltm", DoNotCombineShows = false });
-                                // this.Profiles.Insert(new Profiles { ProfileId = 0, ProfileName = Multilingual.GetShowName("fb_main_show"), ProfileOrder = 1, LinkedShowId = "fb_main_show", DoNotCombineShows = false });
+                                //this.Profiles.Insert(new Profiles { ProfileId = 1, ProfileName = Multilingual.GetShowName("fb_ltm"), ProfileOrder = 2, LinkedShowId = "fb_ltm", DoNotCombineShows = false });
+                                //this.Profiles.Insert(new Profiles { ProfileId = 0, ProfileName = Multilingual.GetShowName("fb_main_show"), ProfileOrder = 1, LinkedShowId = "fb_main_show", DoNotCombineShows = false });
                             }
                             this.UserSettings.Update(this.CurrentSettings);
                             this.StatsDB.Commit();
@@ -664,7 +689,7 @@ namespace FinalBeansStats {
 
             this.DatabaseBackup(true);
 
-            Task updateDbVersionTask = new Task(() => this.UpdateDatabaseVersion());
+            Task updateDbVersionTask = new Task(() => this.UpdateDatabase());
             this.RunDatabaseTask(updateDbVersionTask, true);
             updateDbVersionTask.Wait();
 
@@ -1440,9 +1465,45 @@ namespace FinalBeansStats {
         }
 #endif
 
-        private void UpdateDatabaseVersion() {
-            for (int version = this.CurrentSettings.Version_FB; version < currentDbVersion; version++) {
+        private void UpdateDatabase() {
+            for (int version = this.CurrentSettings.Version_FB; version < currentSettingsVersionFB; version++) {
                 switch (version) {
+                    case 1: {
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             select ri).ToList();
+
+                            Profiles profile = this.Profiles.FindOne(Query.EQ("LinkedShowId", "fb_ltm"));
+                            int profileId = profile?.ProfileId ?? -1;
+
+                            roundInfoList.Reverse();
+                            int showID = 0;
+                            foreach (RoundInfo ri in roundInfoList) {
+                                if (!string.Equals(ri.ShowNameId, "fb_main_show") && !string.Equals(ri.ShowNameId, "fb_ltm")) {
+                                    string showNameId = ri.ShowNameId.Substring(3).Trim(new Char[] { '_' });
+                                    ri.ShowNameId = $"fb_{showNameId}";
+                                    ri.ShowName = string.Equals(showNameId, "frightful_final_ween") ? "Frightful Final-Ween" :
+                                                  string.Equals(showNameId, "mix_it_up") ? "Mix it Up!" :
+                                                  this.textInfo.ToTitleCase(showNameId.Replace("_", " "));
+                                    if (this.Profiles.FindOne(Query.EQ("LinkedShowId", $"fb_{showNameId}")) == null && profileId != -1) {
+                                        ri.Profile = profileId;
+                                    }
+                                } else {
+                                    ri.ShowName = !string.Equals(ri.ShowNameId, "fb_main_show") ? "LTM" : "Main Show";
+                                }
+                                ri.Participating = true;
+                                if (!ri.Finish.HasValue) {
+                                    ri.Position = 0;
+                                }
+                                if (ri.ShowID != showID) {
+                                    showID = ri.ShowID;
+                                    ri.LastRound = true;
+                                }
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.StatsDB.Commit();
+                            break;
+                        }
                     case 0: {
                             List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
                                                              select ri).ToList();
@@ -1464,7 +1525,9 @@ namespace FinalBeansStats {
                                 } else if (ri.RoundId.StartsWith("round_egg_grab", StringComparison.OrdinalIgnoreCase)) {
                                     ri.Name = "round_egg_grab";
                                 }
-                                if (ri.Crown) ri.Tier = 1;
+                                if (ri.Crown) {
+                                    ri.Tier = 1;
+                                }
                             }
                             this.StatsDB.BeginTrans();
                             this.RoundDetails.Update(roundInfoList);
@@ -1473,8 +1536,8 @@ namespace FinalBeansStats {
                         }
                 }
             }
-            if (this.CurrentSettings.Version_FB < currentDbVersion) {
-                this.CurrentSettings.Version_FB = currentDbVersion;
+            if (this.CurrentSettings.Version_FB < currentSettingsVersionFB) {
+                this.CurrentSettings.Version_FB = currentSettingsVersionFB;
                 this.SaveUserSettings();
             }
         }
@@ -1562,7 +1625,7 @@ namespace FinalBeansStats {
                 IpGeolocationService = 0,
                 LevelTimeLimitVersion = 0,
                 Version = 0,
-                Version_FB = currentDbVersion
+                Version_FB = currentSettingsVersionFB
             };
         }
 
@@ -1987,13 +2050,13 @@ namespace FinalBeansStats {
                     if (this.CurrentSettings.ShowChangelog) {
                         using (var webClient = new WebClient()) {
                             try {
-                                Version version = Assembly.GetEntryAssembly().GetName().Version;
-                                // string changeLogContent = File.ReadAllText(Path.Combine(CURRENTDIR, "CHANGELOG.md"));
+                                string currentAppVersion = Assembly.GetEntryAssembly().GetName().Version.ToString(2);
+                                //string changeLogContent = File.ReadAllText(Path.Combine(CURRENTDIR, "CHANGELOG.md"));
                                 string changeLogContent = webClient.DownloadString(Utils.FINALBEANSSTATS_RELEASES_CHANGELOG_URL);
                                 string[] changeLogLines = changeLogContent.Split(new[] { '\n' });
                                 List<string> changeLog = new List<string>();
                                 foreach (string lineInfo in changeLogLines) {
-                                    if (lineInfo.StartsWith($"## v{version.ToString(2)}")) {
+                                    if (lineInfo.StartsWith($"## v{currentAppVersion}")) {
                                         for (int i = Array.IndexOf(changeLogLines, lineInfo) + 1; i < changeLogLines.Length; i++) {
                                             if (changeLogLines[i].StartsWith("#")) {
                                                 break;
@@ -2007,14 +2070,13 @@ namespace FinalBeansStats {
                                     throw new Exception("No changelog found for your current version.");
                                 }
 
-                                MetroMessageBox.Show(this, $"{Environment.NewLine}" +
-                                                           $"{string.Join("", changeLog)}" +
-                                                           $"{Environment.NewLine}{Environment.NewLine}" +
-                                                           $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}" +
-                                                           $"{Environment.NewLine}" +
-                                                           $"{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
-                                                           $"{Multilingual.GetWord("message_changelog_caption")} - {Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)}",
-                                                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                Messenger.MessageBox($"{string.Join(Environment.NewLine, changeLog.Where(s => !string.IsNullOrEmpty(s)))}" +
+                                                     $"{Environment.NewLine}{Environment.NewLine}" +
+                                                     $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}" +
+                                                     $"{Environment.NewLine}" +
+                                                     $"{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
+                                                     $"{Multilingual.GetWord("message_changelog_caption")} - {Multilingual.GetWord("main_finalbeans_stats")} v{currentAppVersion}",
+                                    MsgIcon.Info, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
 
                                 this.CurrentSettings.ShowChangelog = false;
                                 this.SaveUserSettings();
@@ -2130,7 +2192,7 @@ namespace FinalBeansStats {
             }
         }
 
-        private void LogFile_OnPersonalBestNotification(string showNameId, string roundId, double currentPb, double currentRecord) {
+        private void LogFile_OnPersonalBestNotification(string showId, string roundId, double currentPb, double currentRecord) {
             string timeDiffContent = string.Empty;
             if (currentPb > 0) {
                 TimeSpan timeDiff = TimeSpan.FromMilliseconds(currentPb - currentRecord);
@@ -2138,8 +2200,8 @@ namespace FinalBeansStats {
                                   : $" ⏱️{timeDiff.Seconds}.{timeDiff.Milliseconds}{Multilingual.GetWord("message_new_personal_best_timediff_by_second")}";
             }
             string levelName = this.StatLookup.TryGetValue(roundId, out LevelStats l1) ? l1.Name : roundId.Substring(0, roundId.Length - 3);
-            string showName = $"{(string.Equals(Multilingual.GetShowName(showNameId), levelName) ? $"({levelName})" : $"({Multilingual.GetShowName(showNameId)} • {levelName})")}";
-            string description = $"{Multilingual.GetWord("message_new_personal_best_prefix")}{showName}{Multilingual.GetWord("message_new_personal_best_suffix")}{timeDiffContent}";
+            string info = $"{(string.Equals(Multilingual.GetShowName(showId), levelName) ? $"({levelName})" : $"({Multilingual.GetShowName(showId)} • {levelName})")}";
+            string description = $"{Multilingual.GetWord("message_new_personal_best_prefix")}{info}{Multilingual.GetWord("message_new_personal_best_suffix")}{timeDiffContent}";
             ToastPosition toastPosition = Enum.TryParse(this.CurrentSettings.NotificationWindowPosition.ToString(), out ToastPosition position) ? position : ToastPosition.BottomRight;
             ToastTheme toastTheme = this.Theme == MetroThemeStyle.Light ? ToastTheme.Light : ToastTheme.Dark;
             ToastAnimation toastAnimation = this.CurrentSettings.NotificationWindowAnimation == 0 ? ToastAnimation.FADE : ToastAnimation.SLIDE;
@@ -2342,8 +2404,8 @@ namespace FinalBeansStats {
 
                         // add new type of round to the rounds lookup
                         if (!this.StatLookup.ContainsKey(stat.Name)) {
-                            string roundName = stat.Name.StartsWith("round_") ? stat.Name.Substring(6).Replace('_', ' ')
-                                                                              : stat.Name.Replace('_', ' ');
+                            string roundName = stat.Name.StartsWith("round_") ? stat.Name.Substring(6).Replace("_", " ")
+                                                                              : stat.Name.Replace("_", " ");
 
                             LevelStats newLevel = new LevelStats(stat.Name, this.textInfo.ToTitleCase(roundName), LevelType.Unknown, BestRecordType.Fastest, false, CURRENTSEASON, Properties.Resources.round_unknown_icon, Properties.Resources.round_unknown_big_icon);
                             this.StatLookup.Add(stat.Name, newLevel);
@@ -2468,6 +2530,8 @@ namespace FinalBeansStats {
         // }
 
         private void ClearPersonalBestLog(int days) {
+            if (this.PersonalBestLog.FindAll().ToList().Count == 0) return;
+
             lock (this.StatsDB) {
                 DateTime daysCond = DateTime.Now.AddDays(days * -1);
                 BsonExpression condition = Query.LT("_id", daysCond);
@@ -2589,7 +2653,7 @@ namespace FinalBeansStats {
         }
 
         public string GetCurrentProfileName() {
-            if (this.AllProfiles.Count == 0) return String.Empty;
+            if (this.AllProfiles.Count == 0) return string.Empty;
             return this.AllProfiles.Find(p => p.ProfileId == this.GetCurrentProfileId()).ProfileName;
         }
 
@@ -2603,7 +2667,7 @@ namespace FinalBeansStats {
         }
 
         private string GetCurrentProfileLinkedShowId() {
-            if (this.AllProfiles.Count == 0) return String.Empty;
+            if (this.AllProfiles.Count == 0) return string.Empty;
             string currentProfileLinkedShowId = this.AllProfiles.Find(p => p.ProfileId == this.GetCurrentProfileId()).LinkedShowId;
             return currentProfileLinkedShowId ?? string.Empty;
         }
@@ -2635,9 +2699,8 @@ namespace FinalBeansStats {
 
         public string GetMainGroupShowId(string showId) {
             switch (showId) {
-                case "fb_frightful_final_ween":
-                case "fb_skilled_speeders":
-                    return "fb_ltm";
+                // Fall Guys Stuff
+                /*
                 case "ranked_show_knockout":
                 case "xtreme_solos_template_ranked":
                     return "ranked_solo_show";
@@ -2681,8 +2744,9 @@ namespace FinalBeansStats {
                     return "timeattack_mode";
                 case "xtreme_explore":
                     return "event_xtreme_fall_guys_template";
+                */
                 default:
-                    return showId;
+                    return !string.Equals(showId, "fb_main_show") ? "fb_ltm" : "fb_main_show";
             }
         }
 
@@ -2849,8 +2913,8 @@ namespace FinalBeansStats {
 
             int lastShow = -1;
             if (!this.StatLookup.TryGetValue(levelId, out LevelStats currentLevel)) {
-                string roundName = levelId.StartsWith("round_") ? levelId.Substring(6).Replace('_', ' ')
-                                                                : levelId.Replace('_', ' ');
+                string roundName = levelId.StartsWith("round_") ? levelId.Substring(6).Replace("_", " ")
+                                                                : levelId.Replace("_", " ");
 
                 currentLevel = new LevelStats(levelId, this.textInfo.ToTitleCase(roundName), LevelType.Unknown, BestRecordType.Fastest, false, CURRENTSEASON, Properties.Resources.round_unknown_icon, Properties.Resources.round_unknown_big_icon);
             }
@@ -3071,11 +3135,12 @@ namespace FinalBeansStats {
                 this.trayIcon.BalloonTipIcon = toolTipIcon;
                 this.trayIcon.ShowBalloonTip(timeout);
             }
-            // else {
-            //     MetroMessageBox.Show(this, text, title, MessageBoxButtons.OK, toolTipIcon == ToolTipIcon.None ? MessageBoxIcon.None :
-            //                                                                                  toolTipIcon == ToolTipIcon.Error ? MessageBoxIcon.Error :
-            //                                                                                  toolTipIcon == ToolTipIcon.Info ? MessageBoxIcon.Information :
-            //                                                                                  toolTipIcon == ToolTipIcon.Warning ? MessageBoxIcon.Warning : MessageBoxIcon.None);
+            // } else {
+            //     Messenger.MessageBox(text, title, toolTipIcon == ToolTipIcon.None ? MsgIcon.None :
+            //                                       toolTipIcon == ToolTipIcon.Error ? MsgIcon.Error :
+            //                                       toolTipIcon == ToolTipIcon.Info ? MsgIcon.Info :
+            //                                       toolTipIcon == ToolTipIcon.Warning ? MsgIcon.Warning : MsgIcon.None,
+            //                                       MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
             // }
         }
 
@@ -3618,6 +3683,7 @@ namespace FinalBeansStats {
                         ShowID = g.ShowID,
                         // Name = g.SortedRounds.LastOrDefault().IsFinal || g.SortedRounds.LastOrDefault().Crown ? "Final" : string.Empty,
                         Name = string.Join(";", g.SortedRounds.Select(r => r.Name)),
+                        ShowName = string.Join(";", g.SortedRounds.Select(r => r.ShowName)),
                         ShowNameId = string.Join(";", g.SortedRounds.Select(r => r.ShowNameId)),
                         IsFinal = g.SortedRounds.LastOrDefault().IsFinal,
                         End = g.SortedRounds.Max(r => r.End),
@@ -3931,21 +3997,21 @@ namespace FinalBeansStats {
                     string finalBeansProcessName = Path.GetFileNameWithoutExtension(this.CurrentSettings.GameExeLocation);
                     if (processes.Select(t => t.ProcessName).Any(name => string.Equals(name, finalBeansProcessName, StringComparison.OrdinalIgnoreCase))) {
                         if (!isSilent) {
-                            MetroMessageBox.Show(this, Multilingual.GetWord("message_finalbeans_already_running"),
-                                Multilingual.GetWord("message_already_running_caption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            Messenger.MessageBox(Multilingual.GetWord("message_finalbeans_already_running"), Multilingual.GetWord("message_already_running_caption"),
+                                MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                         }
                         return;
                     }
 
-                    if (MetroMessageBox.Show(this, $"{Multilingual.GetWord("message_execution_question")}", $"{Multilingual.GetWord("message_execution_caption")}",
-                            MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+                    if (Messenger.MessageBox($"{Multilingual.GetWord("message_execution_question")}", $"{Multilingual.GetWord("message_execution_caption")}",
+                            MsgIcon.Info, MessageBoxButtons.YesNo, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                         this.UnlockGameExeFile();
                         Process.Start(this.CurrentSettings.GameExeLocation);
                         this.WindowState = FormWindowState.Minimized;
                     }
                 } else if (!isSilent) {
-                    MetroMessageBox.Show(this, Multilingual.GetWord("message_register_exe"),
-                        Multilingual.GetWord("message_register_exe_caption"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Messenger.MessageBox(Multilingual.GetWord("message_register_exe"), Multilingual.GetWord("message_register_exe_caption"),
+                        MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                 }
             } catch (Exception ex) {
                 MetroMessageBox.Show(this, ex.ToString(), $"{Multilingual.GetWord("message_program_error_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -3987,7 +4053,7 @@ namespace FinalBeansStats {
                                     int index = line.IndexOf(" at path ", StringComparison.OrdinalIgnoreCase) + 9;
                                     int index2 = line.LastIndexOf("FinalBeans_Data", StringComparison.OrdinalIgnoreCase);
                                     gamePath = Path.Combine(line.Substring(index, index2 - index), "FinalBeans.exe");
-                                    if (File.Exists(gamePath)) { return gamePath; }
+                                    if (File.Exists(gamePath)) return gamePath;
                                 }
                                 break; // Only read the second line
                             }
@@ -4006,7 +4072,7 @@ namespace FinalBeansStats {
                                     if (mc.Count == 1) break; // "installPath" value is null
 
                                     gamePath = Path.Combine(mc[1].ToString().Replace("\"", ""), "FinalBeans.exe");
-                                    if (File.Exists(gamePath)) { return gamePath; }
+                                    if (File.Exists(gamePath)) return gamePath;
                                     break;
                                 }
                             }
@@ -4637,8 +4703,8 @@ namespace FinalBeansStats {
                     this.EnableInfoStrip(true);
                     this.EnableMainMenu(true);
                 } else {
-                    MetroMessageBox.Show(this, $"{Multilingual.GetWord("message_check_internet_connection")}", $"{Multilingual.GetWord("message_check_internet_connection_caption")}",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Messenger.MessageBox($"{Multilingual.GetWord("message_check_internet_connection")}", $"{Multilingual.GetWord("message_check_internet_connection_caption")}",
+                        MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                 }
             } catch (Exception ex) {
                 this.EnableInfoStrip(true);
@@ -4699,44 +4765,55 @@ namespace FinalBeansStats {
             });
             checkForNewVersionTimer.Start(interval);
         }
+
+        public struct LatestReleaseApiInfo {
+            public string name { get; set; }
+            public List<Asset> assets { get; set; }
+            public struct Asset {
+                public string browser_download_url { get; set; }
+            }
+        }
 #endif
 
         private bool CheckForUpdate(bool isSilent) {
 #if AllowUpdate
-            using (ZipWebClient web = new ZipWebClient()) {
+            using (ApiWebClient web = new ApiWebClient()) {
                 try {
-                    string assemblyInfo = web.DownloadString(@"https://raw.githubusercontent.com/Micdu70/FinalBeansStats/main/Properties/AssemblyInfo.cs");
-                    int index = assemblyInfo.IndexOf("AssemblyVersion(");
-                    if (index > 0) {
-                        int indexEnd = assemblyInfo.IndexOf("\")", index);
+                    string json = web.DownloadString(Utils.FINALBEANSSTATS_LATEST_RELEASE_API);
+                    LatestReleaseApiInfo latestReleaseApi = System.Text.Json.JsonSerializer.Deserialize<LatestReleaseApiInfo>(json);
+                    if (!string.IsNullOrEmpty(latestReleaseApi.name)) {
                         Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
-                        Version newVersion = new Version(assemblyInfo.Substring(index + 17, indexEnd - index - 17));
+                        Version newVersion = new Version(latestReleaseApi.name);
                         if (newVersion > currentVersion) {
+                            string downloadUrl = null;
+                            foreach (var asset in latestReleaseApi.assets) {
+                                if (asset.browser_download_url.EndsWith("FinalBeansStats.zip", StringComparison.OrdinalIgnoreCase)) {
+                                    downloadUrl = asset.browser_download_url;
+                                    break;
+                                }
+                            }
                             this.ChangeStateForAvailableNewVersion(newVersion.ToString(2));
-                            if (MetroMessageBox.Show(this,
-                                                     $"{Multilingual.GetWord("message_update_question_prefix")} [ v{newVersion.ToString(2)} ] {Multilingual.GetWord("message_update_question_suffix")}",
-                                                     $"{Multilingual.GetWord("message_update_question_caption")}",
-                                                     MessageBoxButtons.OKCancel, MessageBoxIcon.Question) == DialogResult.OK) {
+                            if (Messenger.MessageBox($"{Multilingual.GetWord("message_update_question_prefix")} [ v{newVersion.ToString(2)} ] {Multilingual.GetWord("message_update_question_suffix")}",
+                                                 $"{Multilingual.GetWord("message_update_question_caption")}",
+                                MsgIcon.Question, MessageBoxButtons.YesNo, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                                 Task.Run(() => {
                                     IsExitingForUpdate = true;
                                     IsUpdatingOnAppLaunch = isSilent;
                                     this.Stats_ExitProgram(this, null);
-                                    this.UpdateProgram(web);
+                                    this.UpdateProgram(downloadUrl);
                                 });
                                 return true;
                             }
                         } else if (!isSilent) {
-                            MetroMessageBox.Show(this,
-                                $"{Multilingual.GetWord("message_update_latest_version")}" +
-                                $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}" +
-                                $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}{Environment.NewLine}{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
-                                $"{Multilingual.GetWord("message_update_question_caption")}",
-                                MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            Messenger.MessageBox($"{Multilingual.GetWord("message_update_latest_version")}" +
+                                                 $"{Environment.NewLine}{Environment.NewLine}" +
+                                                 $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}{Environment.NewLine}{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
+                                                 $"{Multilingual.GetWord("message_update_question_caption")}",
+                                MsgIcon.Info, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                         }
                     } else if (!isSilent) {
-                        MetroMessageBox.Show(this, $"{Multilingual.GetWord("message_update_not_determine_version")}",
-                            $"{Multilingual.GetWord("message_update_error_caption")}",
-                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        Messenger.MessageBox($"{Multilingual.GetWord("message_update_not_determine_version")}", $"{Multilingual.GetWord("message_update_error_caption")}",
+                            MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                     }
                 } catch {
                     return false;
@@ -4749,11 +4826,11 @@ namespace FinalBeansStats {
         }
 
 #if AllowUpdate
-        public void UpdateProgram(ZipWebClient web) {
+        public void UpdateProgram(string downloadUrl) {
             using (DownloadProgress updater = new DownloadProgress()) {
                 updater.CurrentExeName = Path.GetFileName(Assembly.GetEntryAssembly().Location);
-                updater.ZipWebClient = web;
-                updater.DownloadUrl = Utils.FINALBEANSSTATS_RELEASES_LATEST_DOWNLOAD_URL;
+                updater.ZipWebClient = new ZipWebClient();
+                updater.DownloadUrl = downloadUrl ?? Utils.FINALBEANSSTATS_LATEST_RELEASE_DOWNLOAD_URL;
                 updater.ZipFileName = $"{CURRENTDIR}FinalBeansStats.zip";
                 updater.ShowDialog(this);
             }

@@ -84,7 +84,6 @@ FinalBeansStats est open source, ce qui signifie que tout le monde peut voir le 
 ## Utilisation
   - Extrayez le zip dans son propre dossier.
   - Exécutez le programme tout en jouant à FinalBeans pour voir de nouvelles statistiques.
-  - Seules les mises à jour après la fin d'un spectacle et les résultats sont donnés.
 
 
 ### Fenêtre Principale

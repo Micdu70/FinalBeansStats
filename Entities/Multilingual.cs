@@ -104,6 +104,7 @@ namespace FinalBeansStats {
                             { "main_delete_shows", "Delete" },
                             { "main_move_shows", "Move Show Data" },
                             { "main_delete_finish_time", "Delete \"Finish\" Time" },
+                            { "main_delete_last_round", "Delete" },
                             { "main_update_creative_map_infos", "Update Map Infos" },
                             { "main_update_program", "Update FinalBeans Stats" },
                             { "main_updating_program", "Downloading..." },
@@ -112,7 +113,7 @@ namespace FinalBeansStats {
                             { "level_detail_medal", "Medal" },
                             { "level_detail_is_final", "Final" },
                             { "level_detail_show_id", "Show No." },
-                            { "level_detail_show_name_id", "Show Name" },
+                            { "level_detail_show_name", "Show Name" },
                             { "level_detail_round", "Round" },
                             { "level_detail_round_suffix", "(s)" },
                             { "level_detail_name", "Level" },
@@ -205,7 +206,7 @@ namespace FinalBeansStats {
                             { "message_register_exe_caption", "Need to set exe file path" },
                             { "message_register_exe", "Please set the exe file path of the FinalBeans." },
                             { "message_wrong_selected_file_caption", "Wrong File Selected" },
-                            { "message_wrong_selected_file_epicgames", "Please select the FinalBeans client's shortcut file." },
+                            { "message_wrong_selected_file_epicgames", "Please select the FinalBeans shortcut file." },
                             { "message_wrong_selected_file", "Please select \"FinalBeans.exe\" in the install folder." },
                             { "message_not_installed_steam_caption", "Not Installed" },
                             { "message_not_installed_steam", "The Steam version of FinalBeans is not installed." },
@@ -246,7 +247,7 @@ namespace FinalBeansStats {
                             { "message_save_profile_prefix", "Do you want to save current data to" },
                             { "message_save_profile_suffix", "profile?" },
                             { "message_execution_caption", "Running FinalBeans" },
-                            { "message_execution_question", "Do you want to run the FinalBeans client?" },
+                            { "message_execution_question", "Do you want to run FinalBeans?" },
                             { "message_update_question_caption", "Update Program" },
                             { "message_update_question_prefix", "There is a new version of FinalBeans Stats available" },
                             { "message_update_question_suffix", "- Do you wish to update now?" },
@@ -258,6 +259,8 @@ namespace FinalBeansStats {
                             { "message_program_error_caption", "Program Error" },
                             { "message_delete_finish_time_caption", "Delete \"Finish\" Time" },
                             { "message_delete_finish_time", "Are you sure you want to delete the \"Finish\" time of this round?" },
+                            { "message_delete_round_caption", "Remove Round" },
+                            { "message_delete_round", "Are you sure you want to remove this round?" },
                             { "message_update_creative_map_caption", "Update creative map informations" },
                             { "message_update_creative_map_with_sharecode_prefix", "Would you like to update map infos with the share code \"" },
                             { "message_update_creative_map_with_sharecode_suffix", "\"?" },
@@ -382,11 +385,11 @@ namespace FinalBeansStats {
                             { "settings_game_options", "Game Options" },
                             { "settings_game_options_platform", "Platform" },
                             { "settings_finalbeans_exe_location", "↗️ Game EXE Location" },
-                            { "settings_finalbeans_exe_openfile_title", "Select the FinalBeans Client EXE file" },
+                            { "settings_finalbeans_exe_openfile_title", "Select the FinalBeans EXE file" },
                             { "settings_finalbeans_exe_openfile_name", "FinalBeans.exe" },
                             { "settings_finalbeans_exe_openfile_filter", "EXE files (*.exe)|*.exe" },
                             { "settings_finalbeans_shortcut_location", "↗️ Game Shortcut Location" },
-                            { "settings_finalbeans_shortcut_openfile_title", "Select the FinalBeans Client shortcut file" },
+                            { "settings_finalbeans_shortcut_openfile_title", "Select the FinalBeans shortcut file" },
                             { "settings_finalbeans_shortcut_openfile_name", ""},
                             { "settings_finalbeans_shortcut_openfile_filter", "URL Files (*.url)|*.url" },
                             { "settings_browse", "Browse" },
@@ -598,6 +601,7 @@ namespace FinalBeansStats {
                             { "main_delete_shows", "Supprimer" },
                             { "main_move_shows", "Déplacer les données" },
                             { "main_delete_finish_time", "Supprimer le temps \"Finish\"" },
+                            { "main_delete_last_round", "Supprimer" },
                             { "main_update_creative_map_infos", "Mettre à jour les infos" },
                             { "main_update_program", "Mise à jour du tracker" },
                             { "main_updating_program", "Téléchargement..." },
@@ -606,7 +610,7 @@ namespace FinalBeansStats {
                             { "level_detail_medal", "Médaille" },
                             { "level_detail_is_final", "Finale" },
                             { "level_detail_show_id", "N° d'émission" },
-                            { "level_detail_show_name_id", "Nom de l'émission" },
+                            { "level_detail_show_name", "Nom de l'émission" },
                             { "level_detail_round", "Manche" },
                             { "level_detail_round_suffix", "(s)" },
                             { "level_detail_name", "Nom de la manche" },
@@ -752,6 +756,8 @@ namespace FinalBeansStats {
                             { "message_program_error_caption", "Erreur Tracker" },
                             { "message_delete_finish_time_caption", "Supprimer le temps \"Finish\"" },
                             { "message_delete_finish_time", "Êtes-vous sûr de vouloir supprimer le temps \"Finish\" de cette manche ?" },
+                            { "message_delete_round_caption", "Supprimer la manche" },
+                            { "message_delete_round", "Êtes-vous sûr de vouloir supprimer cette manche ?" },
                             { "message_update_creative_map_caption", "MAJ des infos de la map créative" },
                             { "message_update_creative_map_with_sharecode_prefix", "Mettre à jour les infos de la map créative ayant \"" },
                             { "message_update_creative_map_with_sharecode_suffix", "\" comme code de partage ?" },
@@ -771,7 +777,7 @@ namespace FinalBeansStats {
                             { "message_connected_to_server_suffix", "\"." },
                             { "message_check_internet_connection_caption", "Erreur réseau" },
                             { "message_check_internet_connection", "Veuillez vérifier votre connexion Internet." },
-                            { "message_changelog_caption", "Journal des modifications" },
+                            { "message_changelog_caption", "Changelog" },
                             { "message_changelog_bugfix_and_program_optimization", "Correction de bugs et optimisation du programme" },
                             { "message_changelog_updated_new_show_and_round_names", "Mise à jour des noms des nouvelles manches / émissions" },
                             { "message_changelog_overlay_display_improvements", "Améliorations de l'affichage de l'overlay" },
@@ -996,7 +1002,7 @@ namespace FinalBeansStats {
                             { "main_by", "by" },
                             { "main_multilingual", "다국어" },
                             { "main_settings", "설정" },
-                            { "main_finalbeans_stats", "FinalBeans 스탯츠" },
+                            { "main_finalbeans_stats", "FinalBeans Stats" },
                             { "main_filters", "필터링" },
                             { "main_stats", "통계 범위" },
                             { "main_all", "전체" },
@@ -1092,6 +1098,7 @@ namespace FinalBeansStats {
                             { "main_delete_shows", "삭제" },
                             { "main_move_shows", "쇼 데이터 이동" },
                             { "main_delete_finish_time", "\"도착\" 시간 삭제" },
+                            { "main_delete_last_round", "삭제" },
                             { "main_update_creative_map_infos", "정보 업데이트" },
                             { "main_update_program", "FinalBeans 스탯츠 업데이트" },
                             { "main_updating_program", "다운로드 중..." },
@@ -1100,7 +1107,7 @@ namespace FinalBeansStats {
                             { "level_detail_medal", "메달" },
                             { "level_detail_is_final", "결승" },
                             { "level_detail_show_id", "쇼 번호" },
-                            { "level_detail_show_name_id", "쇼 이름" },
+                            { "level_detail_show_name", "쇼 이름" },
                             { "level_detail_round", "라운드" },
                             { "level_detail_round_suffix", " 수" },
                             { "level_detail_name", "라운드 이름" },
@@ -1246,6 +1253,8 @@ namespace FinalBeansStats {
                             { "message_program_error_caption", "프로그램 오류" },
                             { "message_delete_finish_time_caption", "\"도착\" 시간 삭제" },
                             { "message_delete_finish_time", "정말 삭제하시겠습니까?" },
+                            { "message_delete_round_caption", "Remove Round" },
+                            { "message_delete_round", "Are you sure you want to remove this round?" },
                             { "message_update_creative_map_caption", "폴크리 맵 정보 업데이트" },
                             { "message_update_creative_map_with_sharecode_prefix", "공유 코드 \"" },
                             { "message_update_creative_map_with_sharecode_suffix", "\"로 맵 정보를 업데이트하시겠습니까?" },
@@ -1586,6 +1595,7 @@ namespace FinalBeansStats {
                             { "main_delete_shows", "ショーを削除" },
                             { "main_move_shows", "ショーデータの移動" },
                             { "main_delete_finish_time", "「到着」時間を削除する" },
+                            { "main_delete_last_round", "を削除" },
                             { "main_update_creative_map_infos", "情報の更新" },
                             { "main_update_program", "FinalBeans Stats アップデート" },
                             { "main_updating_program", "ダウンロード中..." },
@@ -1594,7 +1604,7 @@ namespace FinalBeansStats {
                             { "level_detail_medal", "メダル" },
                             { "level_detail_is_final", "決勝" },
                             { "level_detail_show_id", "ショー番号" },
-                            { "level_detail_show_name_id", "ショー名" },
+                            { "level_detail_show_name", "ショー名" },
                             { "level_detail_round", "ラウンド" },
                             { "level_detail_round_suffix", "数" },
                             { "level_detail_name", "ラウンド名" },
@@ -1740,6 +1750,8 @@ namespace FinalBeansStats {
                             { "message_program_error_caption", "プログラムエラー" },
                             { "message_delete_finish_time_caption", "「到着」時間を削除する" },
                             { "message_delete_finish_time", "本当に削除しますか？" },
+                            { "message_delete_round_caption", "Remove Round" },
+                            { "message_delete_round", "Are you sure you want to remove this round?" },
                             { "message_update_creative_map_caption", "クリエイティブマップ情報を更新" },
                             { "message_update_creative_map_with_sharecode_prefix", "共有コード「" },
                             { "message_update_creative_map_with_sharecode_suffix", "」でマップ情報を更新しますか?" },
@@ -2080,6 +2092,7 @@ namespace FinalBeansStats {
                             { "main_delete_shows", "删除" },
                             { "main_move_shows", "移动游玩场次数据" },
                             { "main_delete_finish_time", "删除“结束”时间" },
+                            { "main_delete_last_round", "删除" },
                             { "main_update_creative_map_infos", "更新信息" },
                             { "main_update_program", "更新 FinalBeans Stats" },
                             { "main_updating_program", "正在下载..." },
@@ -2088,7 +2101,7 @@ namespace FinalBeansStats {
                             { "level_detail_medal", "勋章" },
                             { "level_detail_is_final", "决赛" },
                             { "level_detail_show_id", "节目场次" },
-                            { "level_detail_show_name_id", "节目名" },
+                            { "level_detail_show_name", "节目名" },
                             { "level_detail_round", "轮次" },
                             { "level_detail_round_suffix", ""},
                             { "level_detail_name", "关卡" },
@@ -2234,6 +2247,8 @@ namespace FinalBeansStats {
                             { "message_program_error_caption", "程序错误" },
                             { "message_delete_finish_time_caption", "删除“结束”时间" },
                             { "message_delete_finish_time", "确定要继续吗？" },
+                            { "message_delete_round_caption", "Remove Round" },
+                            { "message_delete_round", "Are you sure you want to remove this round?" },
                             { "message_update_creative_map_caption", "更新创意地图信息" },
                             { "message_update_creative_map_with_sharecode_prefix", "您想更新带有共享代码 \"" },
                             { "message_update_creative_map_with_sharecode_suffix", "\"的地图信息吗？" },
@@ -2574,6 +2589,7 @@ namespace FinalBeansStats {
                             { "main_delete_shows", "刪除" },
                             { "main_move_shows", "移動遊玩場次數據" },
                             { "main_delete_finish_time", "刪除“結束”時間" },
+                            { "main_delete_last_round", "刪除" },
                             { "main_update_creative_map_infos", "更新信息" },
                             { "main_update_program", "更新 FinalBeans Stats" },
                             { "main_updating_program", "正在下載..." },
@@ -2582,7 +2598,7 @@ namespace FinalBeansStats {
                             { "level_detail_medal", "勳章" },
                             { "level_detail_is_final", "決賽" },
                             { "level_detail_show_id", "節目場次" },
-                            { "level_detail_show_name_id", "節目名" },
+                            { "level_detail_show_name", "節目名" },
                             { "level_detail_round", "輪次" },
                             { "level_detail_round_suffix", ""},
                             { "level_detail_name", "關卡" },
@@ -2728,6 +2744,8 @@ namespace FinalBeansStats {
                             { "message_program_error_caption", "程序錯誤" },
                             { "message_delete_finish_time_caption", "刪除“結束”時間" },
                             { "message_delete_finish_time", "確定要繼續嗎？" },
+                            { "message_delete_round_caption", "Remove Round" },
+                            { "message_delete_round", "Are you sure you want to remove this round?" },
                             { "message_update_creative_map_caption", "更新創意地圖資訊" },
                             { "message_update_creative_map_with_sharecode_prefix", "您想用分享代碼「" },
                             { "message_update_creative_map_with_sharecode_suffix", "」更新地圖資訊嗎？" },
@@ -3508,10 +3526,12 @@ namespace FinalBeansStats {
 
         private static readonly Dictionary<Language, Dictionary<string, string>> MultilingualShowsDictionary = new Dictionary<Language, Dictionary<string, string>> {
             { Language.English, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-                    { "fb_skilled_speeders", "Skilled Speeders" },
-                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
-                    { "fb_ltm", "LTM" },
                     { "fb_main_show", "Main Show" },
+                    { "fb_ltm", "LTM" },
+
+                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
+                    { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_skilled_speeders", "Skilled Speeders" },
 
                     { "anniversary_fp12_ltm", "Anniversary Party" },
                     { "casual_show", "Explore" },
@@ -3916,10 +3936,12 @@ namespace FinalBeansStats {
                 }
             },
             { Language.French, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-                    { "fb_skilled_speeders", "Skilled Speeders" },
-                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
-                    { "fb_ltm", "LTM" },
                     { "fb_main_show", "Main Show" },
+                    { "fb_ltm", "LTM" },
+
+                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
+                    { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_skilled_speeders", "Skilled Speeders" },
 
                     { "anniversary_fp12_ltm", "Fête d'anniversaire" },
                     { "casual_show", "Exploration" },
@@ -4324,10 +4346,12 @@ namespace FinalBeansStats {
                 }
             },
             { Language.Korean, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-                    { "fb_skilled_speeders", "Skilled Speeders" },
-                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
-                    { "fb_ltm", "LTM" },
                     { "fb_main_show", "Main Show" },
+                    { "fb_ltm", "LTM" },
+
+                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
+                    { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_skilled_speeders", "Skilled Speeders" },
 
                     { "anniversary_fp12_ltm", "기념 파티" },
                     { "casual_show", "탐험" },
@@ -4732,10 +4756,12 @@ namespace FinalBeansStats {
                 }
             },
             { Language.Japanese, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-                    { "fb_skilled_speeders", "Skilled Speeders" },
-                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
-                    { "fb_ltm", "LTM" },
                     { "fb_main_show", "Main Show" },
+                    { "fb_ltm", "LTM" },
+
+                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
+                    { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_skilled_speeders", "Skilled Speeders" },
 
                     { "anniversary_fp12_ltm", "アニバーサリーパーティー" },
                     { "casual_show", "自由探索" },
@@ -5140,10 +5166,12 @@ namespace FinalBeansStats {
                 }
             },
             { Language.SimplifiedChinese, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-                    { "fb_skilled_speeders", "Skilled Speeders" },
-                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
-                    { "fb_ltm", "LTM" },
                     { "fb_main_show", "Main Show" },
+                    { "fb_ltm", "LTM" },
+
+                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
+                    { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_skilled_speeders", "Skilled Speeders" },
 
                     { "anniversary_fp12_ltm", "周年庆大派对" },
                     { "casual_show", "探索" },
@@ -5548,10 +5576,12 @@ namespace FinalBeansStats {
                 }
             },
             { Language.TraditionalChinese, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) {
-                    { "fb_skilled_speeders", "Skilled Speeders" },
-                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
-                    { "fb_ltm", "LTM" },
                     { "fb_main_show", "Main Show" },
+                    { "fb_ltm", "LTM" },
+
+                    { "fb_frightful_final_ween", "Frightful Final-Ween" },
+                    { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_skilled_speeders", "Skilled Speeders" },
 
                     { "anniversary_fp12_ltm", "週年派對" },
                     { "casual_show", "探索" },
@@ -7473,7 +7503,7 @@ namespace FinalBeansStats {
         };
 
         public static string GetWord(string keyword) {
-            if (string.IsNullOrEmpty(keyword)) return String.Empty;
+            if (string.IsNullOrEmpty(keyword)) return string.Empty;
             string word = string.Empty;
             MultilingualDictionary.TryGetValue(Stats.CurrentLanguage, out Dictionary<string, string> wordsDictionary);
             wordsDictionary?.TryGetValue(keyword, out word);
@@ -7481,7 +7511,7 @@ namespace FinalBeansStats {
         }
 
         public static string GetWord(string keyword, Language lang) {
-            if (string.IsNullOrEmpty(keyword)) return String.Empty;
+            if (string.IsNullOrEmpty(keyword)) return string.Empty;
             string word = string.Empty;
             MultilingualDictionary.TryGetValue(lang, out Dictionary<string, string> wordsDictionary);
             wordsDictionary?.TryGetValue(keyword, out word);
@@ -7489,7 +7519,7 @@ namespace FinalBeansStats {
         }
 
         public static string GetLevelName(string keyword) {
-            if (string.IsNullOrEmpty(keyword)) return String.Empty;
+            if (string.IsNullOrEmpty(keyword)) return string.Empty;
             string name = string.Empty;
             // Force "English" because FinalBeans is only in English
             MultilingualLevelsDictionary.TryGetValue(Language.English, out Dictionary<string, string> levelsDictionary);
@@ -7499,7 +7529,7 @@ namespace FinalBeansStats {
         }
 
         public static string GetLevelName(string keyword, Language lang) {
-            if (string.IsNullOrEmpty(keyword)) return String.Empty;
+            if (string.IsNullOrEmpty(keyword)) return string.Empty;
             string name = string.Empty;
             MultilingualLevelsDictionary.TryGetValue(lang, out Dictionary<string, string> levelsDictionary);
             levelsDictionary?.TryGetValue(keyword, out name);
@@ -7507,7 +7537,7 @@ namespace FinalBeansStats {
         }
 
         public static string GetShowName(string keyword) {
-            if (string.IsNullOrEmpty(keyword)) return String.Empty;
+            if (string.IsNullOrEmpty(keyword)) return string.Empty;
             string name = string.Empty;
             // Force "English" because FinalBeans is only in English
             MultilingualShowsDictionary.TryGetValue(Language.English, out Dictionary<string, string> showsDictionary);
@@ -7516,7 +7546,7 @@ namespace FinalBeansStats {
         }
 
         public static string GetCountryName(string keyword) {
-            if (string.IsNullOrEmpty(keyword)) return String.Empty;
+            if (string.IsNullOrEmpty(keyword)) return string.Empty;
             string name = string.Empty;
             MultilingualCountryDictionary.TryGetValue(Stats.CurrentLanguage, out Dictionary<string, string> countryDictionary);
             countryDictionary?.TryGetValue(keyword, out name);
@@ -7524,7 +7554,7 @@ namespace FinalBeansStats {
         }
 
         public static string GetCountryName(string keyword, Language lang) {
-            if (string.IsNullOrEmpty(keyword)) return String.Empty;
+            if (string.IsNullOrEmpty(keyword)) return string.Empty;
             string name = string.Empty;
             MultilingualCountryDictionary.TryGetValue(lang, out Dictionary<string, string> countryDictionary);
             countryDictionary?.TryGetValue(keyword, out name);
