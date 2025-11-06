@@ -2940,16 +2940,14 @@ namespace FinalBeansStats {
                     endRound = roundInfo[j];
                 }
 
-                bool isNotPrivateLobby = !endRound.PrivateLobby;
-
-                bool isInWinsFilter = isNotPrivateLobby
+                bool isInWinsFilter = !endRound.PrivateLobby
                                       && (this.CurrentSettings.WinsFilter == 0
                                           || (this.CurrentSettings.WinsFilter == 1 && this.IsInStatsFilter(endRound) && this.IsInPartyFilter(info))
                                           || (this.CurrentSettings.WinsFilter == 2 && endRound.Start > SeasonStart)
                                           || (this.CurrentSettings.WinsFilter == 3 && endRound.Start > WeekStart)
                                           || (this.CurrentSettings.WinsFilter == 4 && endRound.Start > DayStart)
                                           || (this.CurrentSettings.WinsFilter == 5 && endRound.Start > SessionStart));
-                bool isInQualifyFilter = isNotPrivateLobby
+                bool isInQualifyFilter = !endRound.PrivateLobby
                                          && (this.CurrentSettings.QualifyFilter == 0
                                              || (this.CurrentSettings.QualifyFilter == 1 && this.IsInStatsFilter(endRound) && this.IsInPartyFilter(info))
                                              || (this.CurrentSettings.QualifyFilter == 2 && endRound.Start > SeasonStart)
@@ -2972,6 +2970,12 @@ namespace FinalBeansStats {
 
                 if (isCurrentLevel) {
                     if (isInQualifyFilter) {
+                        if (info.Qualified) {
+                            if (info.Tier == (int)QualifyTier.Gold) {
+                                summary.TotalGolds++;
+                            }
+                            summary.TotalQualify++;
+                        }
                         summary.TotalPlays++;
                     }
 
@@ -3002,51 +3006,36 @@ namespace FinalBeansStats {
                     }
                 }
 
-                bool isFinalRound = (info.IsFinal || info.Crown) && !endRound.PrivateLobby;
-
-                if (ReferenceEquals(info, endRound) && isFinalRound) {
+                if (ReferenceEquals(info, endRound) && hasLevelDetails && (endRound.IsFinal || endRound.Crown) && !endRound.PrivateLobby) {
                     summary.CurrentFinalStreak++;
                     if (summary.BestFinalStreak < summary.CurrentFinalStreak) {
                         summary.BestFinalStreak = summary.CurrentFinalStreak;
                     }
                 }
 
-                isNotPrivateLobby = !info.PrivateLobby;
-
-                if (info.Qualified) {
-                    if (hasLevelDetails && (info.IsFinal || info.Crown)) {
-                        if (isNotPrivateLobby) {
+                if (ReferenceEquals(info, endRound)) {
+                    if (endRound.Qualified) {
+                        if (hasLevelDetails && (endRound.IsFinal || endRound.Crown) && !endRound.PrivateLobby) {
                             summary.AllWins++;
-                        }
 
-                        if (isInWinsFilter) {
-                            summary.TotalWins++;
-                            summary.TotalFinals++;
-                        }
+                            if (isInWinsFilter) {
+                                summary.TotalWins++;
+                                summary.TotalFinals++;
+                            }
 
-                        if (isNotPrivateLobby) {
                             summary.CurrentStreak++;
                             if (summary.CurrentStreak > summary.BestStreak) {
                                 summary.BestStreak = summary.CurrentStreak;
                             }
                         }
-                    }
-
-                    if (isCurrentLevel) {
-                        if (isInQualifyFilter) {
-                            if (info.Tier == (int)QualifyTier.Gold) {
-                                summary.TotalGolds++;
-                            }
-                            summary.TotalQualify++;
+                    } else if (!endRound.PrivateLobby) {
+                        if (!hasLevelDetails || (!endRound.IsFinal && !endRound.Crown)) {
+                            summary.CurrentFinalStreak = 0;
                         }
-                    }
-                } else if (isNotPrivateLobby) {
-                    if (!info.IsFinal && !info.Crown) {
-                        summary.CurrentFinalStreak = 0;
-                    }
-                    summary.CurrentStreak = 0;
-                    if (isInWinsFilter && hasLevelDetails && (info.IsFinal || info.Crown)) {
-                        summary.TotalFinals++;
+                        summary.CurrentStreak = 0;
+                        if (isInWinsFilter && hasLevelDetails && (endRound.IsFinal || endRound.Crown)) {
+                            summary.TotalFinals++;
+                        }
                     }
                 }
             }
