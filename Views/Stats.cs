@@ -2197,8 +2197,8 @@ namespace FinalBeansStats {
             string timeDiffContent = string.Empty;
             if (currentPb > 0) {
                 TimeSpan timeDiff = TimeSpan.FromMilliseconds(currentPb - currentRecord);
-                timeDiffContent = timeDiff.Minutes > 0 ? $" ⏱️{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_prefix")}{timeDiff.Minutes}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_infix")} {timeDiff.Seconds}.{timeDiff.Milliseconds}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_suffix")}"
-                                  : $" ⏱️{timeDiff.Seconds}.{timeDiff.Milliseconds}{Multilingual.GetWord("message_new_personal_best_timediff_by_second")}";
+                timeDiffContent = timeDiff.Minutes > 0 ? $" ⏱️{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_prefix")}{timeDiff.Minutes}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_infix")} {timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_suffix")}"
+                                  : $" ⏱️{timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_second")}";
             }
             string levelName = this.StatLookup.TryGetValue(roundId, out LevelStats l1) ? l1.Name : roundId.Substring(0, roundId.Length - 3);
             string info = $"{(string.Equals(Multilingual.GetShowName(showId), levelName) ? $"({levelName})" : $"({Multilingual.GetShowName(showId)} • {levelName})")}";
