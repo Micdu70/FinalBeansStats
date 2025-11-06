@@ -2071,7 +2071,7 @@ namespace FinalBeansStats {
                                 }
 
                                 Messenger.MessageBox($"{Environment.NewLine}" +
-                                                     $"{string.Join(Environment.NewLine, changeLog.Where(s => !string.IsNullOrEmpty(s)))}" +
+                                                     $"{string.Join($"{Environment.NewLine}{Environment.NewLine}", changeLog.Where(s => !string.IsNullOrEmpty(s)))}" +
                                                      $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}" +
                                                      $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}" +
                                                      $"{Environment.NewLine}" +
