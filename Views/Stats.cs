@@ -2070,8 +2070,9 @@ namespace FinalBeansStats {
                                     throw new Exception("No changelog found for your current version.");
                                 }
 
-                                Messenger.MessageBox($"{string.Join(Environment.NewLine, changeLog.Where(s => !string.IsNullOrEmpty(s)))}" +
-                                                     $"{Environment.NewLine}{Environment.NewLine}" +
+                                Messenger.MessageBox($"{Environment.NewLine}" +
+                                                     $"{string.Join(Environment.NewLine, changeLog.Where(s => !string.IsNullOrEmpty(s)))}" +
+                                                     $"{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}" +
                                                      $"{Multilingual.GetWord("main_update_prefix_tooltip").Trim()}" +
                                                      $"{Environment.NewLine}" +
                                                      $"{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
