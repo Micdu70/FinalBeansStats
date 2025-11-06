@@ -8,6 +8,8 @@
 
 ## v1.1
 
+- Fix: Gold medal was missing for the last round when the player won
+- Fix: Invalid differ time in notifications when a PB time was made in LTMs
 - General bug fixes && improvements
 
 ## v1.0
