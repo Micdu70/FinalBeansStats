@@ -1,6 +1,8 @@
 ﻿using System;
 namespace FinalBeansStats {
     public class StatSummary {
+        public int Streak {  get; set; }
+        public int FinalStreak { get; set; }
         public int CurrentStreak { get; set; }
         public int CurrentFinalStreak { get; set; }
         public int BestStreak { get; set; }

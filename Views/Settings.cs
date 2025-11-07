@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Windows.Forms;
 using MetroFramework;
 using MetroFramework.Controls;
-using static FinalBeansStats.Stats;
 
 namespace FinalBeansStats {
     public partial class Settings : MetroFramework.Forms.MetroForm {
@@ -1178,7 +1177,7 @@ namespace FinalBeansStats {
             using (ApiWebClient web = new ApiWebClient()) {
                 try {
                     string json = web.DownloadString(Utils.FINALBEANSSTATS_LATEST_RELEASE_API);
-                    LatestReleaseApiInfo latestReleaseApi = System.Text.Json.JsonSerializer.Deserialize<LatestReleaseApiInfo>(json);
+                    Stats.LatestReleaseApiInfo latestReleaseApi = System.Text.Json.JsonSerializer.Deserialize<Stats.LatestReleaseApiInfo>(json);
                     if (!string.IsNullOrEmpty(latestReleaseApi.name)) {
                         Version currentVersion = Assembly.GetEntryAssembly().GetName().Version;
                         Version newVersion = new Version(latestReleaseApi.name);

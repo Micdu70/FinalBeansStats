@@ -2893,6 +2893,8 @@ namespace FinalBeansStats {
 
         public StatSummary GetLevelInfo(string levelId, LevelType type, BestRecordType record) {
             StatSummary summary = new StatSummary {
+                Streak = 0,
+                FinalStreak = 0,
                 CurrentStreak = 0,
                 CurrentFinalStreak = 0,
                 BestStreak = 0,
@@ -3007,36 +3009,47 @@ namespace FinalBeansStats {
                     }
                 }
 
-                if (ReferenceEquals(info, endRound) && hasLevelDetails && (endRound.IsFinal || endRound.Crown) && !endRound.PrivateLobby) {
-                    summary.CurrentFinalStreak++;
-                    if (summary.BestFinalStreak < summary.CurrentFinalStreak) {
-                        summary.BestFinalStreak = summary.CurrentFinalStreak;
-                    }
-                }
+                if (ReferenceEquals(info, endRound) && !endRound.PrivateLobby) {
+                    bool isEndRoundFinal = hasLevelDetails && (endRound.IsFinal || endRound.Crown);
 
-                if (ReferenceEquals(info, endRound)) {
-                    if (endRound.Qualified) {
-                        if (hasLevelDetails && (endRound.IsFinal || endRound.Crown) && !endRound.PrivateLobby) {
-                            summary.AllWins++;
-
-                            if (isInWinsFilter) {
-                                summary.TotalWins++;
-                                summary.TotalFinals++;
-                            }
-
+                    if (isEndRoundFinal && endRound.Qualified) {
+                        if (isInWinsFilter) {
+                            summary.CurrentFinalStreak++;
                             summary.CurrentStreak++;
-                            if (summary.CurrentStreak > summary.BestStreak) {
-                                summary.BestStreak = summary.CurrentStreak;
-                            }
+                            summary.TotalFinals++;
+                            summary.TotalWins++;
                         }
-                    } else if (!endRound.PrivateLobby) {
-                        if (!hasLevelDetails || (!endRound.IsFinal && !endRound.Crown)) {
-                            summary.CurrentFinalStreak = 0;
+
+                        summary.FinalStreak++;
+                        summary.Streak++;
+                        summary.AllWins++;
+
+                        if (summary.FinalStreak > summary.BestFinalStreak) {
+                            summary.BestFinalStreak = summary.FinalStreak;
                         }
-                        summary.CurrentStreak = 0;
-                        if (isInWinsFilter && hasLevelDetails && (endRound.IsFinal || endRound.Crown)) {
+
+                        if (summary.Streak > summary.BestStreak) {
+                            summary.BestStreak = summary.Streak;
+                        }
+                    } else if (isEndRoundFinal && !endRound.Qualified) {
+                        if (isInWinsFilter) {
+                            summary.CurrentFinalStreak++;
                             summary.TotalFinals++;
                         }
+
+                        summary.FinalStreak++;
+
+                        if (summary.FinalStreak > summary.BestFinalStreak) {
+                            summary.BestFinalStreak = summary.FinalStreak;
+                        }
+
+                        summary.Streak = 0;
+                        summary.CurrentStreak = 0;
+                    } else {
+                        summary.FinalStreak = 0;
+                        summary.Streak = 0;
+                        summary.CurrentFinalStreak = 0;
+                        summary.CurrentStreak = 0;
                     }
                 }
             }

@@ -341,7 +341,6 @@
     <None Include="Resources\stat_icon.png" />
     <None Include="Resources\stat_gray_icon.png" />
     <None Include="Resources\main_icon.png" />
-    <None Include="Resources\main_120_icon.png" />
     <None Include="Resources\reddit_icon.png" />
     <None Include="Resources\roll_off_club_icon.png" />
     <None Include="Resources\lost_temple_analyzer_icon.png" />
@@ -436,7 +435,6 @@
     <None Include="Resources\calendar_gray_icon.png" />
     <None Include="Resources\calendar_off_icon.png" />
     <None Include="Resources\calendar_on_icon.png" />
-    <None Include="Resources\casual_show_icon.png" />
     <None Include="Resources\lollipop_plot_icon.png" />
     <None Include="Resources\lollipop_plot_gray_icon.png" />
     <None Include="Resources\lollipop_plot_teal_icon.png" />
