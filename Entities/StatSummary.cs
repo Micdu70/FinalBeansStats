@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace FinalBeansStats {
     public class StatSummary {
         public int Streak {  get; set; }

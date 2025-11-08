@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+
 namespace FinalBeansStats {
     public class RoundLabel : Label {
         public int cornerRadius = 15;

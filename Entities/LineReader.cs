@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Text;
+
 namespace FinalBeansStats {
     public class LineReader {
         private readonly byte[] buffer;

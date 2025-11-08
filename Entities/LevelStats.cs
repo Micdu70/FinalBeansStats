@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using LiteDB;
+
 namespace FinalBeansStats {
     public class RoundInfo : IComparable<RoundInfo> {
         public ObjectId ID { get; set; }

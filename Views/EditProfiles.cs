@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using MetroFramework;
 using MetroFramework.Controls;
+
 namespace FinalBeansStats {
     public partial class EditProfiles : MetroFramework.Forms.MetroForm {
         public List<Profiles> Profiles { get; set; }

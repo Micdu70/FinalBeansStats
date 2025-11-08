@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using MetroFramework;
 using MetroFramework.Controls;
+
 namespace FinalBeansStats {
     public partial class EditShows : MetroFramework.Forms.MetroForm {
         public Stats StatsForm { get; set; }

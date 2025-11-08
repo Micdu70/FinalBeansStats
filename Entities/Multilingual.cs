@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 namespace FinalBeansStats {
     public static class Multilingual {
         private static readonly Dictionary<Language, Dictionary<string, string>> MultilingualDictionary = new Dictionary<Language, Dictionary<string, string>> {
