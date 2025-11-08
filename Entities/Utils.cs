@@ -349,6 +349,10 @@ namespace FinalBeansStats {
             }
         }
 
+        public static TimeSpan RoundSeconds(TimeSpan span) {
+            return TimeSpan.FromSeconds(Math.Round(span.TotalSeconds));
+        }
+
         public static string GetRelativeTime(DateTime targetTime) {
             TimeSpan diff = DateTime.Now - targetTime;
             double days = diff.TotalDays;

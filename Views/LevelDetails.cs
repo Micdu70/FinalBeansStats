@@ -644,7 +644,7 @@ namespace FinalBeansStats {
             }
 
             if (((Grid)sender).Columns[e.ColumnIndex].Name == "End") {
-                e.Value = (info.End - info.Start).ToString("m\\:ss");
+                e.Value = Utils.RoundSeconds(info.End - info.Start).ToString("m\\:ss");
             } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "Start") {
                 e.Value = info.StartLocal.ToString(Multilingual.GetWord("level_grid_date_format"), Utils.GetCultureInfo());
             } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "Finish") {

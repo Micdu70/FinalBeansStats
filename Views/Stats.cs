@@ -2359,7 +2359,7 @@ namespace FinalBeansStats {
                             }
                             this.Rounds++;
                         }
-                        this.Duration += stat.End - stat.Start;
+                        this.Duration += Utils.RoundSeconds((stat.Finish ?? stat.End) - stat.Start);
 
                         if (stat.PrivateLobby) {
                             if (stat.Qualified) {
@@ -3947,7 +3947,7 @@ namespace FinalBeansStats {
                         ls = (int)(rounds[i].Score < ls ? rounds[i].Score : ls);
                     }
 
-                    pt += rounds[i].End - rounds[i].Start;
+                    pt += Utils.RoundSeconds((rounds[i].Finish ?? rounds[i].End) - rounds[i].Start);
                     ++p;
                     if (rounds[i].Qualified) {
                         switch (rounds[i].Tier) {
