@@ -1,3 +1,8 @@
+## v1.4
+- New: 'Zombeanland' round is now detected as a final in 'Rise of Zombeanland' show
+- Change: Seconds are now rounded for 'Duration' && 'Playing time' infos
+- Fix: Wrong Streak infos in Overlay (proper fix)
+- Fix: Wrong differ time in PB notifications (issue with milliseconds)
 ## v1.3
 - Change: Pink medals are now named "Qualification" (instead of... "Pink")
 - Fix: Wrong "Streak" infos in Overlay (in a specific scenario)
