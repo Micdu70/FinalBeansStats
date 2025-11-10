@@ -769,7 +769,7 @@ namespace FinalBeansStats {
                             { "message_new_personal_best_prefix", "Vous avez établi un nouveau record personnel dans " },
                             { "message_new_personal_best_suffix", "." },
                             { "message_new_personal_best_timediff_by_minute_prefix", ""},
-                            { "message_new_personal_best_timediff_by_minute_infix", " min.," },
+                            { "message_new_personal_best_timediff_by_minute_infix", " min. et" },
                             { "message_new_personal_best_timediff_by_minute_suffix", " sec. de moins !" },
                             { "message_new_personal_best_timediff_by_second", " sec. de moins !" },
                             { "message_test_notifications_caption", "🔔 Notification de test" },
@@ -3532,7 +3532,9 @@ namespace FinalBeansStats {
 
                     { "fb_frightful_final_ween", "Frightful Final-Ween" },
                     { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_rise_of_zombeanland", "Rise of Zombeanland"},
                     { "fb_skilled_speeders", "Skilled Speeders" },
+                    { "fb_warped_main_show", "Warped Main Show" },
 
                     { "anniversary_fp12_ltm", "Anniversary Party" },
                     { "casual_show", "Explore" },
@@ -3942,7 +3944,9 @@ namespace FinalBeansStats {
 
                     { "fb_frightful_final_ween", "Frightful Final-Ween" },
                     { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_rise_of_zombeanland", "Rise of Zombeanland"},
                     { "fb_skilled_speeders", "Skilled Speeders" },
+                    { "fb_warped_main_show", "Warped Main Show" },
 
                     { "anniversary_fp12_ltm", "Fête d'anniversaire" },
                     { "casual_show", "Exploration" },
@@ -4352,7 +4356,9 @@ namespace FinalBeansStats {
 
                     { "fb_frightful_final_ween", "Frightful Final-Ween" },
                     { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_rise_of_zombeanland", "Rise of Zombeanland"},
                     { "fb_skilled_speeders", "Skilled Speeders" },
+                    { "fb_warped_main_show", "Warped Main Show" },
 
                     { "anniversary_fp12_ltm", "기념 파티" },
                     { "casual_show", "탐험" },
@@ -4762,7 +4768,9 @@ namespace FinalBeansStats {
 
                     { "fb_frightful_final_ween", "Frightful Final-Ween" },
                     { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_rise_of_zombeanland", "Rise of Zombeanland"},
                     { "fb_skilled_speeders", "Skilled Speeders" },
+                    { "fb_warped_main_show", "Warped Main Show" },
 
                     { "anniversary_fp12_ltm", "アニバーサリーパーティー" },
                     { "casual_show", "自由探索" },
@@ -5172,7 +5180,9 @@ namespace FinalBeansStats {
 
                     { "fb_frightful_final_ween", "Frightful Final-Ween" },
                     { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_rise_of_zombeanland", "Rise of Zombeanland"},
                     { "fb_skilled_speeders", "Skilled Speeders" },
+                    { "fb_warped_main_show", "Warped Main Show" },
 
                     { "anniversary_fp12_ltm", "周年庆大派对" },
                     { "casual_show", "探索" },
@@ -5582,7 +5592,9 @@ namespace FinalBeansStats {
 
                     { "fb_frightful_final_ween", "Frightful Final-Ween" },
                     { "fb_mix_it_up", "Mix it Up!" },
+                    { "fb_rise_of_zombeanland", "Rise of Zombeanland"},
                     { "fb_skilled_speeders", "Skilled Speeders" },
+                    { "fb_warped_main_show", "Warped Main Show" },
 
                     { "anniversary_fp12_ltm", "週年派對" },
                     { "casual_show", "探索" },

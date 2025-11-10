@@ -392,7 +392,7 @@ namespace FinalBeansStats {
                     }
 
                     Messenger.MessageBox($"{Multilingual.GetWord("message_save_csv")}{Environment.NewLine}({this._saveFile.FileName})", Multilingual.GetWord("message_save_csv_caption"),
-                        MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
+                        MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
                 }
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
@@ -429,7 +429,7 @@ namespace FinalBeansStats {
                 Clipboard.SetText(sb.ToString(), TextDataFormat.Text);
 
                 Messenger.MessageBox(Multilingual.GetWord("message_save_html"), Multilingual.GetWord("message_save_html_caption"),
-                    MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
+                    MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
             }
@@ -465,7 +465,7 @@ namespace FinalBeansStats {
                 Clipboard.SetText(sb.ToString(), TextDataFormat.Text);
 
                 Messenger.MessageBox(Multilingual.GetWord("message_save_bbcode"), Multilingual.GetWord("message_save_bbcode_caption"),
-                    MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
+                    MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
             }
@@ -503,7 +503,7 @@ namespace FinalBeansStats {
                 Clipboard.SetText(sb.ToString(), TextDataFormat.Text);
 
                 Messenger.MessageBox(Multilingual.GetWord("message_save_markdown"), Multilingual.GetWord("message_save_markdown_caption"),
-                    MsgIcon.None, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
+                    MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this.FindForm());
             } catch (Exception ex) {
                 ControlErrors.HandleException(this, ex, false);
             }

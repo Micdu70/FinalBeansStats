@@ -714,8 +714,8 @@ namespace FinalBeansStats {
                 }
             } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "ShowName") {
                 if (!string.IsNullOrEmpty((string)e.Value)) {
-                    // e.Value = Multilingual.GetShowName(((string)e.Value).Split(';')[0]) ?? info.ShowName.Split(';')[0] ?? "";
-                    e.Value = info.ShowName.Split(';')[0] ?? "";
+                    // e.Value = Multilingual.GetShowName(info.ShowNameId.Split(';')[0]) ?? info.ShowName.Split(';')[0] ?? info.ShowNameId.Split(';')[0];
+                    e.Value = info.ShowName.Split(';')[0] ?? info.ShowNameId.Split(';')[0];
                 }
             } else if (((Grid)sender).Columns[e.ColumnIndex].Name == "Position") {
                 if ((int)e.Value == 0) { e.Value = ""; }
@@ -789,10 +789,10 @@ namespace FinalBeansStats {
                         showCompare = one.ShowID.CompareTo(two.ShowID);
                         return showCompare != 0 ? showCompare : roundCompare;
                     case "ShowName":
-                        // string showNameOne = Multilingual.GetShowName(one.ShowName) ?? one.ShowName ?? @" ";
-                        // string showNameTwo = Multilingual.GetShowName(two.ShowName) ?? two.ShowName ?? @" ";
-                        string showNameOne = one.ShowName ?? @" ";
-                        string showNameTwo = two.ShowName ?? @" ";
+                        // string showNameOne = Multilingual.GetShowName(one.ShowNameId) ?? one.ShowName ?? one.ShowNameId;
+                        // string showNameTwo = Multilingual.GetShowName(two.ShowNameId) ?? two.ShowName ?? two.ShowNameId;
+                        string showNameOne = one.ShowName ?? one.ShowNameId;
+                        string showNameTwo = two.ShowName ?? two.ShowNameId;
                         int showNameCompare = showNameOne.CompareTo(showNameTwo);
                         return showNameCompare != 0 ? showNameCompare : roundCompare;
                     case "Round":
@@ -1169,8 +1169,8 @@ namespace FinalBeansStats {
             if (this.statType == StatType.Shows && ((Grid)sender).Columns[e.ColumnIndex].Name == "ShowName") {
                 ((Grid)sender).ShowCellToolTips = false;
                 RoundInfo info = ((Grid)sender).Rows[e.RowIndex].DataBoundItem as RoundInfo;
-                // string showName = Multilingual.GetShowName(info.ShowNameId.Split(';')[0]) ?? info.ShowName.Split(';')[0];
-                string showName = info.ShowName.Split(';')[0];
+                // string showName = Multilingual.GetShowName(info.ShowNameId.Split(';')[0]) ?? info.ShowName.Split(';')[0] ?? info.ShowNameId.Split(';')[0];
+                string showName = info.ShowName.Split(';')[0] ?? info.ShowNameId.Split(';')[0];
                 StringBuilder strBuilder = new StringBuilder();
                 strBuilder.Append(Environment.NewLine);
                 strBuilder.Append(info.StartLocal.ToString(Multilingual.GetWord("level_grid_date_format"), Utils.GetCultureInfo()));

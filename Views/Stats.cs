@@ -58,11 +58,11 @@ namespace FinalBeansStats {
         }
 
         private void SetDarkModeCSForModalDialogs() {
-            DarkModeCS.ExcludeFromProcessing(control: mlReportBug);
             DarkModeCS.ExcludeFromProcessing(control: menu);
             DarkModeCS.ExcludeFromProcessing(control: infoStrip);
             DarkModeCS.ExcludeFromProcessing(control: infoStrip2);
             DarkModeCS.ExcludeFromProcessing(control: infoStrip3);
+            DarkModeCS.ExcludeFromProcessing(control: mlReportBug);
             DarkModeCS.ExcludeFromProcessing(control: mtgIgnoreLevelTypeWhenSorting);
             DarkModeCS.ExcludeFromProcessing(control: lblIgnoreLevelTypeWhenSorting);
             DarkModeCS.ExcludeFromProcessing(control: gridDetails);
@@ -127,6 +127,7 @@ namespace FinalBeansStats {
         public static MetroThemeStyle CurrentTheme = MetroThemeStyle.Dark;
         public static bool InstalledEmojiFont;
 
+        public static int SelectedShowIndex;
         public static DateTime LastGameDate = DateTime.MinValue;
         public static string LastShowNameId = null;
         public static string LastShowName = null;
@@ -272,7 +273,7 @@ namespace FinalBeansStats {
 
         private readonly int currentGlobalDbVersion = 0;
 
-        private readonly int currentSettingsVersionFB = 2;
+        private readonly int currentSettingsVersionFB = 3;
 
         /* -------------------------------------------------------- */
 
@@ -285,8 +286,10 @@ namespace FinalBeansStats {
         public readonly string[] PublicShowIdList2 = {
             /* Keep in an alphabetical order */
             "fb_frightful_final_ween",
-            "fb_mix_it_up"
-            //"fb_skilled_speeders"
+            "fb_mix_it_up",
+            "fb_rise_of_zombeanland",
+            "fb_skilled_speeders",
+            "fb_warped_main_show"
         };
 
         public void RunDatabaseTask(Task task, bool runAsync) {
@@ -1468,6 +1471,21 @@ namespace FinalBeansStats {
         private void UpdateDatabase() {
             for (int version = this.CurrentSettings.Version_FB; version < currentSettingsVersionFB; version++) {
                 switch (version) {
+                    case 2: {
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             select ri).ToList();
+
+                            foreach (RoundInfo ri in roundInfoList) {
+                                if (ri.RoundId.IndexOf("round_zombean", StringComparison.OrdinalIgnoreCase) != -1
+                                    && ri.RoundId.EndsWith("_final", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.IsFinal = true;
+                                }
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.StatsDB.Commit();
+                            break;
+                        }
                     case 1: {
                             List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
                                                              select ri).ToList();
@@ -2077,7 +2095,7 @@ namespace FinalBeansStats {
                                                      $"{Environment.NewLine}" +
                                                      $"{Multilingual.GetWord("main_update_suffix_tooltip").Trim()}",
                                                      $"{Multilingual.GetWord("message_changelog_caption")} - {Multilingual.GetWord("main_finalbeans_stats")} v{currentAppVersion}",
-                                    MsgIcon.Info, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
+                                    MsgIcon.List, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
 
                                 this.CurrentSettings.ShowChangelog = false;
                                 this.SaveUserSettings();
@@ -2197,8 +2215,8 @@ namespace FinalBeansStats {
             string timeDiffContent = string.Empty;
             if (currentPb > 0) {
                 TimeSpan timeDiff = TimeSpan.FromMilliseconds(currentPb - currentRecord);
-                timeDiffContent = timeDiff.Minutes > 0 ? $" ⏱️{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_prefix")}{timeDiff.Minutes}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_infix")} {timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_suffix")}"
-                                  : $" ⏱️{timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_second")}";
+                timeDiffContent = timeDiff.Minutes > 0 ? $" ⏱️ {Multilingual.GetWord("message_new_personal_best_timediff_by_minute_prefix")}{timeDiff.Minutes}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_infix")} {timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_suffix")}"
+                                  : $" ⏱️ {timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_second")}";
             }
             string levelName = this.StatLookup.TryGetValue(roundId, out LevelStats l1) ? l1.Name : roundId.Substring(0, roundId.Length - 3);
             string info = $"{(string.Equals(Multilingual.GetShowName(showId), levelName) ? $"({levelName})" : $"({Multilingual.GetShowName(showId)} • {levelName})")}";
@@ -4001,20 +4019,20 @@ namespace FinalBeansStats {
                     if (processes.Select(t => t.ProcessName).Any(name => string.Equals(name, finalBeansProcessName, StringComparison.OrdinalIgnoreCase))) {
                         if (!isSilent) {
                             Messenger.MessageBox(Multilingual.GetWord("message_finalbeans_already_running"), Multilingual.GetWord("message_already_running_caption"),
-                                MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
+                                MsgIcon.Forbidden, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                         }
                         return;
                     }
 
                     if (Messenger.MessageBox($"{Multilingual.GetWord("message_execution_question")}", $"{Multilingual.GetWord("message_execution_caption")}",
-                            MsgIcon.Info, MessageBoxButtons.YesNo, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
+                            MsgIcon.Question, MessageBoxButtons.YesNo, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                         this.UnlockGameExeFile();
                         Process.Start(this.CurrentSettings.GameExeLocation);
                         this.WindowState = FormWindowState.Minimized;
                     }
                 } else if (!isSilent) {
                     Messenger.MessageBox(Multilingual.GetWord("message_register_exe"), Multilingual.GetWord("message_register_exe_caption"),
-                        MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
+                        MsgIcon.Warning, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                 }
             } catch (Exception ex) {
                 MetroMessageBox.Show(this, ex.ToString(), $"{Multilingual.GetWord("message_program_error_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Error);

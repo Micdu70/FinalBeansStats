@@ -131,7 +131,7 @@ namespace FinalBeansStats {
             foreach (var stat in this.AllStats.FindAll(r => !addedShowList.Contains(r.ShowNameId))) {
                 if (addedShowList.Contains(stat.ShowNameId)) continue;
 
-                showsData.Rows.Add(stat.ShowName, stat.ShowNameId, "True");
+                showsData.Rows.Add(stat.ShowName ?? stat.ShowNameId, stat.ShowNameId, "True");
                 addedShowList.Add(stat.ShowNameId);
             }
 
@@ -267,7 +267,7 @@ namespace FinalBeansStats {
             if (this.cboProfileRemove.SelectedIndex < 0) return;
             if (Messenger.MessageBox($"{Multilingual.GetWord("message_delete_profile_prefix")} ({this.cboProfileRemove.SelectedItem}) {Multilingual.GetWord("message_delete_profile_infix")} {Multilingual.GetWord("message_delete_profile_suffix")}",
                     Multilingual.GetWord("message_delete_profile_caption"),
-                    MsgIcon.Question, MessageBoxButtons.OKCancel, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.OK) {
+                    MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {
                 string prevProfileName = string.Empty;
                 for (int i = 0; i < this.cboProfileRemove.Items.Count; i++) {
                     if (this.cboProfileRemove.Items[i].ToString() == this.cboProfileRemove.SelectedItem.ToString()) {

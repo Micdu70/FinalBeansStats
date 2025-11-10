@@ -691,7 +691,7 @@ namespace FinalBeansStats {
                                 this.txtGameExeLocation.Text = openFile.FileName;
                             } else {
                                 Messenger.MessageBox(Multilingual.GetWord("message_wrong_selected_file", this.DisplayLang), Multilingual.GetWord("message_wrong_selected_file_caption", this.DisplayLang),
-                                    MsgIcon.Error, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
+                                    MsgIcon.Warning, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                             }
                         }
                     }

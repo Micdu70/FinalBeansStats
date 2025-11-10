@@ -43,7 +43,6 @@ namespace FinalBeansStats {
 
         public bool isPrivateLobby;
         public bool currentlyInParty;
-        public int selectedShowIndex;
         public DateTime lastGameDate;
         public string currentShowNameId;
         public string currentSessionId;
@@ -220,6 +219,9 @@ namespace FinalBeansStats {
                                        || line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateReloadingToMainMenu with FGClient.StateMainMenu", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[StateMainMenu] Loading scene MainMenu", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[GlobalGameStateClient] OnDestroy called", StringComparison.OrdinalIgnoreCase) != -1) {
+                                if (line.Line.IndexOf("[LobbyManager] Show selected index: ", StringComparison.OrdinalIgnoreCase) != -1) {
+                                    Stats.SelectedShowIndex = int.Parse(line.Line.Substring(line.Line.IndexOf("[LobbyManager]", StringComparison.OrdinalIgnoreCase) + 36));
+                                }
                                 offset = i > 0 ? tempLines[i - 1].Offset : offset;
                                 lastDate = line.Date;
                             } else if (this.StatsForm.CurrentSettings.AutoChangeProfile && line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateMainMenu with FGClient.StateGameLoading", StringComparison.OrdinalIgnoreCase) != -1) {
@@ -351,7 +353,9 @@ namespace FinalBeansStats {
 
         private bool IsRealFinalRound(int roundNum, string roundId, string showId) {
             // FinalBeans Stuff
-            if (string.Equals(showId, "fb_skilled_speeders")) return true;
+            if (string.Equals(showId, "fb_skilled_speeders")) {
+                return true;
+            }
 
             // Fall Guys Stuff
             if ((showId.StartsWith("knockout_fp") && showId.EndsWith("_srs"))
@@ -368,8 +372,8 @@ namespace FinalBeansStats {
             }
 
             return (roundId.IndexOf("round_jinxed", StringComparison.OrdinalIgnoreCase) != -1
-                    && roundId.IndexOf("_non_final", StringComparison.OrdinalIgnoreCase) == -1
-                    && !string.Equals(showId, "event_anniversary_season_1_alternate_name"))
+                        && roundId.IndexOf("_non_final", StringComparison.OrdinalIgnoreCase) == -1
+                        && !string.Equals(showId, "event_anniversary_season_1_alternate_name"))
 
                     || (roundId.IndexOf("round_fall_ball", StringComparison.OrdinalIgnoreCase) != -1
                         && roundId.IndexOf("_non_final", StringComparison.OrdinalIgnoreCase) == -1
@@ -391,7 +395,8 @@ namespace FinalBeansStats {
                             || roundId.IndexOf("_teamgames", StringComparison.OrdinalIgnoreCase) != -1))
 
                     || ((roundId.IndexOf("round_pixelperfect", StringComparison.OrdinalIgnoreCase) != -1
-                         || roundId.IndexOf("round_robotrampage", StringComparison.OrdinalIgnoreCase) != -1)
+                         || roundId.IndexOf("round_robotrampage", StringComparison.OrdinalIgnoreCase) != -1
+                         || roundId.IndexOf("round_zombean", StringComparison.OrdinalIgnoreCase) != -1)
                             && roundId.EndsWith("_final", StringComparison.OrdinalIgnoreCase))
 
                     || roundId.EndsWith("_2teamsfinal", StringComparison.OrdinalIgnoreCase)
@@ -624,7 +629,6 @@ namespace FinalBeansStats {
         private void ResetMainLocalVariables() {
             this.threadLocalVariable.Value.isPrivateLobby = false;
             this.threadLocalVariable.Value.currentlyInParty = false;
-            this.threadLocalVariable.Value.selectedShowIndex = 0;
             this.threadLocalVariable.Value.lastGameDate = DateTime.MinValue;
             this.threadLocalVariable.Value.currentShowNameId = string.Empty;
             this.threadLocalVariable.Value.currentSessionId = string.Empty;
@@ -814,8 +818,6 @@ namespace FinalBeansStats {
                 logRound.Info = null;
                 Stats.InShow = false;
                 Stats.EndedShow = true;
-            } else if ((index = line.Line.IndexOf("[LobbyManager] Show selected index: ", StringComparison.OrdinalIgnoreCase)) != -1) {
-                this.threadLocalVariable.Value.selectedShowIndex = int.Parse(line.Line.Substring(index + 36));
             } else if (line.Line.IndexOf("[StateMainMenu] No server address specified, attempting to matchmake", StringComparison.OrdinalIgnoreCase) != -1
                        || line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StatePrivateLobby with FGClient.StateConnectToGame", StringComparison.OrdinalIgnoreCase) != -1) {
                 //
@@ -904,8 +906,8 @@ namespace FinalBeansStats {
 
                 round.Add(logRound.Info);
 
-                logRound.Info.ShowName = logRound.Info.ShowName ?? (this.threadLocalVariable.Value.selectedShowIndex == 0 ? "Main Show" : "LTM");
-                logRound.Info.ShowNameId = logRound.Info.ShowNameId ?? (this.threadLocalVariable.Value.selectedShowIndex == 0 ? "fb_main_show" : "fb_ltm");
+                logRound.Info.ShowName = logRound.Info.ShowName ?? (Stats.SelectedShowIndex == 0 ? "Main Show" : "LTM");
+                logRound.Info.ShowNameId = logRound.Info.ShowNameId ?? (Stats.SelectedShowIndex == 0 ? "fb_main_show" : "fb_ltm");
                 this.threadLocalVariable.Value.currentShowNameId = logRound.Info.ShowNameId;
 
                 logRound.Info.Name = this.VerifiedRoundId(logRound.Info.RoundId);
