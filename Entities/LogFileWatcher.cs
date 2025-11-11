@@ -995,13 +995,14 @@ namespace FinalBeansStats {
                     Stats.NumPlayersPcSucceeded++;
                 }
             } else if (line.Line.IndexOf("[ROUNDMANAGER] Loading round", StringComparison.OrdinalIgnoreCase) != -1
+                       || line.Line.EndsWith(": Playing", StringComparison.OrdinalIgnoreCase)
                        || line.Line.EndsWith(": Succeeded", StringComparison.OrdinalIgnoreCase)) {
                 //
                 // "[GameSession] Changing state from Playing to GameOver" line is not present in FinalBeans logs
                 //
                 // "[ROUNDMANAGER] - Loading round" is used in FinalBeans logs to possibly indicate a round end (ONLY WHEN GAME STARTED WITH 1 PLAYER!)
                 //
-                // "Succeeded" is also used to indicate a round end (should be present in any case but can't confirm it...)
+                // "Succeeded" or "Playing" are also (sometimes) used to indicate a round end
                 //
                 if (line.Date > Stats.LastRoundLoad) {
                     if (Stats.InShow && Stats.LastPlayedRoundStart.HasValue && !Stats.LastPlayedRoundEnd.HasValue) {

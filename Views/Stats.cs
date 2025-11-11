@@ -285,10 +285,17 @@ namespace FinalBeansStats {
 
         public readonly string[] PublicShowIdList2 = {
             /* Keep in an alphabetical order */
+            "fb_big_yeetus_tour",
             "fb_frightful_final_ween",
+            "fb_future_fumble",
+            "fb_gauntlet_showdown",
+            "fb_gravity_scramble",
+            "fb_lily_leapers_limbo",
+            "fb_lost_temple_trials",
             "fb_mix_it_up",
             "fb_rise_of_zombeanland",
             "fb_skilled_speeders",
+            "fb_slime_survivors",
             "fb_warped_main_show"
         };
 
