@@ -1646,7 +1646,7 @@ namespace FinalBeansStats {
                 OverlayFontSerialized = string.Empty,
                 OverlayFontColorSerialized = string.Empty,
                 WinPerDayGraphStyle = 2,
-                ShowChangelog = true,
+                ShowChangelog = false,
                 IpGeolocationService = 0,
                 LevelTimeLimitVersion = 0,
                 Version = 0,
