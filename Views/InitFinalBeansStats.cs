@@ -52,7 +52,7 @@ namespace FinalBeansStats {
         }
 
         private void InitFinalBeansStats_FormClosing(object sender, FormClosingEventArgs e) {
-            // Dispose the database and exit the program (if force-closed)
+            // Dispose the database and exit the program (if force-closed or "Esc" key pressed)
             this.StatsForm.StatsDB.Dispose();
             Environment.Exit(0);
         }
@@ -62,25 +62,6 @@ namespace FinalBeansStats {
             this.DialogResult = DialogResult.OK;
             this.FormClosing -= new FormClosingEventHandler(this.InitFinalBeansStats_FormClosing);
             this.Close();
-        }
-
-        private void InitFinalBeansStats_KeyDown(object sender, KeyEventArgs e) {
-            switch (e.KeyCode) {
-                case Keys.Enter when this.ActiveControl is MetroCheckBox:
-                    this.chkAutoGenerateProfile.Checked = !this.chkAutoGenerateProfile.Checked;
-                    break;
-            }
-        }
-
-        private void InitFinalBeansStats_KeyUp(object sender, KeyEventArgs e) {
-            switch (e.KeyCode) {
-                case Keys.Tab:
-                    // Send "Alt" key to fix hightlight issue
-                    // in MetroComboBox DropDown Menu
-                    // when "Tab" key is used
-                    SendKeys.Send("%");
-                    break;
-            }
         }
 
         private void SetTheme(MetroThemeStyle theme) {
@@ -114,6 +95,18 @@ namespace FinalBeansStats {
                 }
             }
             this.ResumeLayout();
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
+            if (keyData == Keys.Enter && this.ActiveControl is MetroCheckBox) {
+                this.chkAutoGenerateProfile.Checked = !this.chkAutoGenerateProfile.Checked;
+            }
+            if (keyData == Keys.Tab) { SendKeys.Send("%"); }
+            if (keyData == Keys.Escape) {
+                this.Close();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void ChangeLanguage(Language lang) {

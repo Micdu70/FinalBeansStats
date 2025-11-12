@@ -192,8 +192,8 @@
             this.Style = MetroFramework.MetroColorStyle.Teal;
             this.Text = "Level Stats";
             this.Load += new System.EventHandler(this.LevelDetails_Load);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LevelDetails_KeyDown);
             this.Shown += new System.EventHandler(this.LevelDetails_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LevelDetails_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.gridDetails)).EndInit();
             this.ResumeLayout(false);
         }

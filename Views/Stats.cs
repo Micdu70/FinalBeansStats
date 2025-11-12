@@ -2776,7 +2776,7 @@ namespace FinalBeansStats {
             }
         }
 
-        private int GetLinkedProfileId(string realShowId, bool isPrivateLobbies) {
+        public int GetLinkedProfileId(string realShowId, bool isPrivateLobbies) {
             if (this.AllProfiles.Count == 0 || string.IsNullOrEmpty(realShowId)) return 0;
             realShowId = this.GetAlternateShowId(realShowId);
             string showId = this.GetMainGroupShowId(realShowId);

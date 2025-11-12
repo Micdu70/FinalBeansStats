@@ -28,7 +28,8 @@
             this.picEditShowsIcon = new System.Windows.Forms.PictureBox();
             this.lblEditShowsQuestion = new MetroFramework.Controls.MetroLabel();
             this.lblEditShowslabel = new MetroFramework.Controls.MetroLabel();
-            this.cboEditShows = new MetroFramework.Controls.MetroComboBox();
+            this.cboShows = new MetroFramework.Controls.MetroComboBox();
+            this.cboProfiles = new MetroFramework.Controls.MetroComboBox();
             this.lblEditShowsBackColor = new System.Windows.Forms.Label();
             this.chkUseLinkedProfiles = new MetroFramework.Controls.MetroCheckBox();
             this.btnEditShowsSave = new MetroFramework.Controls.MetroButton();
@@ -53,7 +54,7 @@
             this.lblEditShowsQuestion.Location = new System.Drawing.Point(100, 80);
             this.lblEditShowsQuestion.Name = "lblEditShowsQuestion";
             this.lblEditShowsQuestion.Size = new System.Drawing.Size(74, 19);
-            this.lblEditShowsQuestion.TabIndex = 1;
+            this.lblEditShowsQuestion.TabIndex = 0;
             this.lblEditShowsQuestion.Text = "Description";
             // 
             // lblEditShowslabel
@@ -63,20 +64,32 @@
             this.lblEditShowslabel.Location = new System.Drawing.Point(86, 137);
             this.lblEditShowslabel.Name = "lblEditShowslabel";
             this.lblEditShowslabel.Size = new System.Drawing.Size(69, 19);
-            this.lblEditShowslabel.TabIndex = 2;
-            this.lblEditShowslabel.Text = "Profile List";
+            this.lblEditShowslabel.TabIndex = 0;
+            this.lblEditShowslabel.Text = "Profile:";
             // 
-            // cboEditShows
+            // cboShows
             // 
-            this.cboEditShows.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.cboEditShows.FormattingEnabled = true;
-            this.cboEditShows.ItemHeight = 23;
-            this.cboEditShows.Location = new System.Drawing.Point(185, 132);
-            this.cboEditShows.Name = "cboEditShows";
-            this.cboEditShows.Size = new System.Drawing.Size(198, 29);
-            this.cboEditShows.TabIndex = 0;
-            this.cboEditShows.UseSelectable = true;
-            this.cboEditShows.SelectedIndexChanged += new System.EventHandler(this.cboEditShows_Changed);
+            this.cboShows.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.cboShows.FormattingEnabled = true;
+            this.cboShows.ItemHeight = 23;
+            this.cboShows.Location = new System.Drawing.Point(185, 132);
+            this.cboShows.Name = "cboShows";
+            this.cboShows.Size = new System.Drawing.Size(198, 29);
+            this.cboShows.TabIndex = 0;
+            this.cboShows.UseSelectable = true;
+            this.cboShows.SelectedIndexChanged += new System.EventHandler(this.cboShows_Changed);
+            // 
+            // cboProfiles
+            // 
+            this.cboProfiles.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.cboProfiles.FormattingEnabled = true;
+            this.cboProfiles.ItemHeight = 23;
+            this.cboProfiles.Location = new System.Drawing.Point(185, 132);
+            this.cboProfiles.Name = "cboProfiles";
+            this.cboProfiles.Size = new System.Drawing.Size(198, 29);
+            this.cboProfiles.TabIndex = 0;
+            this.cboProfiles.UseSelectable = true;
+            this.cboProfiles.SelectedIndexChanged += new System.EventHandler(this.cboProfiles_Changed);
             // 
             // lblEditShowsBackColor
             // 
@@ -84,7 +97,7 @@
             this.lblEditShowsBackColor.Location = new System.Drawing.Point(0, 200);
             this.lblEditShowsBackColor.Name = "lblEditShowsBackColor";
             this.lblEditShowsBackColor.Size = new System.Drawing.Size(445, 64);
-            this.lblEditShowsBackColor.TabIndex = 3;
+            this.lblEditShowsBackColor.TabIndex = 1;
             // 
             // chkUseLinkedProfiles
             // 
@@ -109,7 +122,7 @@
             this.btnEditShowsSave.Location = new System.Drawing.Point(238, 219);
             this.btnEditShowsSave.Name = "btnEditShowsSave";
             this.btnEditShowsSave.Size = new System.Drawing.Size(87, 26);
-            this.btnEditShowsSave.TabIndex = 1;
+            this.btnEditShowsSave.TabIndex = 2;
             this.btnEditShowsSave.Text = "Save";
             this.btnEditShowsSave.UseSelectable = true;
             this.btnEditShowsSave.Click += new System.EventHandler(this.btnEditShowsSave_Click);
@@ -121,7 +134,7 @@
             this.btnEditShowsCancel.Location = new System.Drawing.Point(337, 219);
             this.btnEditShowsCancel.Name = "btnEditShowsCancel";
             this.btnEditShowsCancel.Size = new System.Drawing.Size(87, 26);
-            this.btnEditShowsCancel.TabIndex = 2;
+            this.btnEditShowsCancel.TabIndex = 3;
             this.btnEditShowsCancel.Text = "Cancel";
             this.btnEditShowsCancel.UseSelectable = true;
             this.btnEditShowsCancel.Click += new System.EventHandler(this.btnEditShowsCancel_Click);
@@ -133,7 +146,8 @@
             this.Controls.Add(this.picEditShowsIcon);
             this.Controls.Add(this.lblEditShowsQuestion);
             this.Controls.Add(this.lblEditShowslabel);
-            this.Controls.Add(this.cboEditShows);
+            this.Controls.Add(this.cboShows);
+            this.Controls.Add(this.cboProfiles);
             this.Controls.Add(this.btnEditShowsSave);
             this.Controls.Add(this.btnEditShowsCancel);
             this.Controls.Add(this.chkUseLinkedProfiles);
@@ -160,7 +174,8 @@
         private System.Windows.Forms.PictureBox picEditShowsIcon;
         private MetroFramework.Controls.MetroLabel lblEditShowsQuestion;
         private MetroFramework.Controls.MetroLabel lblEditShowslabel;
-        private MetroFramework.Controls.MetroComboBox cboEditShows;
+        private MetroFramework.Controls.MetroComboBox cboShows;
+        private MetroFramework.Controls.MetroComboBox cboProfiles;
         private System.Windows.Forms.Label lblEditShowsBackColor;
         private MetroFramework.Controls.MetroCheckBox chkUseLinkedProfiles;
         private MetroFramework.Controls.MetroButton btnEditShowsSave;

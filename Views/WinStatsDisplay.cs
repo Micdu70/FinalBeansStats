@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using MetroFramework;
+using MetroFramework.Controls;
 using ScottPlot;
 using ScottPlot.Plottable;
 
@@ -82,10 +83,12 @@ namespace FinalBeansStats {
                 this.MyLollipopPlot2.IsVisible = false;
                 this.MyLollipopPlot3.IsVisible = false;
 
-                this.chkShows.Checked = true;
-                this.chkFinals.Checked = true;
-                this.chkWins.Checked = true;
                 this.picSwitchGraphStyle.Image = this.graphStyle == 0 ? Properties.Resources.scatter_plot_teal_icon : (this.graphStyle == 1 ? Properties.Resources.lollipop_plot_teal_icon : Properties.Resources.bar_plot_teal_icon);
+
+                this.chkWins.Checked = true;
+                this.chkFinals.Checked = true;
+                this.chkShows.Checked = true;
+
                 this.ChangeFormsPlotStyle(this.graphStyle);
             } else {
                 this.formsPlot.Refresh();
@@ -362,6 +365,16 @@ namespace FinalBeansStats {
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
+            if (keyData == Keys.Enter && this.ActiveControl is MetroCheckBox) {
+                if (string.Equals(this.ActiveControl.Name, "chkWins")) {
+                    this.chkWins.Checked = !this.chkWins.Checked;
+                } else if (string.Equals(this.ActiveControl.Name, "chkFinals")) {
+                    this.chkFinals.Checked = !this.chkFinals.Checked;
+                } else if (string.Equals(this.ActiveControl.Name, "chkShows")) {
+                    this.chkShows.Checked = !this.chkShows.Checked;
+                }
+            }
+            if (keyData == Keys.Tab) { SendKeys.Send("%"); }
             if (keyData == Keys.Escape) {
                 this.Close();
                 return true;

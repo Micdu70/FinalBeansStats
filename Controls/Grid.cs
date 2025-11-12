@@ -18,7 +18,7 @@ namespace FinalBeansStats {
         private IContainer components;
         private SaveFileDialog _saveFile;
         private ToolStripMenuItem ExportItemCsv, ExportItemHtml, ExportItemBbcode, ExportItemMd;
-        public ToolStripMenuItem DeleteShows, MoveShows, DeleteLastRound, DeleteFinishTime;
+        public ToolStripMenuItem DeleteShows, MoveShows, RenameShows, DeleteLastRound, DeleteFinishTime;
         public ToolStripSeparator MenuSeparator1, MenuSeparator2;
         private bool IsEditOnEnter, readOnly;
         private bool? allowUpdate, allowNew, allowDelete;
@@ -63,6 +63,8 @@ namespace FinalBeansStats {
                     tsi.Image = Properties.Resources.export;
                 } else if (tsi.Name.Equals("exportItemMD")) {
                     tsi.Image = Properties.Resources.export;
+                } else if (tsi.Name.Equals("renameShows")) {
+                    tsi.Image = Properties.Resources.rename;
                 } else if (tsi.Name.Equals("moveShows")) {
                     tsi.Image = Properties.Resources.move;
                 } else if (tsi.Name.Equals("deleteShows")) {
@@ -82,6 +84,8 @@ namespace FinalBeansStats {
                     tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.export : Properties.Resources.export_gray;
                 } else if (tsi.Name.Equals("exportItemMD")) {
                     tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.export : Properties.Resources.export_gray;
+                } else if (tsi.Name.Equals("renameShows")) {
+                    tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.rename : Properties.Resources.rename_gray;
                 } else if (tsi.Name.Equals("moveShows")) {
                     tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.move : Properties.Resources.move_gray;
                 } else if (tsi.Name.Equals("deleteShows")) {
@@ -111,6 +115,8 @@ namespace FinalBeansStats {
                         tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.export : Properties.Resources.export_gray;
                     } else if (tsi.Name.Equals("exportItemMD")) {
                         tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.export : Properties.Resources.export_gray;
+                    } else if (tsi.Name.Equals("renameShows")) {
+                        tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.rename : Properties.Resources.rename_gray;
                     } else if (tsi.Name.Equals("moveShows")) {
                         tsi.Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.move : Properties.Resources.move_gray;
                     } else if (tsi.Name.Equals("deleteShows")) {

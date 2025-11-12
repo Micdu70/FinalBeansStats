@@ -160,8 +160,6 @@ namespace FinalBeansStats {
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.InitFinalBeansStats_FormClosing);
             this.Load += new System.EventHandler(this.InitFinalBeansStats_Load);
             this.Shown += new System.EventHandler(this.InitFinalBeansStats_Shown);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.InitFinalBeansStats_KeyDown);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.InitFinalBeansStats_KeyUp);
             ((System.ComponentModel.ISupportInitialize)(this.picLanguageSelection)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();

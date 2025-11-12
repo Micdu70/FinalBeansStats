@@ -162,6 +162,21 @@ namespace FinalBeansStats {
                     this.gridDetails.MenuSeparator1.Paint += this.gridDetails.CustomToolStripSeparator_Paint;
                     // this.gridDetails.CMenu.Items.Add(this.gridDetails.MenuSeparator1);
 
+                    this.gridDetails.RenameShows = new ToolStripMenuItem {
+                        Name = "renameShows"
+                        , Size = new Size(134, 22)
+                        , Text = Multilingual.GetWord("main_fix_show_name")
+                        , ShowShortcutKeys = true
+                        , Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.rename : Properties.Resources.rename_gray
+                        , ShortcutKeys = Keys.Control | Keys.R
+                        , BackColor = this.Theme == MetroThemeStyle.Light ? Color.White : Color.FromArgb(17, 17, 17)
+                        , ForeColor = this.Theme == MetroThemeStyle.Light ? Color.Black : Color.DarkGray
+                    };
+                    this.gridDetails.RenameShows.Click += this.renameShows_Click;
+                    this.gridDetails.RenameShows.MouseEnter += this.gridDetails.CMenu_MouseEnter;
+                    this.gridDetails.RenameShows.MouseLeave += this.gridDetails.CMenu_MouseLeave;
+                    // this.gridDetails.CMenu.Items.Add(this.gridDetails.RenameShows);
+
                     if (this.StatsForm.AllProfiles.Count > 1) {
                         this.gridDetails.MoveShows = new ToolStripMenuItem {
                             Name = "moveShows"
@@ -169,7 +184,7 @@ namespace FinalBeansStats {
                             , Text = Multilingual.GetWord("main_move_shows")
                             , ShowShortcutKeys = true
                             , Image = this.Theme == MetroThemeStyle.Light ? Properties.Resources.move : Properties.Resources.move_gray
-                            , ShortcutKeys = Keys.Control | Keys.P
+                            , ShortcutKeys = Keys.Control | Keys.T
                             , BackColor = this.Theme == MetroThemeStyle.Light ? Color.White : Color.FromArgb(17, 17, 17)
                             , ForeColor = this.Theme == MetroThemeStyle.Light ? Color.Black : Color.DarkGray
                         };
@@ -872,7 +887,35 @@ namespace FinalBeansStats {
                 this.isHeaderClicked = false;
             }
 
-            if (this.statType != StatType.Shows) {
+            if (this.statType == StatType.Shows) {
+                if (((Grid)sender).SelectedCells.Count > 0) {
+                    if (((Grid)sender).MenuSeparator1 != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
+                        ((Grid)sender).CMenu.Items.Add(((Grid)sender).MenuSeparator1);
+                    }
+                    if (((Grid)sender).RenameShows != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).RenameShows)) {
+                        ((Grid)sender).CMenu.Items.Add(((Grid)sender).RenameShows);
+                    }
+                    if (((Grid)sender).MoveShows != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MoveShows)) {
+                        ((Grid)sender).CMenu.Items.Add(((Grid)sender).MoveShows);
+                    }
+                    if (((Grid)sender).DeleteShows != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteShows)) {
+                        ((Grid)sender).CMenu.Items.Add(((Grid)sender).DeleteShows);
+                    }
+                } else {
+                    if (((Grid)sender).MenuSeparator1 != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
+                        ((Grid)sender).CMenu.Items.Remove(((Grid)sender).MenuSeparator1);
+                    }
+                    if (((Grid)sender).RenameShows != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).RenameShows)) {
+                        ((Grid)sender).CMenu.Items.Remove(((Grid)sender).RenameShows);
+                    }
+                    if (((Grid)sender).MoveShows != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).MoveShows)) {
+                        ((Grid)sender).CMenu.Items.Remove(((Grid)sender).MoveShows);
+                    }
+                    if (((Grid)sender).DeleteShows != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteShows)) {
+                        ((Grid)sender).CMenu.Items.Remove(((Grid)sender).DeleteShows);
+                    }
+                }
+            } else {
                 if (((Grid)sender).MenuSeparator1 != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
                     ((Grid)sender).CMenu.Items.Remove(((Grid)sender).MenuSeparator1);
                 }
@@ -904,28 +947,6 @@ namespace FinalBeansStats {
                         ((Grid)sender).ClearSelection();
                     }
                 }
-            } else if (this.statType == StatType.Shows) {
-                if (((Grid)sender).SelectedCells.Count > 0) {
-                    if (((Grid)sender).MenuSeparator1 != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
-                        ((Grid)sender).CMenu.Items.Add(((Grid)sender).MenuSeparator1);
-                    }
-                    if (((Grid)sender).MoveShows != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MoveShows)) {
-                        ((Grid)sender).CMenu.Items.Add(((Grid)sender).MoveShows);
-                    }
-                    if (((Grid)sender).DeleteShows != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteShows)) {
-                        ((Grid)sender).CMenu.Items.Add(((Grid)sender).DeleteShows);
-                    }
-                } else {
-                    if (((Grid)sender).MenuSeparator1 != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
-                        ((Grid)sender).CMenu.Items.Remove(((Grid)sender).MenuSeparator1);
-                    }
-                    if (((Grid)sender).MoveShows != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).MoveShows)) {
-                        ((Grid)sender).CMenu.Items.Remove(((Grid)sender).MoveShows);
-                    }
-                    if (((Grid)sender).DeleteShows != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).DeleteShows)) {
-                        ((Grid)sender).CMenu.Items.Remove(((Grid)sender).DeleteShows);
-                    }
-                }
             }
         }
 
@@ -945,6 +966,7 @@ namespace FinalBeansStats {
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
+            if (keyData == Keys.Tab) { SendKeys.Send("%"); }
             if (keyData == Keys.Escape) {
                 this.Close();
                 return true;
@@ -1008,6 +1030,63 @@ namespace FinalBeansStats {
                                 Stats.IsOverlayRoundInfoNeedRefresh = true;
                             });
                         });
+                    }
+                }
+            }
+        }
+
+        private void renameShows_Click(object sender, EventArgs e) {
+            int selectedCount = this.gridDetails.SelectedRows.Count;
+            if (selectedCount > 0) {
+                using (EditShows renameShows = new EditShows()) {
+                    renameShows.StatsForm = this.StatsForm;
+                    renameShows.AllStats = this.StatsForm.AllStats;
+                    renameShows.FunctionFlag = "rename";
+                    renameShows.SelectedCount = selectedCount;
+                    renameShows.Icon = this.Icon;
+                    if (renameShows.ShowDialog(this) == DialogResult.OK) {
+                        this.gridDetails.Enabled = false;
+                        this.spinnerTransition.Start();
+                        this.BackMaxSize = 0;
+                        this.mpsSpinner01.Visible = true;
+                        lock (this.StatsForm.StatsDB) {
+                            Task.Run(() => {
+                                Task renameShowsTask = new Task(() => {
+                                    this.StatsForm.StatsDB.BeginTrans();
+                                    foreach (DataGridViewRow row in this.gridDetails.SelectedRows) {
+                                        RoundInfo bi = row.DataBoundItem as RoundInfo;
+                                        List<RoundInfo> ri = this.StatsForm.AllStats.FindAll(r => r.ShowID == bi.ShowID);
+                                        foreach (RoundInfo r in ri) {
+                                            r.ShowName = renameShows.SelectedShowName;
+                                            r.ShowNameId = renameShows.SelectedShowNameId;
+                                            if (renameShows.UseLinkedProfiles) {
+                                                r.Profile = this.StatsForm.GetLinkedProfileId(renameShows.SelectedShowNameId, r.PrivateLobby);
+                                            }
+                                        }
+                                        this.StatsForm.RoundDetails.Update(ri);
+                                    }
+                                    this.StatsForm.StatsDB.Commit();
+                                });
+                                this.StatsForm.RunDatabaseTask(renameShowsTask, false);
+                            }).ContinueWith(prevTask => {
+                                this.BeginInvoke((MethodInvoker)delegate {
+                                    this.RoundDetails = this.StatsForm.GetShowsForDisplay();
+                                    this.totalPages = (int)Math.Ceiling(this.RoundDetails.Count / (float)this.pageSize);
+                                    if (this.currentPage > this.totalPages) {
+                                        this.currentPage = this.totalPages;
+                                    }
+                                    this.UpdateGridPage(this.currentPage <= 1, this.currentPage >= this.totalPages, FirstDisplayedScrollingRowIndex.PrevIndex, false);
+
+                                    this.gridDetails.Enabled = true;
+                                    this.spinnerTransition.Stop();
+                                    this.mpsSpinner01.Visible = false;
+                                    this.BackMaxSize = 32;
+
+                                    this.StatsForm.ResetStats();
+                                    Stats.IsOverlayRoundInfoNeedRefresh = true;
+                                });
+                            });
+                        }
                     }
                 }
             }
@@ -1141,6 +1220,7 @@ namespace FinalBeansStats {
                                     this.StatsForm.StatsDB.BeginTrans();
                                     this.StatsForm.RoundDetails.Update(roundInfoList);
                                     this.StatsForm.RoundDetails.DeleteMany(r => r.ShowID == ri.ShowID && r.Round == ri.Round);
+                                    this.StatsForm.AllStats.RemoveAll(r => r.ShowID == ri.ShowID && r.Round == ri.Round);
                                     this.StatsForm.StatsDB.Commit();
                                 });
                                 this.StatsForm.RunDatabaseTask(deleteLastRoundTask, false);

@@ -210,6 +210,7 @@ namespace FinalBeansStats {
         }
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
+            if (keyData == Keys.Tab) { SendKeys.Send("%"); }
             if (keyData == Keys.Escape) {
                 this.Close();
                 return true;
