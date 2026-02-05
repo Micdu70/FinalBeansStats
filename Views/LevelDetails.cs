@@ -809,7 +809,7 @@ namespace FinalBeansStats {
                         string showNameOne = one.ShowName ?? one.ShowNameId;
                         string showNameTwo = two.ShowName ?? two.ShowNameId;
                         int showNameCompare = showNameOne.CompareTo(showNameTwo);
-                        return showNameCompare != 0 ? showNameCompare : roundCompare;
+                        return showNameCompare != 0 ? showNameCompare : showCompare == 0 ? roundCompare : showCompare;
                     case "Round":
                         roundCompare = one.Round.CompareTo(two.Round);
                         return roundCompare != 0 ? roundCompare : showCompare;
