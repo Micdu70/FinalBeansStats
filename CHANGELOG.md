@@ -1,3 +1,6 @@
+## v1.6
+- Add: New FinalBeans season in "Custom period" filter
+- General bug fixes && improvements
 ## v1.5
 - New: Added an option to fix the show name of one (or multiple) show(s)
 - Fix: Wrong "End" time for survival rounds (in some cases)

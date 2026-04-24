@@ -120,6 +120,7 @@ namespace FinalBeansStats {
             ("FS1-1.0.X", new DateTime(2025, 8, 14, 0, 0, 0, DateTimeKind.Utc)),     // Season 1
             ("FS2-2.0.0", new DateTime(2025, 10, 23, 0, 0, 0, DateTimeKind.Utc)),    // Season 2 (Frightful Final-Ween) { Broken Physics }
             ("FS2-2.0.1", new DateTime(2025, 10, 26, 0, 0, 0, DateTimeKind.Utc)),    // Season 2 (Frightful Final-Ween) { Fixed Physics }
+            ("FS3-3.0.X", new DateTime(2026, 4, 24, 0, 0, 0, DateTimeKind.Utc)),     // Season 3 (Builder Brigade)
         };
         private static DateTime SeasonStart, WeekStart, DayStart;
         private static DateTime SessionStart = DateTime.UtcNow;
@@ -273,7 +274,7 @@ namespace FinalBeansStats {
 
         private readonly int currentGlobalDbVersion = 0;
 
-        private readonly int currentSettingsVersionFB = 3;
+        private readonly int currentSettingsVersionFB = 4;
 
         /* -------------------------------------------------------- */
 
@@ -286,6 +287,7 @@ namespace FinalBeansStats {
         public readonly string[] PublicShowIdList2 = {
             /* Keep in an alphabetical order */
             "fb_big_yeetus_tour",
+            "fb_builder_s_main_show",
             "fb_frightful_final_ween",
             "fb_future_fumble",
             "fb_gauntlet_showdown",
@@ -293,6 +295,8 @@ namespace FinalBeansStats {
             "fb_lily_leapers_limbo",
             "fb_lost_temple_trials",
             "fb_mix_it_up",
+            "fb_placeholder",
+            "fb_refurb_rumble",
             "fb_rise_of_zombeanland",
             "fb_skilled_speeders",
             "fb_slime_survivors",
@@ -427,9 +431,12 @@ namespace FinalBeansStats {
                             List<LevelTimeLimit> newList = new List<LevelTimeLimit>();
                             foreach (var roundpool in levelTimeLimit.data.roundpools) {
                                 foreach (var level in roundpool.levels) {
-                                    newList.Add(new LevelTimeLimit { LevelId = level.id, Duration = level.duration });
+                                    if (!newList.Any(l => string.Equals(l.LevelId, level.id))) {
+                                        newList.Add(new LevelTimeLimit { LevelId = level.id, Duration = level.duration });
+                                    }
                                 }
                             }
+                            this.LevelTimeLimitCache.Clear();
                             this.LevelTimeLimitCache = newList;
 
                             lock (this.StatsDB) {
@@ -1478,6 +1485,36 @@ namespace FinalBeansStats {
         private void UpdateDatabase() {
             for (int version = this.CurrentSettings.Version_FB; version < currentSettingsVersionFB; version++) {
                 switch (version) {
+                    case 3: {
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             where string.Equals(ri.ShowName, "Lost Temple Trials")
+                                                             select ri).ToList();
+
+                            foreach (RoundInfo ri in roundInfoList) {
+                                ri.ShowName = "LOST TEMPLE TRIALS";
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.StatsDB.Commit();
+
+                            bool isProfileUpdated = false;
+                            this.AllProfiles.AddRange(this.Profiles.FindAll());
+                            for (int i = this.AllProfiles.Count - 1; i >= 0; i--) {
+                                Profiles profile = this.AllProfiles[i];
+                                if (string.Equals(profile.ProfileName, "Lost Temple Trials")) {
+                                    profile.ProfileName = "LOST TEMPLE TRIALS";
+                                    isProfileUpdated = true;
+                                }
+                            }
+                            if (isProfileUpdated) {
+                                this.StatsDB.BeginTrans();
+                                this.Profiles.DeleteAll();
+                                this.Profiles.InsertBulk(this.AllProfiles);
+                                this.StatsDB.Commit();
+                            }
+                            this.AllProfiles.Clear();
+                            break;
+                        }
                     case 2: {
                             List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
                                                              select ri).ToList();
