@@ -1,3 +1,5 @@
+## v1.7
+- Add: Support for "Fall Mountain Trials" show
 ## v1.6
 - Add: New FinalBeans season in "Custom period" filter
 - General bug fixes && improvements

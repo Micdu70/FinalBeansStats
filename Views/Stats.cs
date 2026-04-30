@@ -274,7 +274,7 @@ namespace FinalBeansStats {
 
         private readonly int currentGlobalDbVersion = 0;
 
-        private readonly int currentSettingsVersionFB = 4;
+        private readonly int currentSettingsVersionFB = 5;
 
         /* -------------------------------------------------------- */
 
@@ -286,8 +286,10 @@ namespace FinalBeansStats {
 
         public readonly string[] PublicShowIdList2 = {
             /* Keep in an alphabetical order */
+            "fb_3_2_1__space",
             "fb_big_yeetus_tour",
             "fb_builder_s_main_show",
+            "fb_fall_mountain_trials",
             "fb_frightful_final_ween",
             "fb_future_fumble",
             "fb_gauntlet_showdown",
@@ -1485,6 +1487,23 @@ namespace FinalBeansStats {
         private void UpdateDatabase() {
             for (int version = this.CurrentSettings.Version_FB; version < currentSettingsVersionFB; version++) {
                 switch (version) {
+                    case 4: {
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             select ri).ToList();
+
+                            foreach (RoundInfo ri in roundInfoList) {
+                                if (ri.Name.StartsWith("round_fall_mountain", StringComparison.OrdinalIgnoreCase)) {
+                                    ri.Name = "round_fall_mountain";
+                                }
+                                if (ri.RoundId.IndexOf("round_fall_mountain_trials", StringComparison.OrdinalIgnoreCase) != -1) {
+                                    ri.IsFinal = ri.RoundId.EndsWith("_03", StringComparison.OrdinalIgnoreCase);
+                                }
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.StatsDB.Commit();
+                            break;
+                        }
                     case 3: {
                             List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
                                                              where string.Equals(ri.ShowName, "Lost Temple Trials")
