@@ -2805,15 +2805,20 @@ namespace FinalBeansStats {
                 /*
                 case "ranked_show_knockout":
                 case "xtreme_solos_template_ranked":
+                case "event_only_finals_v3_ranked":
+                case "event_only_roll_out_ranked":
+                case "event_only_button_bashers_ranked":
                     return "ranked_solo_show";
                 case "event_only_fall_ball_trios_ranked":
                     return "ranked_trios_show";
                 case "greatestsquads_ranked":
+                case "event_xtreme_squads_template_ranked":
                     return "ranked_squads_show";
                 // case "anniversary_fp12_ltm":
                 case "classic_solo_main_show":
                 case "ftue_uk_show":
                 case "knockout_mode":
+                case "reversed_knockout_show":
                 case "no_elimination_explore":
                 case "event_only_races_any_final_template":
                 case "turbo_2_show":
@@ -3397,15 +3402,15 @@ namespace FinalBeansStats {
                     break;
                 case "Qualified":
                     sizeOfText = TextRenderer.MeasureText(columnText, this.dataGridViewCellStyle1.Font).Width;
-                    sizeOfText += CurrentLanguage == Language.English || CurrentLanguage == Language.French ? 0 : 5;
+                    sizeOfText += CurrentLanguage == Language.English || CurrentLanguage == Language.French || CurrentLanguage == Language.Spanish ? 0 : 5;
                     break;
                 case "Gold":
                     sizeOfText = TextRenderer.MeasureText(columnText, this.dataGridViewCellStyle1.Font).Width;
-                    sizeOfText += CurrentLanguage == Language.French ? 12 : CurrentLanguage == Language.SimplifiedChinese || CurrentLanguage == Language.TraditionalChinese ? 5 : 0;
+                    sizeOfText += CurrentLanguage == Language.French ? 12 : CurrentLanguage == Language.Spanish ? 10 : CurrentLanguage == Language.SimplifiedChinese || CurrentLanguage == Language.TraditionalChinese ? 5 : 0;
                     break;
                 case "Silver":
                     sizeOfText = TextRenderer.MeasureText(columnText, this.dataGridViewCellStyle1.Font).Width;
-                    sizeOfText += CurrentLanguage == Language.SimplifiedChinese || CurrentLanguage == Language.TraditionalChinese ? 5 : 0;
+                    sizeOfText += CurrentLanguage == Language.Spanish || CurrentLanguage == Language.SimplifiedChinese || CurrentLanguage == Language.TraditionalChinese ? 5 : 0;
                     break;
                 case "Bronze":
                     sizeOfText = TextRenderer.MeasureText(columnText, this.dataGridViewCellStyle1.Font).Width;
@@ -4998,7 +5003,7 @@ namespace FinalBeansStats {
         }
 
         private void SetMinimumSize() {
-            this.MinimumSize = new Size(CurrentLanguage == Language.English || CurrentLanguage == Language.French ? 905 :
+            this.MinimumSize = new Size(CurrentLanguage == Language.English || CurrentLanguage == Language.French || CurrentLanguage == Language.Spanish ? 905 :
                                         CurrentLanguage == Language.Korean ? 740 :
                                         CurrentLanguage == Language.Japanese ? 835 : 715
                                         , 350);

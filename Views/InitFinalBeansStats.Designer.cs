@@ -52,6 +52,7 @@ namespace FinalBeansStats {
             this.cboLanguage.Items.AddRange(new object[] {
             "🇺🇸 English",
             "🇫🇷 Français",
+            "🇪🇸 Español",
             "🇰🇷 한국어",
             "🇯🇵 日本語",
             "🇨🇳 简体中文",

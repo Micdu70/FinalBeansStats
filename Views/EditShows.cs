@@ -284,6 +284,12 @@ namespace FinalBeansStats {
                 this.cboProfiles.Left = 140;
                 //this.cboProfiles.Size = new Size(198, 29);
                 this.lblEditShowsBackColor.Width = 525;
+            } else if (Stats.CurrentLanguage == Language.Spanish) {
+                this.Width = 525;
+                this.cboShows.Left = 220;
+                this.cboProfiles.Left = 140;
+                //this.cboProfiles.Size = new Size(198, 29);
+                this.lblEditShowsBackColor.Width = 525;
             } else if (Stats.CurrentLanguage == Language.Korean) {
                 this.Width = 445;
                 this.cboShows.Left = 180;

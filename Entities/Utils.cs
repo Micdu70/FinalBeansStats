@@ -402,6 +402,8 @@ namespace FinalBeansStats {
                     case 1: return number + "er";
                     default: return number + "e";
                 }
+            } else if (Stats.CurrentLanguage == Language.Spanish) {
+                return number + "°";
             } else if (Stats.CurrentLanguage == Language.Korean) {
                 return number + "위";
             } else if (Stats.CurrentLanguage == Language.Japanese) {
@@ -430,6 +432,8 @@ namespace FinalBeansStats {
             switch (Stats.CurrentLanguage) {
                 case Language.French:
                     return $"Semaine {week}, {year}";
+                case Language.Spanish:
+                    return $"Semana {week}, {year}";
                 case Language.Korean:
                     return $"{year}년 {week}주차";
                 case Language.Japanese:
@@ -462,6 +466,8 @@ namespace FinalBeansStats {
             switch (Stats.CurrentLanguage) {
                 case Language.French:
                     return $"{start.ToString(GetDateFormat(), GetCultureInfo())} - {end.ToString(GetDateFormat(), GetCultureInfo())}";
+                case Language.Spanish:
+                    return $"{start.ToString(GetDateFormat(), GetCultureInfo())} - {end.ToString(GetDateFormat(), GetCultureInfo())}";
                 case Language.Korean:
                     return $"{start.ToString(GetDateFormat(), GetCultureInfo())} - {end.ToString(GetDateFormat(), GetCultureInfo())}";
                 case Language.Japanese:
@@ -479,6 +485,7 @@ namespace FinalBeansStats {
             switch (Stats.CurrentLanguage) {
                 case Language.English: return "MMM dd, yyyy";
                 case Language.French: return "d MMM yyyy";
+                case Language.Spanish: return "d de MMMM de yyyy";
                 case Language.Korean: return "yyyy년 M월 d일";
                 case Language.Japanese: return "yyyy年M月d日";
                 case Language.SimplifiedChinese: return "yyyy年M月d日";
@@ -491,6 +498,7 @@ namespace FinalBeansStats {
             switch (Stats.CurrentLanguage) {
                 case Language.English: return new CultureInfo("en-US");
                 case Language.French: return new CultureInfo("fr-FR");
+                case Language.Spanish: return new CultureInfo("es-ES");
                 case Language.Korean: return new CultureInfo("ko-KR");
                 case Language.Japanese: return new CultureInfo("ja-JP");
                 case Language.SimplifiedChinese: return new CultureInfo("zh-CN");

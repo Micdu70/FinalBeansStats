@@ -16,6 +16,7 @@ namespace FinalBeansStats {
 
         public InitFinalBeansStats(string sysLang) {
             this.defaultLanguage = string.Equals(sysLang, "fr", StringComparison.OrdinalIgnoreCase) ? Language.French :
+                                   string.Equals(sysLang, "es", StringComparison.OrdinalIgnoreCase) ? Language.Spanish :
                                    string.Equals(sysLang, "ko", StringComparison.OrdinalIgnoreCase) ? Language.Korean :
                                    string.Equals(sysLang, "ja", StringComparison.OrdinalIgnoreCase) ? Language.Japanese :
                                    string.Equals(sysLang, "zh-chs", StringComparison.OrdinalIgnoreCase) ? Language.SimplifiedChinese :
