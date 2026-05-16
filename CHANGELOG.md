@@ -1,3 +1,5 @@
+## v1.8
+- Fix: Final round detection for "Skilled Speeders" show
 ## v1.7
 - Add: Support for "Fall Mountain Trials" show
 ## v1.6
