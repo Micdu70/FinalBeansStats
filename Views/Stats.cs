@@ -274,7 +274,7 @@ namespace FinalBeansStats {
 
         private readonly int currentGlobalDbVersion = 0;
 
-        private readonly int currentSettingsVersionFB = 5;
+        private readonly int currentSettingsVersionFB = 6;
 
         /* -------------------------------------------------------- */
 
@@ -298,11 +298,14 @@ namespace FinalBeansStats {
             "fb_lost_temple_trials",
             "fb_mix_it_up",
             "fb_placeholder",
+            "fb_random_rumble",
             "fb_refurb_rumble",
             "fb_rise_of_zombeanland",
             "fb_skilled_speeders",
             "fb_slime_survivors",
-            "fb_warped_main_show"
+            "fb_slimescraper_time",
+            "fb_warped_main_show",
+            "fb_x_treme_solos"
         };
 
         public void RunDatabaseTask(Task task, bool runAsync) {
@@ -1487,6 +1490,20 @@ namespace FinalBeansStats {
         private void UpdateDatabase() {
             for (int version = this.CurrentSettings.Version_FB; version < currentSettingsVersionFB; version++) {
                 switch (version) {
+                    case 5: {
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             select ri).ToList();
+
+                            foreach (RoundInfo ri in roundInfoList) {
+                                if (this.IsSkilledSpeedersShow(ri.RoundId)) {
+                                    ri.IsFinal = true;
+                                }
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.StatsDB.Commit();
+                            break;
+                        }
                     case 4: {
                             List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
                                                              select ri).ToList();
@@ -2756,6 +2773,8 @@ namespace FinalBeansStats {
 
         public string GetAlternateShowId(string showId) {
             switch (showId) {
+                // Fall Guys Stuff
+                /*
                 case "event_day_at_the_races_ltm":
                     return "event_only_races_any_final_template";
                 case "event_le_anchovy_private_lobbies":
@@ -2774,6 +2793,7 @@ namespace FinalBeansStats {
                     return "classic_solo_main_show";
                 case "pl_squads_show":
                     return "classic_squads_show";
+                */
                 default:
                     return showId;
             }
@@ -2830,6 +2850,25 @@ namespace FinalBeansStats {
                 default:
                     return !string.Equals(showId, "fb_main_show") ? "fb_ltm" : "fb_main_show";
             }
+        }
+
+        public bool IsSkilledSpeedersShow(string roundId) {
+            return string.Equals(roundId, "round_shortcircuit_final")
+                   || string.Equals(roundId, "round_gauntlet_01_final")
+                   || string.Equals(roundId, "round_lava_event_only_slime_climb_final")
+                   || string.Equals(roundId, "round_slimeclimb_2_event_only_final")
+                   || string.Equals(roundId, "round_gauntlet_09_final")
+                   || string.Equals(roundId, "round_gauntlet_10_final")
+                   || string.Equals(roundId, "round_satellitehoppers_final")
+                   || string.Equals(roundId, "round_hallow_heights_final")
+                   || string.Equals(roundId, "round_slide_chute_final")
+                   || string.Equals(roundId, "round_drumtop_event_only_final")
+                   || string.Equals(roundId, "round_gauntlet_02_final")
+                   || string.Equals(roundId, "round_gauntlet_04_final")
+                   || string.Equals(roundId, "round_gauntlet_05_final")
+                   || string.Equals(roundId, "round_gauntlet_06_final")
+                   || string.Equals(roundId, "round_gauntlet_07_final")
+                   || string.Equals(roundId, "round_gauntlet_08_final");
         }
 
         public int GetLinkedProfileId(string realShowId, bool isPrivateLobbies) {

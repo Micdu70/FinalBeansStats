@@ -352,20 +352,23 @@ namespace FinalBeansStats {
         }
 
         private bool IsRealFinalRound(int roundNum, string roundId, string showId) {
+            /*
             if ((showId.StartsWith("knockout_fp") && showId.EndsWith("_srs"))
-                 || (showId.StartsWith("show_wle_s10_") && showId.IndexOf("_srs", StringComparison.OrdinalIgnoreCase) != -1)
-                 || showId.IndexOf("wle_s10_player_round_", StringComparison.OrdinalIgnoreCase) != -1
-                 || showId.StartsWith("wle_mrs_shuffle_")
-                 || showId.StartsWith("wle_shuffle_")
-                 || showId.StartsWith("current_wle_fp")
-                 || showId.StartsWith("wle_s10_cf_round_")
-                 || string.Equals(showId, "wle_playful_shuffle")
-                 || (showId.StartsWith("event_") && showId.EndsWith("_fools") && roundId.StartsWith("wle_shuffle_"))
-                 || (string.Equals(showId, "anniversary_fp12_ltm") && roundNum == 10)
+                || (showId.StartsWith("show_wle_s10_") && showId.IndexOf("_srs", StringComparison.OrdinalIgnoreCase) != -1)
+                || showId.IndexOf("wle_s10_player_round_", StringComparison.OrdinalIgnoreCase) != -1
+                || showId.StartsWith("wle_mrs_shuffle_")
+                || showId.StartsWith("wle_shuffle_")
+                || showId.StartsWith("current_wle_fp")
+                || showId.StartsWith("wle_s10_cf_round_")
+                || string.Equals(showId, "wle_playful_shuffle")
+                || (showId.StartsWith("event_") && showId.EndsWith("_fools") && roundId.StartsWith("wle_shuffle_"))
+                || (string.Equals(showId, "anniversary_fp12_ltm") && roundNum == 10)
 
-                 || string.Equals(showId, "fb_skilled_speeders")) {
+                  // SHOW ID IS NOT VISIBLE IN FINALBEANS LOGS!
+                || string.Equals(showId, "fb_skilled_speeders")) {
                 return true;
             }
+            */
 
             return (roundId.IndexOf("round_jinxed", StringComparison.OrdinalIgnoreCase) != -1
                         && roundId.IndexOf("_non_final", StringComparison.OrdinalIgnoreCase) == -1
@@ -404,6 +407,10 @@ namespace FinalBeansStats {
                     || (roundId.IndexOf("_squads_squadcelebration", StringComparison.OrdinalIgnoreCase) != -1
                         && roundId.EndsWith("_final", StringComparison.OrdinalIgnoreCase))
 
+                    // "Skilled Speeders" Show
+                    || this.StatsForm.IsSkilledSpeedersShow(roundId);
+
+                    /*
                     || (string.Equals(showId, "event_animals_template")
                         && roundNum == 4)
 
@@ -460,21 +467,24 @@ namespace FinalBeansStats {
                         && (roundNum == 3 || string.Equals(roundId, "logroll_nature_ltm")))
 
                     || (showId.StartsWith("greatestsquads_")
-                        && (roundNum == 3 || string.Equals(roundId, "gs_slimecycle")))
+                        && (roundNum == 3 || string.Equals(roundId, "gs_slimecycle")));
+                    */
 
-                    // "Knockout" Shows
-                    || (showId.StartsWith("knockout_")
-                        && (string.Equals(roundId, "knockout_rotateandeliminate")
-                            || string.Equals(roundId, "knockout_gooprope_rodeo")
-                            || string.Equals(roundId, "knockout_slimeballshowdown")
-                            || string.Equals(roundId, "knockout_blunderblocks")
-                            || string.Equals(roundId, "knockout_pier_pressure")
-                            || string.Equals(roundId, "round_fp17_knockout_castlesiege")
-                            || string.Equals(roundId, "round_fp17_knockout_gardenpardon")
-                            || (!string.Equals(roundId, "knockout_fp10_final_8")
-                                && roundId.StartsWith("knockout_", StringComparison.OrdinalIgnoreCase)
-                                && (roundId.EndsWith("_opener_4", StringComparison.OrdinalIgnoreCase)
-                                    || roundId.IndexOf("_final", StringComparison.OrdinalIgnoreCase) != -1))));
+            /*
+            // "Knockout" Shows
+            || (showId.StartsWith("knockout_")
+                && (string.Equals(roundId, "knockout_rotateandeliminate")
+                    || string.Equals(roundId, "knockout_gooprope_rodeo")
+                    || string.Equals(roundId, "knockout_slimeballshowdown")
+                    || string.Equals(roundId, "knockout_blunderblocks")
+                    || string.Equals(roundId, "knockout_pier_pressure")
+                    || string.Equals(roundId, "round_fp17_knockout_castlesiege")
+                    || string.Equals(roundId, "round_fp17_knockout_gardenpardon")
+                    || (!string.Equals(roundId, "knockout_fp10_final_8")
+                        && roundId.StartsWith("knockout_", StringComparison.OrdinalIgnoreCase)
+                        && (roundId.EndsWith("_opener_4", StringComparison.OrdinalIgnoreCase)
+                            || roundId.IndexOf("_final", StringComparison.OrdinalIgnoreCase) != -1))));
+            */
         }
 
         private bool IsModeException(string roundId, string showId) {
@@ -509,9 +519,14 @@ namespace FinalBeansStats {
                    || roundId.IndexOf("round_crown_maze_trials", StringComparison.OrdinalIgnoreCase) != -1
                    || roundId.IndexOf("round_fall_mountain_trials", StringComparison.OrdinalIgnoreCase) != -1;
 
-                   // || string.Equals(showId, "event_blast_ball_banger_template")
-                   // || showId.StartsWith("knockout_")
-                   // || showId.StartsWith("ranked_"); // "Ranked Knockout" Show
+                   /*
+                   || string.Equals(showId, "event_blast_ball_banger_template")
+                   */
+
+                   /*
+                   || showId.StartsWith("knockout_")
+                   || showId.StartsWith("ranked_"); // "Ranked Knockout" Show
+                   */
         }
 
         private bool IsModeFinalException(string roundId) {
@@ -552,19 +567,23 @@ namespace FinalBeansStats {
                      || (roundId.IndexOf("round_crown_maze_trials", StringComparison.OrdinalIgnoreCase) != -1
                          && roundId.EndsWith("_3", StringComparison.OrdinalIgnoreCase));
 
-                     // || string.Equals(roundId, "round_blastball_arenasurvival_blast_ball_banger");
+                     /*
+                     || string.Equals(roundId, "round_blastball_arenasurvival_blast_ball_banger")
+                     */
 
+                     /*
                      // "Knockout" Shows
-                     // string.Equals(roundId, "round_fp17_knockout_castlesiege")
-                     // string.Equals(roundId, "round_fp17_knockout_gardenpardon")
-                     // (!string.Equals(roundId, "knockout_fp10_final_8")
-                     //  && roundId.StartsWith("knockout_", StringComparison.OrdinalIgnoreCase)
-                     //  && (roundId.EndsWith("_opener_4", StringComparison.OrdinalIgnoreCase)
-                     //      || roundId.IndexOf("_final", StringComparison.OrdinalIgnoreCase) != -1))
+                     string.Equals(roundId, "round_fp17_knockout_castlesiege")
+                     string.Equals(roundId, "round_fp17_knockout_gardenpardon")
+                     (!string.Equals(roundId, "knockout_fp10_final_8")
+                      && roundId.StartsWith("knockout_", StringComparison.OrdinalIgnoreCase)
+                      && (roundId.EndsWith("_opener_4", StringComparison.OrdinalIgnoreCase)
+                          || roundId.IndexOf("_final", StringComparison.OrdinalIgnoreCase) != -1))
 
                      // "Ranked Knockout" Show
-                     // || (roundId.StartsWith("ranked_", StringComparison.OrdinalIgnoreCase)
-                     //     && roundId.EndsWith("_final", StringComparison.OrdinalIgnoreCase));
+                     || (roundId.StartsWith("ranked_", StringComparison.OrdinalIgnoreCase)
+                         && roundId.EndsWith("_final", StringComparison.OrdinalIgnoreCase))
+                     */
         }
 
         private bool IsTeamException(string roundId) {
