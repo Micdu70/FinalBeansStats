@@ -18,6 +18,7 @@ namespace FinalBeansStats {
         public string FunctionFlag = string.Empty;
         public int SelectedCount = 0;
         public bool UseLinkedProfiles;
+        public bool AskedPreviousShows;
         public EditShows() {
             this.InitializeComponent();
             this.Opacity = 0;
@@ -34,7 +35,7 @@ namespace FinalBeansStats {
 
                 List<string> addedShowList = new List<string>();
                 foreach (string showId in this.StatsForm.PublicShowIdList) {
-                    if (!string.Equals(showId, "fb_ltm")) {
+                    if (!string.Equals(showId, "ltm_show")) {
                         Shows.Add(Multilingual.GetShowName(showId), showId);
                     }
                     addedShowList.Add(showId);
@@ -188,7 +189,10 @@ namespace FinalBeansStats {
             this.Visible = false;
             switch (this.FunctionFlag) {
                 case "add":
-                    if (this.UseLinkedProfiles) {
+                    if (this.AskedPreviousShows) {
+                        this.DialogResult = DialogResult.OK;
+                        this.Close();
+                    } else if (this.UseLinkedProfiles) {
                         if (Messenger.MessageBox($"{Multilingual.GetWord("message_save_data_linked_profiles")}{Environment.NewLine}{Multilingual.GetWord("message_save_data_linked_profiles_info_prefix")} ({this.cboProfiles.SelectedItem}) {Multilingual.GetWord("message_save_data_linked_profiles_info_suffix")}",
                                                  $"{Multilingual.GetWord("message_save_data_caption")}",
                                 MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {

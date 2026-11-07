@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -23,12 +24,25 @@ namespace FinalBeansStats {
                                    string.Equals(sysLang, "zh-cht", StringComparison.OrdinalIgnoreCase) ? Language.TraditionalChinese : Language.English;
             this.InitializeComponent();
             this.Opacity = 0;
+            this.cboLanguage.MouseWheel += (o, e) => ((HandledMouseEventArgs)e).Handled = true;
         }
 
         private void InitFinalBeansStats_Load(object sender, EventArgs e) {
-            this.cboLanguage.SelectedIndex = (int)this.defaultLanguage;
             this.SetTheme(Stats.CurrentTheme);
+
             this.ChangeLanguage(this.defaultLanguage);
+
+            List<ImageItem> flagItemArray = new List<ImageItem> {
+                new ImageItem(Properties.Resources.country_us_shiny_icon, "English", Overlay.GetMainFont(14f)),
+                new ImageItem(Properties.Resources.country_fr_shiny_icon, "Français", Overlay.GetMainFont(14f)),
+                new ImageItem(Properties.Resources.country_es_shiny_icon, "Español", Overlay.GetMainFont(14f)),
+                new ImageItem(Properties.Resources.country_kr_shiny_icon, "한국어", Overlay.GetMainFont(14f)),
+                new ImageItem(Properties.Resources.country_jp_shiny_icon, "日本語", Overlay.GetMainFont(14f)),
+                new ImageItem(Properties.Resources.country_cn_shiny_icon, "简体中文", Overlay.GetMainFont(14f)),
+                new ImageItem(Properties.Resources.country_cn_shiny_icon, "繁體中文", Overlay.GetMainFont(14f)),
+            };
+            this.cboLanguage.SetImageItemData(flagItemArray);
+            this.cboLanguage.SelectedIndex = (int)this.defaultLanguage;
         }
 
         private void InitFinalBeansStats_Shown(object sender, EventArgs e) {
@@ -69,30 +83,14 @@ namespace FinalBeansStats {
             this.SuspendLayout();
             this.Theme = theme;
             foreach (Control c1 in Controls) {
-                if (c1 is MetroLabel ml1) {
-                    ml1.Theme = theme;
-                } else if (c1 is MetroTextBox mtb1) {
+                if (c1 is MetroTextBox mtb1) {
                     mtb1.Theme = theme;
                 } else if (c1 is MetroButton mb1) {
                     mb1.Theme = theme;
                 } else if (c1 is MetroCheckBox mcb1) {
                     mcb1.Theme = theme;
-                } else if (c1 is MetroRadioButton mrb1) {
-                    mrb1.Theme = theme;
-                } else if (c1 is MetroComboBox mcbo1) {
-                    mcbo1.Theme = theme;
-                } else if (c1 is MetroDateTime mdt1) {
-                    mdt1.Theme = theme;
-                } else if (c1 is GroupBox gb1) {
-                    gb1.ForeColor = theme == MetroThemeStyle.Light ? Color.Black : Color.DarkGray;
-                    foreach (Control c2 in gb1.Controls) {
-                        if (c2 is ListBox lb1) {
-                            if (theme == MetroThemeStyle.Dark) {
-                                lb1.BackColor = Color.FromArgb(21, 21, 21);
-                                lb1.ForeColor = Color.WhiteSmoke;
-                            }
-                        }
-                    }
+                } else if (c1 is ImageComboBox icbo1) {
+                    icbo1.Theme = theme;
                 }
             }
             this.ResumeLayout();

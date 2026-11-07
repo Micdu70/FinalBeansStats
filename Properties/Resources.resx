@@ -2653,9 +2653,6 @@
   <data name="tab_unselected_frightful_final_ween" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\overlay\tab_unselected_frightful_final_ween.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="splash_image" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\splash.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="x_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\x_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -2679,5 +2676,68 @@
   </data>
   <data name="rename_gray" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\rename_gray.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="splash_image" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\splash.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="background_rave_royale" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\overlay\background_rave_royale.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="tab_unselected_rave_royale" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\overlay\tab_unselected_rave_royale.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_funky_fumble_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\race\icon_Funky_Fumble.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_funky_fumble_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\race\icon_Funky_Fumble_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_hallow_heights_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\race\icon_Hallow_Heights.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_hallow_heights_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\race\icon_Hallow_Heights_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_roll_in_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\race\icon_Roll_In.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_roll_in_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\race\icon_Roll_In_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_red_light_green_light_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\survival\icon_Red_Light_Green_Light.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_red_light_green_light_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\survival\icon_Red_Light_Green_Light_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_zombeanland_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\survival\icon_Zombeanland.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_zombeanland_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\survival\icon_Zombeanland_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_bean_ball_bowling_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\hunt\icon_Bean_Ball_Bowling.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_bean_ball_bowling_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\hunt\icon_Bean_Ball_Bowling_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_bean_skill_zone_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\hunt\icon_Bean_Skill_Zone.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_bean_skill_zone_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\hunt\icon_Bean_Skill_Zone_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_hex_a_ghoul_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\final\icon_Hex-A-Ghoul.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_hex_a_ghoul_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\final\icon_Hex-A-Ghoul_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_lights_out_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\final\icon_Lights_Out.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="round_lights_out_big_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\round_icon\final\icon_Lights_Out_big.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

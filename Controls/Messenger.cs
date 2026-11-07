@@ -837,7 +837,7 @@ namespace FinalBeansStats {
         public static string GetCurrentLanguage(string pDefault = "en-US") {
             string _ret = pDefault;
             string CurrentLanguage = Utils.GetCultureInfo().ToString();
-            if (IsCurrentLanguageSupported(new List<string> { "en-US", "fr-FR", "ko-KR", "ja-JP", "zh-CN", "zh-TW" }, CurrentLanguage)) {
+            if (IsCurrentLanguageSupported(new List<string> { "en-US", "fr-FR", "es-ES", "ko-KR", "ja-JP", "zh-CN", "zh-TW" }, CurrentLanguage)) {
                 _ret = CurrentLanguage;
             }
             return _ret;
@@ -852,6 +852,7 @@ namespace FinalBeansStats {
             Dictionary<string, string> ButtonTranslations = new Dictionary<string, string> {
                 { "en-US", "OK|Cancel|Yes|No|Continue|Retry|Abort|Ignore|Try" },
                 { "fr-FR", "OK|Annuler|Oui|Non|Continuer|Réessayer|Abandonner|Ignorer|Essayer" },
+                { "es-ES", "OK|Cancelar|Sí|No|Continuar|Reintentar|Abortar|Ignorar|Intentar" },
                 { "ko-KR", "OK|취소|예|아니오|계속|다시 시도|중단|무시|써 보다" },
                 { "ja-JP", "OK|キャンセル|はい|いいえ|続行|再試行|中止|無視|試す" },
                 { "zh-CN", "OK|取消|是|否|继续|重试|中止|忽略|尝试" },

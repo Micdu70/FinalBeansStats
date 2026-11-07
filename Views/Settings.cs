@@ -182,6 +182,7 @@ namespace FinalBeansStats {
                 new ImageItem(Properties.Resources.background_parade_guy, "Parade Guy", this.Font, new[] { "background_parade_guy", "tab_unselected_parade_guy" }),
                 new ImageItem(Properties.Resources.background_party_pegwin, "Party Pegwin", this.Font, new[] { "background_party_pegwin", "tab_unselected_party_pegwin" }),
                 new ImageItem(Properties.Resources.background_penguin, "Penguin", this.Font, new[] { "background_penguin", "tab_unselected_penguin" }),
+                new ImageItem(Properties.Resources.background_rave_royale, "Rave Royale", this.Font, new[] { "background_rave_royale", "tab_unselected_rave_royale" }),
                 new ImageItem(Properties.Resources.background_suits_you, "Suits You", this.Font, new[] { "background_suits_you", "tab_unselected_suits_you" }),
                 new ImageItem(Properties.Resources.background_sunny_guys, "Sunny Guys", this.Font, new[] { "background_sunny_guys", "tab_unselected_sunny_guys" }),
                 new ImageItem(Properties.Resources.background_ta_da, "Ta Da", this.Font, new[] { "background_ta_da", "tab_unselected_ta_da" }),

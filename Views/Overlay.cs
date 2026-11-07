@@ -4,6 +4,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
@@ -42,7 +43,7 @@ namespace FinalBeansStats {
         private int drawWidth, drawHeight;
         private bool startedPlaying;
         private DateTime startTime;
-        private bool shiftKeyToggle, ctrlKeyToggle;
+        private bool shiftKeyToggle; //, ctrlKeyToggle;
         private new Size DefaultSize;
         private Bitmap customizedBackground, customizedTab;
         private string backgroundResourceNameCache, tabResourceNameCache;
@@ -676,11 +677,9 @@ namespace FinalBeansStats {
         private void SetFinalsLabel(StatSummary summary, int setting) {
             if (this.StatsForm.CurrentSettings.DisplayCurrentTime && !Stats.IsConnectedToServer && setting == 3) {
                 this.lblFinals.OverlaySetting = setting;
-                this.lblFinals.TickProgress = DateTime.Now.Second;
                 this.lblFinals.Text = $@"{Multilingual.GetWord("overlay_current_time")} :";
                 this.lblFinals.TextRight = $"{DateTime.Now:HH\\:mm\\:ss}";
             } else {
-                this.lblFinals.TickProgress = 0;
                 this.lblFinals.Text = $@"{Multilingual.GetWord("overlay_finals")} :";
                 string finalText = $"{summary.TotalFinals:N0}{(summary.TotalShows < 100000 ? $" / {summary.TotalShows:N0}" : Multilingual.GetWord("overlay_inning"))}";
                 float finalChance = summary.TotalFinals * 100f / Math.Max(1, summary.TotalShows);
@@ -749,7 +748,6 @@ namespace FinalBeansStats {
         private void SetFastestLabel(StatSummary summary, BestRecordType bestRecordType, int setting) {
             if (this.StatsForm.CurrentSettings.DisplayCurrentTime && !Stats.IsConnectedToServer && setting == 2) {
                 this.lblFastest.OverlaySetting = setting;
-                this.lblFastest.TickProgress = DateTime.Now.Second;
                 this.lblFastest.Text = $@"{Multilingual.GetWord("overlay_current_time")} :";
                 this.lblFastest.TextRight = $"{DateTime.Now:HH\\:mm\\:ss}";
             } else {
@@ -762,7 +760,6 @@ namespace FinalBeansStats {
                     this.lblFastest.ImageHeight = 22;
                     this.tmrQueued.Start();
                 } else {
-                    this.lblFastest.TickProgress = 0;
                     bool useSwitching = this.StatsForm.CurrentSettings.SwitchBetweenLongest;
                     bool onlyShowLongest = this.StatsForm.CurrentSettings.OnlyShowLongest;
                     switch (bestRecordType) {
@@ -802,11 +799,9 @@ namespace FinalBeansStats {
                 this.lblCountryIcon.DrawVisible = false;
                 this.lblPingIcon.DrawVisible = false;
                 this.lblPlayers.OverlaySetting = setting;
-                this.lblPlayers.TickProgress = DateTime.Now.Second;
                 this.lblPlayers.Text = $@"{Multilingual.GetWord("overlay_current_time")} :";
                 this.lblPlayers.TextRight = $"{DateTime.Now:HH\\:mm\\:ss}";
             } else {
-                this.lblPlayers.TickProgress = 0;
                 int playersSwitchCount = this.switchCount;
                 if (!this.StatsForm.CurrentSettings.SwitchBetweenPlayers) {
                     playersSwitchCount = this.StatsForm.CurrentSettings.OnlyShowPing ? 1 : 0;
@@ -994,16 +989,13 @@ namespace FinalBeansStats {
         private void SetDurationLabel(int timeLimit, DateTime currentUtc, int setting) {
             if (this.StatsForm.CurrentSettings.DisplayCurrentTime && !Stats.IsConnectedToServer && (setting == 0 || setting == 2 || setting == 4)) {
                 this.lblDuration.OverlaySetting = setting;
-                this.lblDuration.TickProgress = 0;
                 this.lblDuration.Text = "";
                 this.lblDuration.TextRight = $@"{DateTime.Now.ToString(Multilingual.GetWord("level_date_format"), Utils.GetCultureInfo())}";
             } else if (this.StatsForm.CurrentSettings.DisplayCurrentTime && !Stats.IsConnectedToServer && setting == 6) {
                 this.lblDuration.OverlaySetting = setting;
-                this.lblDuration.TickProgress = DateTime.Now.Second;
                 this.lblDuration.Text = $@"{Multilingual.GetWord("overlay_current_time")} :";
                 this.lblDuration.TextRight = $"{DateTime.Now:HH\\:mm\\:ss}";
             } else {
-                this.lblDuration.TickProgress = 0;
                 this.lblDuration.Text = timeLimit > 0 ? $"{Multilingual.GetWord("overlay_duration")} ({TimeSpan.FromSeconds(timeLimit):m\\:ss}) :" : $"{Multilingual.GetWord("overlay_duration")} :";
 
                 DateTime start = this.lastRound.Start;
@@ -1013,7 +1005,7 @@ namespace FinalBeansStats {
 
                 if (!Stats.IsDisplayOverlayTime) {
                     this.lblDuration.TextRight = "-";
-                } else if (Stats.LastPlayedRoundEnd.HasValue && Stats.LastPlayedRoundEnd > Stats.LastPlayedRoundStart) {
+                } else if (!Stats.IsShowStarting && Stats.LastPlayedRoundEnd.HasValue && Stats.LastPlayedRoundEnd > Stats.LastPlayedRoundStart) {
                     TimeSpan time = Stats.LastPlayedRoundEnd.Value - Stats.LastPlayedRoundStart.Value;
                     bool isExtraTime = timeLimit > 0 && TimeSpan.FromSeconds(timeLimit) < time;
                     this.lblDuration.TextRight = timeLimit > 0 ? $"{(isExtraTime ? "+ " : "")}{TimeSpan.FromSeconds(timeLimit) - time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
@@ -1062,25 +1054,36 @@ namespace FinalBeansStats {
                     if (!Stats.IsDisplayOverlayTime) {
                         this.lblFinish.TextRight = "-";
                         this.lblFinish.ForeColor = this.ForeColor;
+                    } else if (Stats.PrecountdownDate != DateTime.MinValue) {
+                        int precountDuration = 5; // in seconds
+                        double secondsDiff = (Stats.PrecountdownDate - currentUtc).TotalSeconds;
+                        this.lblFinish.TextRight = secondsDiff > -5.0 ? $"{precountDuration + (int)Math.Ceiling(secondsDiff):N0}" : "Go!";
+                        this.lblFinish.ForeColor = secondsDiff > -1.0 ? Color.FromArgb(240, 210, 230)
+                                                 : secondsDiff > -2.0 ? Color.FromArgb(240, 190, 215)
+                                                 : secondsDiff > -3.0 ? Color.FromArgb(220, 200, 235)
+                                                 : secondsDiff > -4.0 ? Color.FromArgb(140, 200, 235)
+                                                 : secondsDiff > -5.0 ? Color.FromArgb(240, 190, 175)
+                                                 : Color.FromArgb(220, 235, 235);
                     } else if (finish.HasValue) {
                         TimeSpan time = finish.GetValueOrDefault(start) - start;
                         if (this.lastRound.Crown) {
-                            this.lblFinish.TextRight = this.StatsForm.CurrentSettings.DisplayGamePlayedInfo ? $"{Multilingual.GetWord("overlay_position_win")}! {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
+                            this.lblFinish.TextRight = this.StatsForm.CurrentSettings.DisplayGamePlayedInfo ? $"{Multilingual.GetWord("overlay_position_win")}| {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
                         } else {
                             switch (type) {
                                 case LevelType.Survival:
                                     this.lblFinish.TextRight = record == BestRecordType.Fastest ? (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Position > 0) ? $"# {Multilingual.GetWord("overlay_position_prefix")}{this.lastRound.Position}{Multilingual.GetWord("overlay_position_suffix")} - {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}"
-                                                                                                : (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Position > 0) ? $"{this.lastRound.Position} {Multilingual.GetWord("overlay_position_survived")}! {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
+                                                                                                : (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Position > 0) ? $"{this.lastRound.Position} {Multilingual.GetWord("overlay_position_survived")}| {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
                                     break;
-                                case LevelType.Logic:
-                                case LevelType.Hunt:
                                 case LevelType.Team:
                                 case LevelType.Invisibeans:
-                                    this.lblFinish.TextRight = (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Position > 0) ? $"{Multilingual.GetWord("overlay_position_qualified")}! {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
+                                    this.lblFinish.TextRight = this.StatsForm.CurrentSettings.DisplayGamePlayedInfo ? $"{Multilingual.GetWord("overlay_position_qualified")}| {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
                                     break;
                                 case LevelType.Race:
+                                case LevelType.Logic:
+                                case LevelType.Hunt:
                                 default:
-                                    this.lblFinish.TextRight = (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Position > 0) ? $"# {Multilingual.GetWord("overlay_position_prefix")}{this.lastRound.Position}{Multilingual.GetWord("overlay_position_suffix")} - {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
+                                    this.lblFinish.TextRight = record == BestRecordType.Fastest ? (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Position > 0) ? $"# {Multilingual.GetWord("overlay_position_prefix")}{this.lastRound.Position}{Multilingual.GetWord("overlay_position_suffix")} - {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}"
+                                                                                                : (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Position > 0) ? $"{this.lastRound.Position} {Multilingual.GetWord("overlay_position_qualified")}| {time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
                                     break;
                             }
                         }
@@ -1106,8 +1109,8 @@ namespace FinalBeansStats {
                         }
                     } else if (end != DateTime.MinValue) {
                         TimeSpan time = end - start;
-                        this.lblFinish.TextRight = (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Crown) ? $"{Multilingual.GetWord("overlay_position_win")}! {time:m\\:ss\\.fff}" :
-                                                   (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && (!(Stats.InShow && !Stats.EndedShow && this.lastRound.Participating))) ? $"{Multilingual.GetWord("overlay_position_eliminated")}! {time:m\\:ss\\.fff}" :
+                        this.lblFinish.TextRight = (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && this.lastRound.Crown) ? $"{Multilingual.GetWord("overlay_position_win")}| {time:m\\:ss\\.fff}" :
+                                                   (this.StatsForm.CurrentSettings.DisplayGamePlayedInfo && (!(Stats.InShow && !Stats.EndedShow && this.lastRound.Participating))) ? $"{Multilingual.GetWord("overlay_position_eliminated")}| {time:m\\:ss\\.fff}" :
                                                    $"{time:m\\:ss\\.fff}";
                         this.lblFinish.ForeColor = this.lastRound.Crown || (Stats.InShow && !Stats.EndedShow && this.lastRound.Participating) ? this.ForeColor : Utils.GetColorBrightnessAdjustment(this.ForeColor, fBrightness);
                     } else if (this.lastRound.Playing) {
@@ -1195,7 +1198,7 @@ namespace FinalBeansStats {
                         this.levelType = (this.levelStats?.Type).GetValueOrDefault(LevelType.Unknown);
                         this.recordType = (this.levelStats?.BestRecordType).GetValueOrDefault(BestRecordType.Fastest);
                         this.roundIcon = this.levelType != LevelType.Unknown ? this.levelStats.RoundBigIcon : Properties.Resources.round_unknown_big_icon;
-                        this.levelSummary = this.StatsForm.GetLevelInfo(this.levelId, this.levelType, this.recordType);
+                        this.levelSummary = this.StatsForm.GetLevelInfo(this.levelId, this.recordType);
                     }
 
                     int overlaySetting = this.GetDisplaySetting();
@@ -1285,7 +1288,7 @@ namespace FinalBeansStats {
         private void Overlay_KeyUp(object sender, KeyEventArgs e) {
             switch (e.KeyCode) {
                 case Keys.ControlKey:
-                    this.ctrlKeyToggle = false;
+                    // this.ctrlKeyToggle = false;
                     break;
                 case Keys.ShiftKey:
                     this.shiftKeyToggle = false;
@@ -1296,7 +1299,7 @@ namespace FinalBeansStats {
         private void Overlay_KeyDown(object sender, KeyEventArgs e) {
             switch (e.KeyCode) {
                 case Keys.ControlKey:
-                    this.ctrlKeyToggle = true;
+                    // this.ctrlKeyToggle = true;
                     break;
                 case Keys.ShiftKey:
                     this.shiftKeyToggle = true;
@@ -2032,16 +2035,16 @@ namespace FinalBeansStats {
                 using (Graphics g = Graphics.FromImage(newImage)) {
                     Bitmap background;
                     if (string.IsNullOrEmpty(this.BackgroundResourceName)) {
-                        background = Properties.Resources.background_frightful_final_ween;
+                        background = Properties.Resources.background_rave_royale;
                     } else {
                         if (overlayCustomized) {
                             if (!string.Equals(this.BackgroundResourceName, this.backgroundResourceNameCache) && File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png"))) {
                                 this.customizedBackground = new Bitmap(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png"));
                                 this.backgroundResourceNameCache = this.BackgroundResourceName;
                             }
-                            background = File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png")) ? this.customizedBackground : Properties.Resources.background_frightful_final_ween;
+                            background = File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png")) ? this.customizedBackground : Properties.Resources.background_rave_royale;
                         } else {
-                            background = (Bitmap)Properties.Resources.ResourceManager.GetObject(this.BackgroundResourceName) ?? Properties.Resources.background_frightful_final_ween;
+                            background = (Bitmap)Properties.Resources.ResourceManager.GetObject(this.BackgroundResourceName) ?? Properties.Resources.background_rave_royale;
                         }
                     }
                     g.DrawImage(background, 0, tabsDisplayed ? 35 : 0);
@@ -2049,16 +2052,16 @@ namespace FinalBeansStats {
                     if (tabsDisplayed) {
                         Bitmap tab;
                         if (string.IsNullOrEmpty(this.TabResourceName)) {
-                            tab = Properties.Resources.tab_unselected_frightful_final_ween;
+                            tab = Properties.Resources.tab_unselected_rave_royale;
                         } else {
                             if (overlayCustomized) {
                                 if (!string.Equals(this.TabResourceName, this.tabResourceNameCache) && File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png"))) {
                                     this.customizedTab = new Bitmap(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png"));
                                     this.tabResourceNameCache = this.TabResourceName;
                                 }
-                                tab = File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png")) ? this.customizedTab : Properties.Resources.tab_unselected_frightful_final_ween;
+                                tab = File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png")) ? this.customizedTab : Properties.Resources.tab_unselected_rave_royale;
                             } else {
-                                tab = (Bitmap)Properties.Resources.ResourceManager.GetObject(this.TabResourceName) ?? Properties.Resources.tab_unselected_frightful_final_ween;
+                                tab = (Bitmap)Properties.Resources.ResourceManager.GetObject(this.TabResourceName) ?? Properties.Resources.tab_unselected_rave_royale;
                             }
                         }
                         g.DrawImage(tab, this.drawWidth - 170 - this.GetOverlayProfileOffset(this.StatsForm.GetCurrentProfileName()), 0);

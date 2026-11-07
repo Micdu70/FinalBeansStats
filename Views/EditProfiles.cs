@@ -131,7 +131,7 @@ namespace FinalBeansStats {
             foreach (var stat in this.AllStats.FindAll(r => !addedShowList.Contains(r.ShowNameId))) {
                 if (addedShowList.Contains(stat.ShowNameId)) continue;
 
-                showsData.Rows.Add(stat.ShowName ?? stat.ShowNameId, stat.ShowNameId, "True");
+                showsData.Rows.Add(stat.ShowName, stat.ShowNameId, "True");
                 addedShowList.Add(stat.ShowNameId);
             }
 

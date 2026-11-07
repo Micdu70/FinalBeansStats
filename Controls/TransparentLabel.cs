@@ -25,7 +25,6 @@ namespace FinalBeansStats {
         public Color LevelTrueColor { get; set; }
         public Color PingColor { get; set; }
         public Image RoundIcon { get; set; }
-        public int TickProgress { get; set; }
         public int OverlaySetting { get; set; }
 
         public void Draw(Graphics g) {
@@ -83,9 +82,6 @@ namespace FinalBeansStats {
                                 (string.Equals(this.Name, "lblFastest") && this.OverlaySetting == 2) ||
                                 (string.Equals(this.Name, "lblFinals") && this.OverlaySetting == 3) ||
                                 (string.Equals(this.Name, "lblDuration") && this.OverlaySetting == 6)) {
-                                if (this.TickProgress > 0) {
-                                    this.FillRoundedRectangleF(g, new Pen(Utils.GetComplementaryColor(Utils.GetColorBrightnessAdjustment(brFore.Color, this.TickProgress % 2 == 0 ? 1 : 0.95f), 95)), new SolidBrush(Utils.GetComplementaryColor(Utils.GetColorBrightnessAdjustment(brFore.Color, this.TickProgress % 2 == 0 ? 1 : 0.95f), 95)), this.ClientRectangle.X, this.ClientRectangle.Y, this.ClientRectangle.Width * this.TickProgress / 60f, this.ClientRectangle.Height * 2, 4f);
-                                }
                             }
                         }
 

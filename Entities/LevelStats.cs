@@ -119,6 +119,7 @@ namespace FinalBeansStats {
             { "round_drumtop",                                    new LevelStats("round_drumtop", "Lily Leapers", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_lily_leapers_icon, Properties.Resources.round_lily_leapers_big_icon)},
             { "round_gauntlet_08",                                new LevelStats("round_gauntlet_08", "Party Promenade", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_party_promenade_icon, Properties.Resources.round_party_promenade_big_icon)},
             { "round_pipedup",                                    new LevelStats("round_pipedup", "Pipe Dream", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_pipe_dream_icon, Properties.Resources.round_pipe_dream_big_icon)},
+            { "round_pixelperfect",                               new LevelStats("round_pixelperfect", "Pixel Painters", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_pixel_painters_icon, Properties.Resources.round_pixel_painters_big_icon)},
             { "round_follow_the_line",                            new LevelStats("round_follow_the_line", "Puzzle Path", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_puzzle_path_icon, Properties.Resources.round_puzzle_path_big_icon)},
             { "round_tunnel_race",                                new LevelStats("round_tunnel_race", "Roll On", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_roll_on_icon, Properties.Resources.round_roll_on_big_icon)},
             { "round_see_saw",                                    new LevelStats("round_see_saw", "See Saw", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_see_saw_icon, Properties.Resources.round_see_saw_big_icon)},
@@ -139,16 +140,16 @@ namespace FinalBeansStats {
             { "round_wall_guys",                                  new LevelStats("round_wall_guys", "Wall Guys", LevelType.Race, BestRecordType.Fastest, false, 1, Properties.Resources.round_wall_guys_icon, Properties.Resources.round_wall_guys_big_icon)},
 
             { "round_airtime",                                    new LevelStats("round_airtime", "Airtime", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_airtime_icon, Properties.Resources.round_airtime_big_icon)},
-            { "round_bluejay",                                    new LevelStats("round_bluejay", "Bean Hill Zone", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_bean_hill_zone_icon, Properties.Resources.round_bean_hill_zone_big_icon)},
+            // { "round_bluejay",                                    new LevelStats("round_bluejay", "Bean Hill Zone", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_bean_hill_zone_icon, Properties.Resources.round_bean_hill_zone_big_icon)},
             { "round_hoops_revenge",                              new LevelStats("round_hoops_revenge", "Bounce Party", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_bounce_party_icon, Properties.Resources.round_bounce_party_big_icon)},
             { "round_king_of_the_hill",                           new LevelStats("round_king_of_the_hill", "Bubble Trouble", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_bubble_trouble_icon, Properties.Resources.round_bubble_trouble_big_icon)},
-            { "round_1v1_button_basher",                          new LevelStats("round_1v1_button_basher", "Button Bashers", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_button_bashers_icon, Properties.Resources.round_button_bashers_big_icon)},
+            { "round_1v1_button_basher",                          new LevelStats("round_1v1_button_basher", "Button Bashers", LevelType.Hunt, BestRecordType.HighScore, false, 1, Properties.Resources.round_button_bashers_icon, Properties.Resources.round_button_bashers_big_icon)},
             { "round_ffa_button_bashers",                         new LevelStats("round_ffa_button_bashers", "Frantic Factory", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_frantic_factory_icon, Properties.Resources.round_frantic_factory_big_icon)},
             { "round_slippy_slide",                               new LevelStats("round_slippy_slide", "Hoop Chute", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_hoop_chute_icon, Properties.Resources.round_hoop_chute_big_icon)},
             { "round_hoops_blockade_solo",                        new LevelStats("round_hoops_blockade_solo", "Hoopsie Legends", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_hoopsie_legends_icon, Properties.Resources.round_hoopsie_legends_big_icon)},
             { "round_follow-the-leader",                          new LevelStats("round_follow-the-leader", "Leading Light", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_leading_light_icon, Properties.Resources.round_leading_light_big_icon)},
             { "round_penguin_solos",                              new LevelStats("round_penguin_solos", "Pegwin Pool Party", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_pegwin_pool_party_icon, Properties.Resources.round_pegwin_pool_party_big_icon)},
-            { "round_tail_tag",                                   new LevelStats("round_tail_tag", "Tail Tag", LevelType.Hunt, BestRecordType.Fastest, false, 1, Properties.Resources.round_tail_tag_icon, Properties.Resources.round_tail_tag_big_icon)},
+            { "round_tail_tag",                                   new LevelStats("round_tail_tag", "Tail Tag", LevelType.Hunt, BestRecordType.Longest, false, 1, Properties.Resources.round_tail_tag_icon, Properties.Resources.round_tail_tag_big_icon)},
             { "round_1v1_volleyfall",                             new LevelStats("round_1v1_volleyfall", "Volleyfall", LevelType.Hunt, BestRecordType.HighScore, false, 1, Properties.Resources.round_volleyfall_icon, Properties.Resources.round_volleyfall_big_icon)},
 
             { "round_fruitpunch",                                 new LevelStats("round_fruitpunch", "Big Shots", LevelType.Survival, BestRecordType.Longest, false, 1, Properties.Resources.round_big_shots_icon, Properties.Resources.round_big_shots_big_icon)},
@@ -163,7 +164,6 @@ namespace FinalBeansStats {
             { "round_spin_ring",                                  new LevelStats("round_spin_ring", "The Swiveller", LevelType.Survival, BestRecordType.Longest, false, 1, Properties.Resources.round_the_swiveller_icon, Properties.Resources.round_the_swiveller_big_icon)},
 
             { "round_match_fall",                                 new LevelStats("round_match_fall", "Perfect Match", LevelType.Logic, BestRecordType.Longest, false, 1, Properties.Resources.round_perfect_match_icon, Properties.Resources.round_perfect_match_big_icon)},
-            { "round_pixelperfect",                               new LevelStats("round_pixelperfect", "Pixel Painters", LevelType.Logic, BestRecordType.Fastest, false, 1, Properties.Resources.round_pixel_painters_icon, Properties.Resources.round_pixel_painters_big_icon)},
             { "round_fruit_bowl",                                 new LevelStats("round_fruit_bowl", "Sum Fruit", LevelType.Logic, BestRecordType.Longest, false, 1, Properties.Resources.round_sum_fruit_icon, Properties.Resources.round_sum_fruit_big_icon)},
 
             { "round_basketfall",                                 new LevelStats("round_basketfall", "Basketfall", LevelType.Team, BestRecordType.HighScore, false, 1, Properties.Resources.round_basketfall_icon, Properties.Resources.round_basketfall_big_icon)},
@@ -177,7 +177,7 @@ namespace FinalBeansStats {
             { "round_territory_control",                          new LevelStats("round_territory_control", "Power Trip", LevelType.Team, BestRecordType.HighScore, false, 1, Properties.Resources.round_power_trip_icon, Properties.Resources.round_power_trip_big_icon)},
             { "round_rocknroll",                                  new LevelStats("round_rocknroll", "Rock 'n' Roll", LevelType.Team, BestRecordType.Fastest, false, 1, Properties.Resources.round_rock_n_roll_icon, Properties.Resources.round_rock_n_roll_big_icon)},
             { "round_snowy_scrap",                                new LevelStats("round_snowy_scrap", "Snowy Scrap", LevelType.Team, BestRecordType.Fastest, false, 1, Properties.Resources.round_snowy_scrap_icon, Properties.Resources.round_snowy_scrap_big_icon)},
-            { "round_conveyor_arena",                             new LevelStats("round_conveyor_arena", "Team Tail Tag", LevelType.Team, BestRecordType.Fastest, false, 1, Properties.Resources.round_team_tail_tag_icon, Properties.Resources.round_team_tail_tag_big_icon)},
+            { "round_conveyor_arena",                             new LevelStats("round_conveyor_arena", "Team Tail Tag", LevelType.Team, BestRecordType.Longest, false, 1, Properties.Resources.round_team_tail_tag_icon, Properties.Resources.round_team_tail_tag_big_icon)},
 
             { "round_invisibeans",                                new LevelStats("round_invisibeans", "Sweet Thieves", LevelType.Invisibeans, BestRecordType.Fastest, false, 1, Properties.Resources.round_sweet_thieves_icon, Properties.Resources.round_sweet_thieves_big_icon)},
             { "round_pumpkin_pie",                                new LevelStats("round_pumpkin_pie", "Treat Thieves", LevelType.Invisibeans, BestRecordType.Fastest, false, 1, Properties.Resources.round_treat_thieves_icon, Properties.Resources.round_treat_thieves_big_icon)},
@@ -191,16 +191,27 @@ namespace FinalBeansStats {
             { "round_kraken_attack",                              new LevelStats("round_kraken_attack", "Kraken Slam", LevelType.Survival, BestRecordType.Longest, true, 1, Properties.Resources.round_kraken_slam_icon, Properties.Resources.round_kraken_slam_big_icon)},
             { "round_crown_maze",                                 new LevelStats("round_crown_maze", "Lost Temple", LevelType.Race, BestRecordType.Fastest, true, 1, Properties.Resources.round_lost_temple_icon, Properties.Resources.round_lost_temple_big_icon)},
             { "round_tunnel_final",                               new LevelStats("round_tunnel_final", "Roll Off", LevelType.Survival, BestRecordType.Longest, true, 1, Properties.Resources.round_roll_off_icon, Properties.Resources.round_roll_off_big_icon)},
-            { "round_royal_rumble",                               new LevelStats("round_royal_rumble", "Royal Fumble", LevelType.Hunt, BestRecordType.Fastest, true, 1, Properties.Resources.round_royal_fumble_icon, Properties.Resources.round_royal_fumble_big_icon)},
+            { "round_royal_rumble",                               new LevelStats("round_royal_rumble", "Royal Fumble", LevelType.Hunt, BestRecordType.Longest, true, 1, Properties.Resources.round_royal_fumble_icon, Properties.Resources.round_royal_fumble_big_icon)},
             { "round_thin_ice",                                   new LevelStats("round_thin_ice", "Thin Ice", LevelType.Survival, BestRecordType.Longest, true, 1, Properties.Resources.round_thin_ice_icon, Properties.Resources.round_thin_ice_big_icon)},
             { "round_tiptoefinale",                               new LevelStats("round_tiptoefinale", "Tip Toe Finale", LevelType.Race, BestRecordType.Fastest, true, 1, Properties.Resources.round_tip_toe_finale_icon, Properties.Resources.round_tip_toe_finale_big_icon)},
 
+            //
             // FINALBEANS ROUNDS
-
-            { "round_hallow_heights",                             new LevelStats("round_hallow_heights", "Hallow Heights", LevelType.Race, BestRecordType.Fastest, false, 2, Properties.Resources.round_block_party_icon, Properties.Resources.round_block_party_big_icon)},
-            { "round_bowling",                                    new LevelStats("round_bowling", "Bean Ball Bowling", LevelType.Hunt, BestRecordType.Fastest, false, 2, Properties.Resources.round_block_party_icon, Properties.Resources.round_block_party_big_icon)},
-            { "round_zombean",                                    new LevelStats("round_zombean", "Zombeanland", LevelType.Survival, BestRecordType.Longest, false, 2, Properties.Resources.round_block_party_icon, Properties.Resources.round_block_party_big_icon)},
-            { "round_hexaghoul",                                  new LevelStats("round_hexaghoul", "Hex-A-Ghoul", LevelType.Survival, BestRecordType.Longest, true, 2, Properties.Resources.round_block_party_icon, Properties.Resources.round_block_party_big_icon)}
+            //
+            // [FS2]
+            //
+            { "round_hallow_heights",                             new LevelStats("round_hallow_heights", "Hallow Heights", LevelType.Race, BestRecordType.Fastest, false, 2, Properties.Resources.round_hallow_heights_icon, Properties.Resources.round_hallow_heights_big_icon)},
+            { "round_bowling",                                    new LevelStats("round_bowling", "Bean Ball Bowling", LevelType.Hunt, BestRecordType.Fastest, false, 2, Properties.Resources.round_bean_ball_bowling_icon, Properties.Resources.round_bean_ball_bowling_big_icon)},
+            { "round_zombean",                                    new LevelStats("round_zombean", "Zombeanland", LevelType.Survival, BestRecordType.Longest, false, 2, Properties.Resources.round_zombeanland_icon, Properties.Resources.round_zombeanland_big_icon)},
+            { "round_hexaghoul",                                  new LevelStats("round_hexaghoul", "Hex-A-Ghoul", LevelType.Survival, BestRecordType.Longest, true, 2, Properties.Resources.round_hex_a_ghoul_icon, Properties.Resources.round_hex_a_ghoul_big_icon)},
+            //
+            // [FS4]
+            //
+            { "round_funky_fumble",                               new LevelStats("round_funky_fumble", "Funky Fumble", LevelType.Race, BestRecordType.Fastest, false, 4, Properties.Resources.round_funky_fumble_icon, Properties.Resources.round_funky_fumble_big_icon)},
+            { "round_roll_in",                                    new LevelStats("round_roll_in", "Roll In", LevelType.Race, BestRecordType.Fastest, false, 4, Properties.Resources.round_roll_in_icon, Properties.Resources.round_roll_in_big_icon)},
+            { "round_bluejay",                                    new LevelStats("round_bluejay", "Bean Skill Zone", LevelType.Hunt, BestRecordType.Fastest, false, 4, Properties.Resources.round_bean_skill_zone_icon, Properties.Resources.round_bean_skill_zone_big_icon)},
+            { "round_redlight_greenlight",                        new LevelStats("round_redlight_greenlight", "Red Light Green Light", LevelType.Survival, BestRecordType.Longest, false, 4, Properties.Resources.round_red_light_green_light_icon, Properties.Resources.round_red_light_green_light_big_icon)},
+            { "round_lightsout",                                  new LevelStats("round_lightsout", "Lights Out", LevelType.Survival, BestRecordType.Longest, true, 4, Properties.Resources.round_lights_out_icon, Properties.Resources.round_lights_out_big_icon)}
         };
 
         public Image RoundIcon { get; set; }

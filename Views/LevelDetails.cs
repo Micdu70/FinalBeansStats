@@ -162,6 +162,7 @@ namespace FinalBeansStats {
                     this.gridDetails.MenuSeparator1.Paint += this.gridDetails.CustomToolStripSeparator_Paint;
                     // this.gridDetails.CMenu.Items.Add(this.gridDetails.MenuSeparator1);
 
+                    /*
                     this.gridDetails.RenameShows = new ToolStripMenuItem {
                         Name = "renameShows"
                         , Size = new Size(134, 22)
@@ -175,6 +176,7 @@ namespace FinalBeansStats {
                     this.gridDetails.RenameShows.Click += this.renameShows_Click;
                     this.gridDetails.RenameShows.MouseEnter += this.gridDetails.CMenu_MouseEnter;
                     this.gridDetails.RenameShows.MouseLeave += this.gridDetails.CMenu_MouseLeave;
+                    */
                     // this.gridDetails.CMenu.Items.Add(this.gridDetails.RenameShows);
 
                     if (this.StatsForm.AllProfiles.Count > 1) {
@@ -903,10 +905,10 @@ namespace FinalBeansStats {
                 if (((Grid)sender).SelectedCells.Count > 0) {
                     if (((Grid)sender).MenuSeparator1 != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
                         ((Grid)sender).CMenu.Items.Add(((Grid)sender).MenuSeparator1);
-                    }
+                    }/*
                     if (((Grid)sender).RenameShows != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).RenameShows)) {
                         ((Grid)sender).CMenu.Items.Add(((Grid)sender).RenameShows);
-                    }
+                    }*/
                     if (((Grid)sender).MoveShows != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MoveShows)) {
                         ((Grid)sender).CMenu.Items.Add(((Grid)sender).MoveShows);
                     }
@@ -916,10 +918,10 @@ namespace FinalBeansStats {
                 } else {
                     if (((Grid)sender).MenuSeparator1 != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
                         ((Grid)sender).CMenu.Items.Remove(((Grid)sender).MenuSeparator1);
-                    }
+                    }/*
                     if (((Grid)sender).RenameShows != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).RenameShows)) {
                         ((Grid)sender).CMenu.Items.Remove(((Grid)sender).RenameShows);
-                    }
+                    }*/
                     if (((Grid)sender).MoveShows != null && ((Grid)sender).CMenu.Items.Contains(((Grid)sender).MoveShows)) {
                         ((Grid)sender).CMenu.Items.Remove(((Grid)sender).MoveShows);
                     }

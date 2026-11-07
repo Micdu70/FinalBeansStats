@@ -19,7 +19,7 @@ namespace FinalBeansStats.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -206,6 +206,16 @@ namespace FinalBeansStats.Properties {
         internal static System.Drawing.Bitmap background_penguin {
             get {
                 object obj = ResourceManager.GetObject("background_penguin", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap background_rave_royale {
+            get {
+                object obj = ResourceManager.GetObject("background_rave_royale", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -6419,6 +6429,26 @@ namespace FinalBeansStats.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_bean_ball_bowling_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_bean_ball_bowling_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_bean_ball_bowling_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_bean_ball_bowling_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap round_bean_hill_zone_big_icon {
             get {
                 object obj = ResourceManager.GetObject("round_bean_hill_zone_big_icon", resourceCulture);
@@ -6432,6 +6462,26 @@ namespace FinalBeansStats.Properties {
         internal static System.Drawing.Bitmap round_bean_hill_zone_icon {
             get {
                 object obj = ResourceManager.GetObject("round_bean_hill_zone_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_bean_skill_zone_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_bean_skill_zone_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_bean_skill_zone_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_bean_skill_zone_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -6839,6 +6889,26 @@ namespace FinalBeansStats.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_funky_fumble_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_funky_fumble_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_funky_fumble_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_funky_fumble_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap round_gate_crash_big_icon {
             get {
                 object obj = ResourceManager.GetObject("round_gate_crash_big_icon", resourceCulture);
@@ -6882,6 +6952,46 @@ namespace FinalBeansStats.Properties {
         internal static System.Drawing.Bitmap round_gray_icon {
             get {
                 object obj = ResourceManager.GetObject("round_gray_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_hallow_heights_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_hallow_heights_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_hallow_heights_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_hallow_heights_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_hex_a_ghoul_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_hex_a_ghoul_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_hex_a_ghoul_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_hex_a_ghoul_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -7219,6 +7329,26 @@ namespace FinalBeansStats.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_lights_out_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_lights_out_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_lights_out_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_lights_out_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap round_lily_leapers_big_icon {
             get {
                 object obj = ResourceManager.GetObject("round_lily_leapers_big_icon", resourceCulture);
@@ -7419,6 +7549,26 @@ namespace FinalBeansStats.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_red_light_green_light_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_red_light_green_light_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_red_light_green_light_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_red_light_green_light_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap round_rock_n_roll_big_icon {
             get {
                 object obj = ResourceManager.GetObject("round_rock_n_roll_big_icon", resourceCulture);
@@ -7432,6 +7582,26 @@ namespace FinalBeansStats.Properties {
         internal static System.Drawing.Bitmap round_rock_n_roll_icon {
             get {
                 object obj = ResourceManager.GetObject("round_rock_n_roll_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_roll_in_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_roll_in_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_roll_in_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_roll_in_icon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -8099,6 +8269,26 @@ namespace FinalBeansStats.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap round_zombeanland_big_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_zombeanland_big_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap round_zombeanland_icon {
+            get {
+                object obj = ResourceManager.GetObject("round_zombeanland_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap scatter_plot_gray_icon {
             get {
                 object obj = ResourceManager.GetObject("scatter_plot_gray_icon", resourceCulture);
@@ -8412,6 +8602,16 @@ namespace FinalBeansStats.Properties {
         internal static System.Drawing.Bitmap tab_unselected_penguin {
             get {
                 object obj = ResourceManager.GetObject("tab_unselected_penguin", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tab_unselected_rave_royale {
+            get {
+                object obj = ResourceManager.GetObject("tab_unselected_rave_royale", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

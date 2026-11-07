@@ -27,7 +27,7 @@ namespace FinalBeansStats {
         private void InitializeComponent()
         {
             this.picLanguageSelection = new System.Windows.Forms.PictureBox();
-            this.cboLanguage = new MetroFramework.Controls.MetroComboBox();
+            this.cboLanguage = new FinalBeansStats.ImageComboBox();
             this.chkAutoGenerateProfile = new MetroFramework.Controls.MetroCheckBox();
             this.lblBackColor = new System.Windows.Forms.Label();
             this.btnSave = new MetroFramework.Controls.MetroButton();
@@ -47,22 +47,15 @@ namespace FinalBeansStats {
             // 
             // cboLanguage
             // 
+            this.cboLanguage.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.cboLanguage.DropDownHeight = 414;
+            this.cboLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboLanguage.FormattingEnabled = true;
             this.cboLanguage.ItemHeight = 23;
-            this.cboLanguage.Items.AddRange(new object[] {
-            "🇺🇸 English",
-            "🇫🇷 Français",
-            "🇪🇸 Español",
-            "🇰🇷 한국어",
-            "🇯🇵 日本語",
-            "🇨🇳 简体中文",
-            "🇨🇳 繁體中文"});
-            this.cboLanguage.DropDownStyle = ComboBoxStyle.DropDownList;
             this.cboLanguage.Location = new System.Drawing.Point(111, 112);
             this.cboLanguage.Name = "cboLanguage";
             this.cboLanguage.Size = new System.Drawing.Size(120, 29);
             this.cboLanguage.TabIndex = 2;
-            this.cboLanguage.UseSelectable = true;
             this.cboLanguage.SelectedIndexChanged += new System.EventHandler(this.cboLanguage_SelectedIndexChanged);
             // 
             // chkAutoGenerateProfile
@@ -169,7 +162,7 @@ namespace FinalBeansStats {
 
         #endregion
         private System.Windows.Forms.PictureBox picLanguageSelection;
-        private MetroFramework.Controls.MetroComboBox cboLanguage;
+        private FinalBeansStats.ImageComboBox cboLanguage;
         private MetroFramework.Controls.MetroCheckBox chkAutoGenerateProfile;
         private System.Windows.Forms.Label lblBackColor;
         private MetroFramework.Controls.MetroButton btnSave;

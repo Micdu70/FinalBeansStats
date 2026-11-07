@@ -121,6 +121,7 @@ namespace FinalBeansStats {
             ("FS2-2.0.0", new DateTime(2025, 10, 23, 0, 0, 0, DateTimeKind.Utc)),    // Season 2 (Frightful Final-Ween) { Broken Physics }
             ("FS2-2.0.1", new DateTime(2025, 10, 26, 0, 0, 0, DateTimeKind.Utc)),    // Season 2 (Frightful Final-Ween) { Fixed Physics }
             ("FS3-3.0.X", new DateTime(2026, 4, 24, 0, 0, 0, DateTimeKind.Utc)),     // Season 3 (Builder Brigade)
+            ("FS4-4.0.X", new DateTime(2026, 11, 7, 0, 0, 0, DateTimeKind.Utc))      // Season 4 (Rave Royale)
         };
         private static DateTime SeasonStart, WeekStart, DayStart;
         private static DateTime SessionStart = DateTime.UtcNow;
@@ -129,12 +130,12 @@ namespace FinalBeansStats {
         public static bool InstalledEmojiFont;
 
         public static int SelectedShowIndex;
-        public static DateTime LastGameDate = DateTime.MinValue;
-        public static string LastShowNameId = null;
-        public static string LastShowName = null;
+
+        // public static string LastShowNameId = null;
         public static string LastRoundId = null;
         public static string LastRoundName = null;
 
+        public static bool IsShowStarting = false;
         public static bool InShow = false;
         public static bool EndedShow = false;
 
@@ -154,12 +155,15 @@ namespace FinalBeansStats {
         public static long LastServerPing = 0;
         public static bool IsBadServerPing = false;
 
+        public static DateTime LastPrecountdownStateDate = DateTime.MinValue;
+        public static DateTime PrecountdownDate = DateTime.MinValue;
+
         public static readonly List<string> SucceededPlayerNames = new List<string>();
         public static readonly List<int> SucceededPlayerIds = new List<int>();
         public static readonly List<int> EliminatedPlayerIds = new List<int>();
         public static readonly Dictionary<int, string> ReadyPlayerIds = new Dictionary<int, string>();
 
-        public static string SavedSessionId { get; set; }
+        // public static string SavedSessionId { get; set; }
         public static int SavedRoundCount { get; set; }
         public static int NumPlayersSucceeded { get; set; }
         public static int NumPlayersPsSucceeded { get; set; }
@@ -173,13 +177,10 @@ namespace FinalBeansStats {
         public static int NumPlayersSwEliminated { get; set; }
         public static int NumPlayersMbEliminated { get; set; }
         public static int NumPlayersPcEliminated { get; set; }
-        public static bool IsLastRoundRunning { get; set; }
         public static bool IsLastPlayedRoundStillPlaying { get; set; }
-        public static DateTime LastGameStart { get; set; } = DateTime.MinValue;
         public static DateTime LastRoundLoad { get; set; } = DateTime.MinValue;
         public static DateTime? LastPlayedRoundStart { get; set; }
         public static DateTime? LastPlayedRoundEnd { get; set; }
-        public static DateTime LastPlayersCount { get; set; } = DateTime.MinValue;
 
         public static bool IsQueuing { get; set; }
         public static int QueuedPlayers { get; set; }
@@ -250,7 +251,7 @@ namespace FinalBeansStats {
 
         private bool maximizedForm;
         private bool isFocused;
-        private bool shiftKeyToggle, ctrlKeyToggle;
+        private bool shiftKeyToggle; //, ctrlKeyToggle;
         private MetroToolTip mtt = new MetroToolTip();
         private MetroToolTip cmtt = new MetroToolTip();
         private MetroToolTip omtt = new MetroToolTip();
@@ -274,38 +275,69 @@ namespace FinalBeansStats {
 
         private readonly int currentGlobalDbVersion = 0;
 
-        private readonly int currentSettingsVersionFB = 6;
+        private readonly int currentSettingsVersionFB = 7;
 
         /* -------------------------------------------------------- */
 
+        private readonly Dictionary<string, string> KnownFinalBeansShowIds = new Dictionary<string, string> {
+            { "fb_3_2_1__space", "only_solo_ss2_rounds_show" },
+            { "fb_big_yeetus_tour", "clan_of_yeetus" },
+            { "fb_builder_s_main_show", "builder_main_show" },
+            { "fb_fall_mountain_trials", "show_fall_mountain_trials" },
+            { "fb_frightful_final_ween", "fs2_launch_show" },
+            { "fb_future_fumble", "event_only_season_4" },
+            { "fb_gauntlet_showdown", "event_only_races_template" },
+            { "fb_gravity_scramble", "show_gravity_scramble" },
+            { "fb_lily_leapers_limbo", "event_only_drumtop_template" },
+            { "fb_lost_temple_trials", "show_crown_maze_trials" },
+            { "fb_ltm", "ltm_show" },
+            { "fb_main_show", "main_show" },
+            { "fb_mix_it_up", "mix_it_up" },
+            { "fb_placeholder", "big_shots_trials" },
+            { "fb_random_rumble", "finalbeans_random_rumble" },
+            { "fb_rave_royale", "fs4_rounds_show" },
+            { "fb_refurb_rumble", "refurb_rumble" },
+            { "fb_rise_of_zombeanland", "rise_zombean_show" },
+            { "fb_roll_off_trials", "show_finalbeans_roll_off_trials" },
+            { "fb_skilled_speeders", "show_skilled_speeders" },
+            { "fb_slime_survivors", "slime_survivors" },
+            { "fb_slimescraper_time", "finalbeans_only_slime_climb_2" },
+            { "fb_warped_main_show", "warped_main_show" },
+            { "fb_x_treme_solos", "finalbeans_xtreme_solos" }
+        };
+
         public readonly string[] PublicShowIdList = {
-            /* Keep "fb_main_show" to the top */
-            "fb_main_show",
-            "fb_ltm"
+            /* Keep "main_show" followed by "ltm_show" to the top */
+            "main_show",    // Main Show
+            "ltm_show",     // LTM
+            "mix_it_up",    // Mix it Up!
         };
 
         public readonly string[] PublicShowIdList2 = {
-            /* Keep in an alphabetical order */
-            "fb_3_2_1__space",
-            "fb_big_yeetus_tour",
-            "fb_builder_s_main_show",
-            "fb_fall_mountain_trials",
-            "fb_frightful_final_ween",
-            "fb_future_fumble",
-            "fb_gauntlet_showdown",
-            "fb_gravity_scramble",
-            "fb_lily_leapers_limbo",
-            "fb_lost_temple_trials",
-            "fb_mix_it_up",
-            "fb_placeholder",
-            "fb_random_rumble",
-            "fb_refurb_rumble",
-            "fb_rise_of_zombeanland",
-            "fb_skilled_speeders",
-            "fb_slime_survivors",
-            "fb_slimescraper_time",
-            "fb_warped_main_show",
-            "fb_x_treme_solos"
+            /* Keep in an alphabetical order => // {ShowName} */
+            "only_solo_ss2_rounds_show",        // 3,2,1, SPACE!
+            "clan_of_yeetus",                   // Big Yeetus Tour
+            "builder_main_show",                // Builder's Main Show
+            "show_fall_mountain_trials",        // Fall Mountain Trials
+            "fs2_launch_show",                  // Frightful Final-Ween
+            "event_only_season_4",              // Future Fumble
+            "event_only_races_template",        // Gauntlet Showdown
+            "show_gravity_scramble",            // GRAVITY SCRAMBLE
+            "event_only_drumtop_template",      // Lily Leapers Limbo
+            "show_crown_maze_trials",           // LOST TEMPLE TRIALS
+            "fs2_mix_it_up",                    // Mix it Up! [FS2]
+            "show_finalbeans_fs4_variations",   // Mix it Up! [FS4]
+            "big_shots_trials",                 // placeholder (Big Shots Trials)
+            "finalbeans_random_rumble",         // Random Rumble 
+            "fs4_rounds_show",                  // Rave Royale
+            "refurb_rumble",                    // Refurb Rumble
+            "rise_zombean_show",                // Rise of Zombeanland
+            "show_finalbeans_roll_off_trials",  // Roll Off Trials
+            "show_skilled_speeders",            // Skilled Speeders
+            "slime_survivors",                  // Slime Survivors
+            "finalbeans_only_slime_climb_2",    // Slimescraper Time
+            "warped_main_show",                 // Warped Main Show
+            "finalbeans_xtreme_solos",          // X-treme Solos
         };
 
         public void RunDatabaseTask(Task task, bool runAsync) {
@@ -676,19 +708,12 @@ namespace FinalBeansStats {
                                     profileOrder--;
                                 }
                             } else {
-                                int profileOrder = this.PublicShowIdList.Length;
-                                for (int i = this.PublicShowIdList.Length; i >= 1; i--) {
-                                    string showId = this.PublicShowIdList[i - 1];
-                                    this.Profiles.Insert(new Profiles { ProfileId = profileOrder - 1, ProfileName = Multilingual.GetShowName(showId), ProfileOrder = profileOrder, LinkedShowId = showId, DoNotCombineShows = false });
-                                    profileOrder--;
-                                }
                                 //this.Profiles.Insert(new Profiles { ProfileId = 5, ProfileName = Multilingual.GetWord("main_profile_custom"), ProfileOrder = 6, LinkedShowId = "private_lobbies", DoNotCombineShows = false });
                                 //this.Profiles.Insert(new Profiles { ProfileId = 4, ProfileName = Multilingual.GetWord("main_profile_squad"), ProfileOrder = 5, LinkedShowId = "squads_4player", DoNotCombineShows = false });
                                 //this.Profiles.Insert(new Profiles { ProfileId = 3, ProfileName = Multilingual.GetWord("main_profile_trio"), ProfileOrder = 4, LinkedShowId = "squads_3player_template", DoNotCombineShows = false });
                                 //this.Profiles.Insert(new Profiles { ProfileId = 2, ProfileName = Multilingual.GetWord("main_profile_duo"), ProfileOrder = 3, LinkedShowId = "squads_2player_template", DoNotCombineShows = false });
-                                //
-                                //this.Profiles.Insert(new Profiles { ProfileId = 1, ProfileName = Multilingual.GetShowName("fb_ltm"), ProfileOrder = 2, LinkedShowId = "fb_ltm", DoNotCombineShows = false });
-                                //this.Profiles.Insert(new Profiles { ProfileId = 0, ProfileName = Multilingual.GetShowName("fb_main_show"), ProfileOrder = 1, LinkedShowId = "fb_main_show", DoNotCombineShows = false });
+                                this.Profiles.Insert(new Profiles { ProfileId = 1, ProfileName = Multilingual.GetShowName("ltm_show"), ProfileOrder = 2, LinkedShowId = "ltm_show", DoNotCombineShows = false });
+                                this.Profiles.Insert(new Profiles { ProfileId = 0, ProfileName = Multilingual.GetShowName("main_show"), ProfileOrder = 1, LinkedShowId = "main_show", DoNotCombineShows = false });
                             }
                             this.UserSettings.Update(this.CurrentSettings);
                             this.StatsDB.Commit();
@@ -1490,6 +1515,63 @@ namespace FinalBeansStats {
         private void UpdateDatabase() {
             for (int version = this.CurrentSettings.Version_FB; version < currentSettingsVersionFB; version++) {
                 switch (version) {
+                    case 6: {
+                            if (this.CurrentSettings.Multilingual >= 2) {
+                                ++this.CurrentSettings.Multilingual;
+                                CurrentLanguage = (Language)this.CurrentSettings.Multilingual;
+                                Overlay.SetDefaultFont(18, CurrentLanguage);
+                            }
+
+                            if (string.Equals(this.CurrentSettings.OverlayBackgroundResourceName, "background_frightful_final_ween")) {
+                                this.CurrentSettings.OverlayBackgroundResourceName = "background_rave_royale";
+                                this.CurrentSettings.OverlayTabResourceName = "tab_unselected_rave_royale";
+                            }
+
+                            List<Profiles> profileList = this.Profiles.FindAll().ToList();
+
+                            bool isUpdateProfiles = false;
+                            foreach (Profiles p in profileList) {
+                                if (this.KnownFinalBeansShowIds.Keys.Contains(p.LinkedShowId)) {
+                                    p.LinkedShowId = this.KnownFinalBeansShowIds[p.LinkedShowId];
+                                    isUpdateProfiles = true;
+                                }
+                            }
+                            if (isUpdateProfiles) {
+                                this.StatsDB.BeginTrans();
+                                this.Profiles.DeleteAll();
+                                this.Profiles.InsertBulk(profileList);
+                                this.StatsDB.Commit();
+                            }
+
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             select ri).ToList();
+
+                            foreach (RoundInfo ri in roundInfoList) {
+                                if (this.KnownFinalBeansShowIds.Keys.Contains(ri.ShowNameId)) {
+                                    ri.ShowNameId = this.KnownFinalBeansShowIds[ri.ShowNameId];
+                                }
+
+                                if (ri.RoundId.IndexOf("round_1v1_volleyfall", StringComparison.OrdinalIgnoreCase) != -1
+                                    || ri.RoundId.IndexOf("round_basketfall", StringComparison.OrdinalIgnoreCase) != -1
+                                    || ri.RoundId.IndexOf("round_fall_ball", StringComparison.OrdinalIgnoreCase) != -1
+                                    || ri.RoundId.IndexOf("round_jinxed", StringComparison.OrdinalIgnoreCase) != -1
+                                    || ri.RoundId.IndexOf("round_redlight_greenlight", StringComparison.OrdinalIgnoreCase) != -1
+                                    || ri.RoundId.IndexOf("round_territory_control", StringComparison.OrdinalIgnoreCase) != -1) {
+                                    ri.IsFinal = ri.RoundId.EndsWith("_final", StringComparison.OrdinalIgnoreCase);
+                                } else if (ri.RoundId.IndexOf("round_hexaghoul", StringComparison.OrdinalIgnoreCase) != -1
+                                           || ri.RoundId.IndexOf("round_lightsout", StringComparison.OrdinalIgnoreCase) != -1) {
+                                    ri.IsFinal = true;
+                                } else if (ri.RoundId.IndexOf("round_tunnel_final_trials", StringComparison.OrdinalIgnoreCase) != -1) {
+                                    ri.IsFinal = false;
+                                }
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.StatsDB.Commit();
+                            break;
+
+
+                        }
                     case 5: {
                             List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
                                                              select ri).ToList();
@@ -1588,7 +1670,6 @@ namespace FinalBeansStats {
                                 } else {
                                     ri.ShowName = !string.Equals(ri.ShowNameId, "fb_main_show") ? "LTM" : "Main Show";
                                 }
-                                ri.Participating = true;
                                 if (!ri.Finish.HasValue) {
                                     ri.Position = 0;
                                 }
@@ -1660,8 +1741,8 @@ namespace FinalBeansStats {
                 OverlayFixedWidth = 786,
                 OverlayFixedHeight = 134,
                 OverlayBackground = 8,
-                OverlayBackgroundResourceName = "background_frightful_final_ween",
-                OverlayTabResourceName = "tab_unselected_frightful_final_ween",
+                OverlayBackgroundResourceName = "background_rave_royale",
+                OverlayTabResourceName = "tab_unselected_rave_royale",
                 OverlayBackgroundOpacity = 100,
                 IsOverlayBackgroundCustomized = false,
                 OverlayColor = 0,
@@ -2298,7 +2379,7 @@ namespace FinalBeansStats {
                 timeDiffContent = timeDiff.Minutes > 0 ? $" ⏱️ {Multilingual.GetWord("message_new_personal_best_timediff_by_minute_prefix")}{timeDiff.Minutes}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_infix")} {timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_minute_suffix")}"
                                   : $" ⏱️ {timeDiff:s\\.fff}{Multilingual.GetWord("message_new_personal_best_timediff_by_second")}";
             }
-            string levelName = this.StatLookup.TryGetValue(roundId, out LevelStats l1) ? l1.Name : roundId.Substring(0, roundId.Length - 3);
+            string levelName = this.StatLookup.TryGetValue(roundId, out LevelStats l1) ? l1.Name : roundId;
             string info = $"{(string.Equals(Multilingual.GetShowName(showId), levelName) ? $"({levelName})" : $"({Multilingual.GetShowName(showId)} • {levelName})")}";
             string description = $"{Multilingual.GetWord("message_new_personal_best_prefix")}{info}{Multilingual.GetWord("message_new_personal_best_suffix")}{timeDiffContent}";
             ToastPosition toastPosition = Enum.TryParse(this.CurrentSettings.NotificationWindowPosition.ToString(), out ToastPosition position) ? position : ToastPosition.BottomRight;
@@ -2384,7 +2465,7 @@ namespace FinalBeansStats {
                             RoundInfo info = null;
                             for (int i = this.AllStats.Count - 1; i >= 0; i--) {
                                 RoundInfo temp = this.AllStats[i];
-                                if (temp.Start == stat.Start && temp.Name == stat.Name) {
+                                if (temp.Start == stat.Start) {
                                     info = temp;
                                     break;
                                 }
@@ -2396,6 +2477,7 @@ namespace FinalBeansStats {
                                     this.EnableInfoStrip(false);
                                     this.EnableMainMenu(false);
                                     using (EditShows editShows = new EditShows()) {
+                                        editShows.AskedPreviousShows = true;
                                         editShows.FunctionFlag = "add";
                                         editShows.Profiles = this.AllProfiles;
                                         editShows.StatsForm = this;
@@ -2773,7 +2855,9 @@ namespace FinalBeansStats {
 
         public string GetAlternateShowId(string showId) {
             switch (showId) {
+                //
                 // Fall Guys Stuff
+                //
                 /*
                 case "event_day_at_the_races_ltm":
                     return "event_only_races_any_final_template";
@@ -2801,7 +2885,12 @@ namespace FinalBeansStats {
 
         public string GetMainGroupShowId(string showId) {
             switch (showId) {
+                case "fs2_mix_it_up":
+                case "show_finalbeans_fs4_variations":
+                    return "mix_it_up";
+                //
                 // Fall Guys Stuff
+                //
                 /*
                 case "ranked_show_knockout":
                 case "xtreme_solos_template_ranked":
@@ -2853,7 +2942,7 @@ namespace FinalBeansStats {
                     return "event_xtreme_fall_guys_template";
                 */
                 default:
-                    return !string.Equals(showId, "fb_main_show") ? "fb_ltm" : "fb_main_show";
+                    return showId;
             }
         }
 
@@ -2886,12 +2975,15 @@ namespace FinalBeansStats {
                         return profiles.ProfileId;
                     }
                 } else {
-                    if (isPrivateLobbies) {
-                        if (!string.IsNullOrEmpty(profiles.LinkedShowId) && string.Equals(profiles.LinkedShowId, "private_lobbies")) {
+                    if (!isPrivateLobbies) {
+                        if (!string.IsNullOrEmpty(profiles.LinkedShowId) && showId.IndexOf(profiles.LinkedShowId, StringComparison.OrdinalIgnoreCase) != -1) {
+                            return profiles.ProfileId;
+                        }
+                        if (!string.Equals(showId, "main_show") && string.Equals(profiles.LinkedShowId, "ltm_show")) {
                             return profiles.ProfileId;
                         }
                     } else {
-                        if (!string.IsNullOrEmpty(profiles.LinkedShowId) && showId.IndexOf(profiles.LinkedShowId, StringComparison.OrdinalIgnoreCase) != -1) {
+                        if (string.Equals(profiles.LinkedShowId, "private_lobbies")) {
                             return profiles.ProfileId;
                         }
                     }
@@ -2939,14 +3031,19 @@ namespace FinalBeansStats {
                         }
                     }
                     if (this.AllProfiles[i].DoNotCombineShows) continue;
-                    if (isPrivateLobbies) {
-                        if (!string.IsNullOrEmpty(this.AllProfiles[i].LinkedShowId) && string.Equals(this.AllProfiles[i].LinkedShowId, "private_lobbies")) {
+                    if (!isPrivateLobbies) {
+                        if (!string.IsNullOrEmpty(this.AllProfiles[i].LinkedShowId) && showId.IndexOf(this.AllProfiles[i].LinkedShowId, StringComparison.OrdinalIgnoreCase) != -1) {
+                            ToolStripMenuItem item = this.ProfileMenuItems[this.AllProfiles.Count - 1 - i];
+                            if (!item.Checked) { this.menuStats_Click(item, EventArgs.Empty); }
+                            return;
+                        }
+                        if (!string.Equals(showId, "main_show") && string.Equals(this.AllProfiles[i].LinkedShowId, "ltm_show")) {
                             ToolStripMenuItem item = this.ProfileMenuItems[this.AllProfiles.Count - 1 - i];
                             if (!item.Checked) { this.menuStats_Click(item, EventArgs.Empty); }
                             return;
                         }
                     } else {
-                        if (!string.IsNullOrEmpty(this.AllProfiles[i].LinkedShowId) && showId.IndexOf(this.AllProfiles[i].LinkedShowId, StringComparison.OrdinalIgnoreCase) != -1) {
+                        if (string.Equals(this.AllProfiles[i].LinkedShowId, "private_lobbies")) {
                             ToolStripMenuItem item = this.ProfileMenuItems[this.AllProfiles.Count - 1 - i];
                             if (!item.Checked) { this.menuStats_Click(item, EventArgs.Empty); }
                             return;
@@ -3016,7 +3113,7 @@ namespace FinalBeansStats {
             });
         }
 
-        public StatSummary GetLevelInfo(string levelId, LevelType type, BestRecordType record) {
+        public StatSummary GetLevelInfo(string levelId, BestRecordType record) {
             StatSummary summary = new StatSummary {
                 Streak = 0,
                 FinalStreak = 0,
@@ -4261,7 +4358,7 @@ namespace FinalBeansStats {
         private void Stats_KeyUp(object sender, KeyEventArgs e) {
             switch (e.KeyCode) {
                 case Keys.ControlKey:
-                    this.ctrlKeyToggle = false;
+                    // this.ctrlKeyToggle = false;
                     break;
                 case Keys.ShiftKey:
                     this.shiftKeyToggle = false;
@@ -4272,7 +4369,7 @@ namespace FinalBeansStats {
         private void Stats_KeyDown(object sender, KeyEventArgs e) {
             switch (e.KeyCode) {
                 case Keys.ControlKey:
-                    this.ctrlKeyToggle = true;
+                    // this.ctrlKeyToggle = true;
                     break;
                 case Keys.ShiftKey:
                     this.shiftKeyToggle = true;
@@ -4325,7 +4422,7 @@ namespace FinalBeansStats {
                     this.overlay.UpdateDisplay();
                     break;
                 case false when e.KeyCode == Keys.ControlKey:
-                    this.ctrlKeyToggle = true;
+                    // this.ctrlKeyToggle = true;
                     break;
                 case false when e.KeyCode == Keys.ShiftKey:
                     this.shiftKeyToggle = true;
