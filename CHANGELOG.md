@@ -1,3 +1,9 @@
+## v2.0
+- Add: Support for new FS4 rounds/shows
+- New: "Español" (Spanish) language is available
+- New: Countdown info before round start (Overlay)
+- Change: Removed option to fix the show name of one (or multiple) show(s)
+- General bug fixes && improvements
 ## v1.8
 - Fix: Final round detection for "Skilled Speeders" show
 ## v1.7
