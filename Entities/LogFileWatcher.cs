@@ -29,9 +29,7 @@ namespace FinalBeansStats {
         }
     }
     public class LogRound {
-        public bool CountingPlayers;
-        public bool GetCurrentPlayerID;
-        public int CurrentPlayerID;
+        public readonly int CurrentPlayerID = 0; // Set to "0" because "local" playerId info is not present in FinalBeans logs
         public bool FindingPosition;
 
         public RoundInfo Info;
@@ -41,6 +39,7 @@ namespace FinalBeansStats {
     public class ThreadLocalData {
         public long lastQueuingInfoLinePos;
 
+        public int selectedShowIndex;
         public bool isPrivateLobby;
         public bool currentlyInParty;
         public string currentShowNameId;
@@ -187,46 +186,42 @@ namespace FinalBeansStats {
                         }
                     }
 
+                    List<RoundInfo> round = new List<RoundInfo>();
+
                     if (tempLines.Count > 0) {
-                        List<RoundInfo> round = new List<RoundInfo>();
                         LogRound logRound = new LogRound();
-                        List<LogLine> currentLines = new List<LogLine>();
 
                         for (int i = 0; i < tempLines.Count; i++) {
                             LogLine line = tempLines[i];
-                            currentLines.Add(line);
                             if (this.ParseLine(line, round, logRound)) {
                                 lastDate = line.Date;
                                 offset = line.Offset;
                                 allStats.AddRange(round);
-                                if (allStats.Count > 0) {
-                                    this.OnParsedLogLines?.Invoke(allStats);
-                                    allStats.Clear();
-                                }
-                                currentLines.Clear();
+                                this.OnParsedLogLines?.Invoke(allStats);
+                                allStats.Clear();
                             } else if (line.Line.IndexOf("[LobbyManager] Show selected index: ", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[StateMainMenu] No server address specified, attempting to matchmake", StringComparison.OrdinalIgnoreCase) != -1
+                                       || line.Line.IndexOf("[Matchmaking] Cancelled", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[GlobalGameStateClient] SwitchToDisconnectingState called with reason IngameMenuLeaveMatch", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[StateDisconnectingFromServer] Shutting down game and resetting scene to reconnect", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateReloadingToMainMenu with FGClient.StateMainMenu", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[StateMainMenu] Loading scene MainMenu", StringComparison.OrdinalIgnoreCase) != -1
                                        || line.Line.IndexOf("[GlobalGameStateClient] OnDestroy called", StringComparison.OrdinalIgnoreCase) != -1) {
-                                if (line.Line.IndexOf("[LobbyManager] Show selected index: ", StringComparison.OrdinalIgnoreCase) != -1) {
-                                    Stats.SelectedShowIndex = int.Parse(line.Line.Substring(line.Line.IndexOf("index: ", StringComparison.OrdinalIgnoreCase) + 7));
-                                }
                                 lastDate = line.Date;
-                                offset = i > 0 ? tempLines[i - 1].Offset : offset;
-                            } else if (this.StatsForm.CurrentSettings.AutoChangeProfile && line.Line.IndexOf("[RoundManager] OnGameStarted", StringComparison.OrdinalIgnoreCase) != -1) {
+                                offset = line.Offset;
+                            } else if (this.StatsForm.CurrentSettings.AutoChangeProfile && line.Line.IndexOf("[MatchLifecycle] Match started showId=", StringComparison.OrdinalIgnoreCase) != -1) {
                                 if (Stats.InShow && !Stats.EndedShow) {
                                     this.StatsForm.SetLinkedProfileMenu(this.threadLocalVariable.Value.currentShowNameId, this.threadLocalVariable.Value.isPrivateLobby);
                                 }
-                            } else if (this.StatsForm.CurrentSettings.PreventOverlayMouseClicks && line.Line.IndexOf("[GameSession] Changing state from Countdown to Playing", StringComparison.OrdinalIgnoreCase) != -1) {
+                            } else if (this.StatsForm.CurrentSettings.PreventOverlayMouseClicks && line.Line.IndexOf("[GameSession] Changing state from Precountdown to Countdown", StringComparison.OrdinalIgnoreCase) != -1) {
                                 if (Stats.InShow && !Stats.EndedShow) {
                                     this.StatsForm.PreventOverlayMouseClicks();
                                 }
                             }
                         }
+                    }
 
+                    if (Stats.InShow && round.Count > 0) {
                         this.OnParsedLogLinesCurrent?.Invoke(round);
                     }
 
@@ -561,9 +556,8 @@ namespace FinalBeansStats {
             Stats.LastCountryRegion = string.Empty;
             Stats.LastCountryCity = string.Empty;
             this.threadLocalVariable.Value.toggleCountryInfoApi = false;
+            Stats.CountdownStartDate = DateTime.MinValue;
             Stats.LastPlayedRoundEnd = null;
-            Stats.SavedRoundCount = 0;
-            Stats.PrecountdownDate = DateTime.MinValue;
         }
 
         private void ResetMainLocalVariables() {
@@ -627,689 +621,750 @@ namespace FinalBeansStats {
         }
 
         private bool ParseLine(LogLine line, List<RoundInfo> round, LogRound logRound) {
-            int index;
-            if (line.Line.IndexOf("[GlobalGameStateClient] SwitchToDisconnectingState called with reason IngameMenuLeaveMatch", StringComparison.OrdinalIgnoreCase) != -1
-                || line.Line.IndexOf("[StateDisconnectingFromServer] Shutting down game and resetting scene to reconnect", StringComparison.OrdinalIgnoreCase) != -1
-                || line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateReloadingToMainMenu with FGClient.StateMainMenu", StringComparison.OrdinalIgnoreCase) != -1
-                || line.Line.IndexOf("[StateMainMenu] Loading scene MainMenu", StringComparison.OrdinalIgnoreCase) != -1
-                || line.Line.IndexOf("[GlobalGameStateClient] OnDestroy called", StringComparison.OrdinalIgnoreCase) != -1
-                || Stats.IsClientHasBeenClosed) {
-                this.ResetVariablesUsedForOverlay();
+            try {
+                int index;
+                if ((index = line.Line.IndexOf("[LobbyManager] Show selected index: ", StringComparison.OrdinalIgnoreCase)) != -1) {
+                    this.threadLocalVariable.Value.selectedShowIndex = int.Parse(line.Line.Substring(index + 36));
+                } else if (line.Line.IndexOf("[StateMainMenu] No server address specified, attempting to matchmake", StringComparison.OrdinalIgnoreCase) != -1) {
+                    //
+                    // No "ServerIp" and no "SessionId" info in FinalBeans logs
+                    //
 
-                if (Stats.IsClientHasBeenClosed) {
-                    Stats.IsClientHasBeenClosed = false;
-                    this.AddLineAfterClientShutdown();
-                    return false;
-                }
+                    // this.threadLocalVariable.Value.isPrivateLobby = line.Line.IndexOf("StatePrivateLobby", StringComparison.OrdinalIgnoreCase) != -1
+                    //                                                 || line.Line.IndexOf("private lobby", StringComparison.OrdinalIgnoreCase) != -1;
 
-                if (Stats.InShow && Stats.LastPlayedRoundStart.HasValue && !Stats.LastPlayedRoundEnd.HasValue) {
-                    Stats.LastPlayedRoundEnd = line.Date;
-                }
-                Stats.IsLastPlayedRoundStillPlaying = false;
+                    // this.threadLocalVariable.Value.currentlyInParty = !this.threadLocalVariable.Value.isPrivateLobby
+                    //                                                   && (line.Line.IndexOf("solo", StringComparison.OrdinalIgnoreCase) == -1);
 
-                logRound.CountingPlayers = false;
-                logRound.GetCurrentPlayerID = false;
-                logRound.FindingPosition = false;
+                    logRound.FindingPosition = false;
+                    logRound.Info = null;
+                    logRound.PlayersInfo = null;
+                    Stats.IsShowStarting = true;
+                    Stats.EndedShow = false;
 
-                if (logRound.Info != null) {
-                    if (logRound.Info.End == DateTime.MinValue) {
-                        logRound.Info.End = line.Date;
+                    round.Clear();
+
+                } else if (line.Line.IndexOf("[Matchmaking] Cancelled", StringComparison.OrdinalIgnoreCase) != -1
+                           || line.Line.IndexOf("[GlobalGameStateClient] SwitchToDisconnectingState called with reason IngameMenuLeaveMatch", StringComparison.OrdinalIgnoreCase) != -1
+                           || line.Line.IndexOf("[StateDisconnectingFromServer] Shutting down game and resetting scene to reconnect", StringComparison.OrdinalIgnoreCase) != -1
+                           || line.Line.IndexOf("[GameStateMachine] Replacing FGClient.StateReloadingToMainMenu with FGClient.StateMainMenu", StringComparison.OrdinalIgnoreCase) != -1
+                           || line.Line.IndexOf("[StateMainMenu] Loading scene MainMenu", StringComparison.OrdinalIgnoreCase) != -1
+                           || line.Line.IndexOf("[GlobalGameStateClient] OnDestroy called", StringComparison.OrdinalIgnoreCase) != -1
+                           || Stats.IsClientHasBeenClosed) {
+                    this.ResetVariablesUsedForOverlay();
+
+                    if (Stats.IsClientHasBeenClosed) {
+                        Stats.IsClientHasBeenClosed = false;
+                        this.AddLineAfterClientShutdown();
+                        return false;
                     }
-                    logRound.Info.Playing = false;
-                    //
-                    // No " == [CompletedEpisodeDto] ==" (show summary) info in FinalBeans logs
-                    //
-                    // "RecordEscapeDuringAGame" setting MUST always be 'true' to save game stats
-                    //
-                    if (!string.IsNullOrEmpty(this.playerName) && this.StatsForm.CurrentSettings.RecordEscapeDuringAGame && !Stats.EndedShow) {
-                        DateTime showStart = DateTime.MinValue;
-                        DateTime showEnd = logRound.Info.End;
-                        for (int i = 0; i < round.Count; i++) {
-                            if (i == 0) {
-                                showStart = round[i].Start;
-                            }
-                            round[i].ShowStart = showStart;
-                            round[i].ShowEnd = showEnd;
-                            round[i].Playing = false;
-                            // round[i].Round = i + 1;
-                            bool isNotParticipated = false;
-                            if (i == (round.Count - 1)) {
-                                for (int j = i; j >= 0; j--) {
-                                    if (string.IsNullOrEmpty(round[j].Name)) {
-                                        round.RemoveAt(j);
-                                        continue;
-                                    }
-                                    //
-                                    // Elimination info (of the local player only) is not always present in FinalBeans logs (mostly in "Survival" rounds)
-                                    // so check if "Participating" flag was set to true or not
-                                    //
-                                    // If "Participating" flag is 'false' at round start => [don't save this round info; save previous rounds only]
-                                    //
-                                    if (!round[j].Participating) {
-                                        isNotParticipated = true;
-                                        if (j < i && round.ElementAtOrDefault(j + 1) != null) {
-                                            round.RemoveAt(j + 1);
-                                        }
-                                        round.RemoveAt(j);
-                                        continue;
-                                    }
-                                    //
-                                    // Qualification/Win info is not always present in FinalBeans logs (mostly in "Survival" rounds)
-                                    // So no "Finish" time set when it happens (it's an issue!)
-                                    // So if the player participate to the last round and no elimination info line is present
-                                    // Manually set "Finish" time / set "Qualified" flag to 'true' for all played rounds
-                                    //
-                                    // IMPORTANT: If the player is eliminated and no elimination info line is present
-                                    // "Finish" time will wrongly be set
-                                    // User can still delete "Finish" time of this round later to fix it...
-                                    //
-                                    for (int k = j; k >= 0; k--) {
-                                        if (k == j && isNotParticipated) {
-                                            // Means the player was eliminated in this round, so don't set "Finish" time / "Qualified" flag
+
+                    if (Stats.InShow && Stats.LastPlayedRoundStart.HasValue && !Stats.LastPlayedRoundEnd.HasValue) {
+                        Stats.LastPlayedRoundEnd = line.Date;
+                    }
+                    Stats.IsLastPlayedRoundStillPlaying = false;
+
+                    logRound.FindingPosition = false;
+
+                    if (logRound.Info != null) {
+                        if (logRound.Info.End == DateTime.MinValue) {
+                            logRound.Info.End = line.Date;
+                        }
+                        logRound.Info.Playing = false;
+                        //
+                        // No " == [CompletedEpisodeDto] ==" (show summary) info in FinalBeans logs
+                        //
+                        // "RecordEscapeDuringAGame" setting MUST always be 'true' to save game stats
+                        //
+                        if (!string.IsNullOrEmpty(this.playerName) && this.StatsForm.CurrentSettings.RecordEscapeDuringAGame && !Stats.EndedShow) {
+                            DateTime showStart = DateTime.MinValue;
+                            DateTime showEnd = logRound.Info.End;
+                            for (int i = 0; i < round.Count; i++) {
+                                if (i == 0) {
+                                    showStart = round[i].Start;
+                                }
+                                round[i].ShowStart = showStart;
+                                round[i].ShowEnd = showEnd;
+                                round[i].Playing = false;
+                                bool isLastRoundNotParticipated = false;
+                                if (i == (round.Count - 1)) {
+                                    for (int j = i; j >= 0; j--) {
+                                        if (string.IsNullOrEmpty(round[j].Name)) {
+                                            round.RemoveAt(j);
                                             continue;
                                         }
-                                        if (!round[k].Finish.HasValue) {
-                                            round[k].Finish = round[k].End;
+                                        //
+                                        // Elimination info (of the local player only) is not always present in FinalBeans logs (mostly in "Survival" rounds)
+                                        // so check if "Participating" flag was set to true or not
+                                        //
+                                        // If "Participating" flag is 'false' at round start => [don't save this round info; save previous rounds only]
+                                        //
+                                        if (!round[j].Participating) {
+                                            isLastRoundNotParticipated = true;
+                                            if (j < i && round.ElementAtOrDefault(j + 1) != null) {
+                                                round.RemoveAt(j + 1);
+                                            }
+                                            round.RemoveAt(j);
+                                            continue;
                                         }
-                                        round[k].Qualified = true;
+                                        //
+                                        // Qualification/Win info is not always present in FinalBeans logs (mostly in "Survival" rounds)
+                                        // So no "Finish" time set when it happens (it's an issue!)
+                                        // So if the player participate to the last round and no elimination info line is present
+                                        // Manually set "Finish" time / set "Qualified" flag to 'true' for all played rounds
+                                        //
+                                        // IMPORTANT: If the player is eliminated and no elimination info line is present
+                                        // "Finish" time will wrongly be set
+                                        // User can still delete "Finish" time of this round later to fix it...
+                                        //
+                                        for (int k = j; k >= 0; k--) {
+                                            if (k == j && isLastRoundNotParticipated && !round[k].Qualified) {
+                                                // Means the player was eliminated in this round, so don't set "Finish" time / "Qualified" flag
+                                                continue;
+                                            }
+                                            if (!round[k].Finish.HasValue) {
+                                                round[k].Finish = round[k].End;
+                                            }
+                                            round[k].Qualified = true;
+                                        }
                                     }
                                 }
-                                if (round.Count > 0) {
-                                    var lastRoundInfo = round[round.Count - 1];
-                                    // If the player leaves the match from the in-game menu or quit the game, unset "Finish" time / "Qualified" flag for the last round
-                                    if (line.Line.IndexOf("[GlobalGameStateClient] SwitchToDisconnectingState called with reason IngameMenuLeaveMatch", StringComparison.OrdinalIgnoreCase) != -1
-                                        || line.Line.IndexOf("[GlobalGameStateClient] OnDestroy called", StringComparison.OrdinalIgnoreCase) != -1) {
-                                        lastRoundInfo.Finish = null;
-                                        lastRoundInfo.Qualified = false;
-                                    } else if (lastRoundInfo.IsFinal && lastRoundInfo.Qualified) {
-                                        lastRoundInfo.Position = 1;
-                                        lastRoundInfo.Tier = 1;
-                                        lastRoundInfo.Crown = true;
-                                    }
-                                    lastRoundInfo.LastRound = true;
+                            }
+                            if (round.Count > 0) {
+                                var lastRoundInfo = round[round.Count - 1];
+                                // If the player leaves the match from the in-game menu or ALT+F4 or having a game crash, unset "Finish" time / "Qualified" flag for the last round
+                                if (line.Line.IndexOf("[GlobalGameStateClient] SwitchToDisconnectingState called with reason IngameMenuLeaveMatch", StringComparison.OrdinalIgnoreCase) != -1
+                                    || line.Line.IndexOf("[GlobalGameStateClient] OnDestroy called", StringComparison.OrdinalIgnoreCase) != -1) {
+                                    lastRoundInfo.Finish = null;
+                                    lastRoundInfo.Qualified = false;
+                                } else if (lastRoundInfo.IsFinal && lastRoundInfo.Qualified) {
+                                    lastRoundInfo.Position = 1;
+                                    lastRoundInfo.Tier = 1;
+                                    lastRoundInfo.Crown = true;
                                 }
+                                lastRoundInfo.LastRound = true;
                                 //
                                 // No "SessionId" info in FinalBeans logs
                                 //
                                 // this.StatsForm.UpdateServerConnectionLog(this.threadLocalVariable.Value.currentSessionId, false);
+                                //
                                 logRound.Info = null;
+                                logRound.PlayersInfo = null;
                                 Stats.InShow = false;
                                 Stats.EndedShow = true;
                                 return true;
                             }
                         }
                     }
-                }
-                logRound.Info = null;
-                Stats.InShow = false;
-                Stats.EndedShow = true;
-            } else if (line.Line.IndexOf("[StateMainMenu] No server address specified, attempting to matchmake", StringComparison.OrdinalIgnoreCase) != -1) {
-                //
-                // No "ServerIp" and no "SessionId" info in FinalBeans logs
-                //
-
-                // this.threadLocalVariable.Value.isPrivateLobby = line.Line.IndexOf("StatePrivateLobby", StringComparison.OrdinalIgnoreCase) != -1
-                //                                                 || line.Line.IndexOf("private lobby", StringComparison.OrdinalIgnoreCase) != -1;
-
-                // this.threadLocalVariable.Value.currentlyInParty = !this.threadLocalVariable.Value.isPrivateLobby
-                //                                                   && (line.Line.IndexOf("solo", StringComparison.OrdinalIgnoreCase) == -1);
-
-                Stats.IsShowStarting = true;
-                Stats.EndedShow = false;
-
-                logRound.CountingPlayers = false;
-                logRound.GetCurrentPlayerID = false;
-                logRound.FindingPosition = false;
-                logRound.PlayersInfo = null;
-
-                round.Clear();
-            } else if ((index = line.Line.IndexOf("ROUNDMANAGER - SELECTED ROUND ", StringComparison.OrdinalIgnoreCase)) != -1) {
-                if (line.Date > Stats.LastRoundLoad) {
-                    Stats.LastRoundLoad = line.Date;
-                    Stats.InShow = true;
-                    Stats.SucceededPlayerNames.Clear();
-                    Stats.SucceededPlayerIds.Clear();
-                    Stats.EliminatedPlayerIds.Clear();
-                    Stats.ReadyPlayerIds.Clear();
-                    Stats.NumPlayersSucceeded = 0;
-                    Stats.NumPlayersPsSucceeded = 0;
-                    Stats.NumPlayersXbSucceeded = 0;
-                    Stats.NumPlayersSwSucceeded = 0;
-                    Stats.NumPlayersPcSucceeded = 0;
-                    Stats.NumPlayersMbSucceeded = 0;
-                    Stats.NumPlayersEliminated = 0;
-                    Stats.NumPlayersPsEliminated = 0;
-                    Stats.NumPlayersXbEliminated = 0;
-                    Stats.NumPlayersSwEliminated = 0;
-                    Stats.NumPlayersPcEliminated = 0;
-                    Stats.NumPlayersMbEliminated = 0;
-                    Stats.IsLastPlayedRoundStillPlaying = false;
-                    Stats.LastPlayedRoundStart = null;
-                    Stats.LastPlayedRoundEnd = null;
-
-                    if (!Stats.IsConnectedToServer) {
-                        Stats.IsConnectedToServer = true;
-                        Stats.ConnectedToServerDate = line.Date;
-                    }
-
-                    if ((DateTime.UtcNow - Stats.ConnectedToServerDate).TotalMinutes <= 40) {
-                        this.gameStateWatcher.Start();
-                    }
-                }
-
-                if (logRound.Info != null) {
-                    if (logRound.Info.End == DateTime.MinValue) {
-                        logRound.Info.End = line.Date;
-                    }
-                    logRound.Info.Playing = false;
-                }
-
-                this.threadLocalVariable.Value.currentRoundId = line.Line.Substring(index + 30);
-                this.threadLocalVariable.Value.currentRoundStart = line.Date;
-
-                logRound.FindingPosition = false;
-
-                logRound.PlayersInfo = new RoundInfo();
-                logRound.CountingPlayers = true;
-                logRound.GetCurrentPlayerID = true; // But currently useless for FinalBeans because playerID of the "local" player is unknown
-                logRound.CurrentPlayerID = 0;       // Set to "0" because it is unknown
-            } else if (logRound.CountingPlayers && line.Line.IndexOf("[CameraDirector] Adding Spectator target", StringComparison.OrdinalIgnoreCase) != -1) {
-                //
-                // "[CameraDirector] Adding Spectator target" in FinalBeans logs means a "remote" player is present (playing -OR- spectating, we can't tell...)
-                //
-                logRound.PlayersInfo.Players++;
-                int playerId = int.Parse(line.Line.Substring(line.Line.IndexOf("playerID: ", StringComparison.OrdinalIgnoreCase) + 10));
-                string platformId = line.Line.Substring(line.Line.IndexOf("(", StringComparison.OrdinalIgnoreCase) + 1, line.Line.IndexOf(")", StringComparison.OrdinalIgnoreCase) - line.Line.IndexOf("(", StringComparison.OrdinalIgnoreCase) - 1);
-                switch (platformId) {
-                    case "ps4":
-                        logRound.PlayersInfo.PlayersPs4++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "ps4");
-                        }
-                        break;
-                    case "ps5":
-                        logRound.PlayersInfo.PlayersPs5++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "ps5");
-                        }
-                        break;
-                    case "xb1":
-                        logRound.PlayersInfo.PlayersXb1++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "xb1");
-                        }
-                        break;
-                    case "xsx":
-                        logRound.PlayersInfo.PlayersXsx++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "xsx");
-                        }
-                        break;
-                    case "switch":
-                        logRound.PlayersInfo.PlayersSw++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "switch");
-                        }
-                        break;
-                    case "win":
-                        logRound.PlayersInfo.PlayersPc++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "win");
-                        }
-                        break;
-                    case "android":
-                        logRound.PlayersInfo.PlayersAndroid++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "android");
-                        }
-                        break;
-                    case "ios":
-                        logRound.PlayersInfo.PlayersIos++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "ios");
-                        }
-                        break;
-                    case "bots":
-                        logRound.PlayersInfo.PlayersBots++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "bots");
-                        }
-                        break;
-                    default:
-                        logRound.PlayersInfo.PlayersEtc++;
-                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                            Stats.ReadyPlayerIds.Add(playerId, "etc");
-                        }
-                        break;
-                }
-            } else if (logRound.CountingPlayers && line.Line.IndexOf("[CameraDirector].UseCloseShot, current camera target type is Intro", StringComparison.OrdinalIgnoreCase) != -1) {
-                //
-                // "[CameraDirector].UseCloseShot, current camera target type is Intro" in FinalBeans logs means YOU will play
-                //
-                logRound.PlayersInfo.Participating = true;
-                logRound.PlayersInfo.Players++;
-                logRound.PlayersInfo.PlayersPc++;
-                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(logRound.CurrentPlayerID)) {
-                    Stats.ReadyPlayerIds.Add(logRound.CurrentPlayerID, "win");
-                }
-            } else if (line.Line.IndexOf("[StateGameLoading].OnIntroCamerasComplete", StringComparison.OrdinalIgnoreCase) != -1) {
-                logRound.CountingPlayers = false;
-                logRound.GetCurrentPlayerID = false;
-            } else if (line.Line.IndexOf("[GameSession] Changing state from Precountdown to Countdown", StringComparison.OrdinalIgnoreCase) != -1) {
-                if (line.Date > Stats.LastPrecountdownStateDate) {
-                    Stats.LastPrecountdownStateDate = line.Date;
-                    Stats.PrecountdownDate = line.Date;
-                }
-            } else if (line.Line.IndexOf("[MatchLifecycle] Match started showId=", StringComparison.OrdinalIgnoreCase) != -1) {
-                this.threadLocalVariable.Value.currentShowNameId = line.Line.Substring(line.Line.IndexOf("showId=", StringComparison.OrdinalIgnoreCase) + 7);
-            } else if (line.Line.IndexOf("[RoundManager] OnGameStarted", StringComparison.OrdinalIgnoreCase) != -1) {
-                string showId = this.threadLocalVariable.Value.currentShowNameId;
-                string showName = Multilingual.GetShowName(showId);
-
-                logRound.Info = new RoundInfo {
-                    PrivateLobby = this.threadLocalVariable.Value.isPrivateLobby,
-                    InParty = this.threadLocalVariable.Value.currentlyInParty,
-                    // ShowName = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate),
-                    // ShowNameId = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate, true),
-                    ShowName = !string.IsNullOrEmpty(showName) ? showName : (!string.IsNullOrWhiteSpace(showId) ? showId : (Stats.SelectedShowIndex == 0 ? Multilingual.GetShowName("main_show") : Multilingual.GetShowName("ltm_show"))),
-                    ShowNameId = !string.IsNullOrWhiteSpace(showId) ? showId : (Stats.SelectedShowIndex == 0 ? "main_show" : "ltm_show"),
-                    RoundId = this.threadLocalVariable.Value.currentRoundId,
-                    Start = this.threadLocalVariable.Value.currentRoundStart
-                };
-
-                if (logRound.PlayersInfo != null) {
-                    logRound.Info.Participating = logRound.PlayersInfo.Participating;
-                    logRound.Info.Players = logRound.PlayersInfo.Players;
-                    logRound.Info.PlayersPs4 = logRound.PlayersInfo.PlayersPs4;
-                    logRound.Info.PlayersPs5 = logRound.PlayersInfo.PlayersPs5;
-                    logRound.Info.PlayersXb1 = logRound.PlayersInfo.PlayersXb1;
-                    logRound.Info.PlayersXsx = logRound.PlayersInfo.PlayersXsx;
-                    logRound.Info.PlayersSw = logRound.PlayersInfo.PlayersSw;
-                    logRound.Info.PlayersPc = logRound.PlayersInfo.PlayersPc;
-                    logRound.Info.PlayersAndroid = logRound.PlayersInfo.PlayersAndroid;
-                    logRound.Info.PlayersIos = logRound.PlayersInfo.PlayersIos;
-                    logRound.Info.PlayersBots = logRound.PlayersInfo.PlayersBots;
-                    logRound.Info.PlayersEtc = logRound.PlayersInfo.PlayersEtc;
+                    logRound.Info = null;
                     logRound.PlayersInfo = null;
-                }
+                    Stats.InShow = false;
+                    Stats.EndedShow = true;
+                } else if ((index = line.Line.IndexOf("[MatchLifecycle] Match started showId=", StringComparison.OrdinalIgnoreCase)) != -1) {
+                    if (!string.Equals(line.Line.Substring(index + 38), this.threadLocalVariable.Value.currentShowNameId)) {
+                        this.threadLocalVariable.Value.currentShowNameId = line.Line.Substring(index + 38);
+                    }
+                } else if ((index = line.Line.IndexOf("ROUNDMANAGER - SELECTED ROUND ", StringComparison.OrdinalIgnoreCase)) != -1) {
+                    if (line.Date > Stats.LastRoundLoad) {
+                        Stats.LastRoundLoad = line.Date;
+                        Stats.InShow = true;
+                        Stats.SucceededPlayerNames.Clear();
+                        Stats.SucceededPlayerIds.Clear();
+                        Stats.EliminatedPlayerIds.Clear();
+                        Stats.ReadyPlayerIds.Clear();
+                        Stats.NumPlayersSucceeded = 0;
+                        Stats.NumPlayersPsSucceeded = 0;
+                        Stats.NumPlayersXbSucceeded = 0;
+                        Stats.NumPlayersSwSucceeded = 0;
+                        Stats.NumPlayersPcSucceeded = 0;
+                        Stats.NumPlayersMbSucceeded = 0;
+                        Stats.NumPlayersEliminated = 0;
+                        Stats.NumPlayersPsEliminated = 0;
+                        Stats.NumPlayersXbEliminated = 0;
+                        Stats.NumPlayersSwEliminated = 0;
+                        Stats.NumPlayersPcEliminated = 0;
+                        Stats.NumPlayersMbEliminated = 0;
+                        Stats.IsLastPlayedRoundStillPlaying = false;
+                        Stats.LastPlayedRoundStart = null;
+                        Stats.LastPlayedRoundEnd = null;
 
-                logRound.Info.Name = this.VerifiedRoundId(logRound.Info.RoundId);
+                        if (!Stats.IsConnectedToServer) {
+                            Stats.IsConnectedToServer = true;
+                            Stats.ConnectedToServerDate = line.Date;
+                        }
 
-                logRound.Info.IsTeam = this.IsTeamException(logRound.Info.RoundId);
+                        if ((DateTime.UtcNow - Stats.ConnectedToServerDate).TotalMinutes <= 40) {
+                            this.gameStateWatcher.Start();
+                        }
+                    }
 
-                if (this.IsRealFinalRound(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
-                    logRound.Info.IsFinal = true;
-                } else if (this.IsModeException(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
-                    logRound.Info.IsFinal = this.IsModeFinalException(logRound.Info.RoundId);
-                } else {
-                    logRound.Info.IsFinal = this.StatsForm.StatLookup.TryGetValue(logRound.Info.Name, out LevelStats levelStats) && levelStats.IsFinal;
-                }
+                    if (logRound.Info != null) {
+                        if (logRound.Info.End == DateTime.MinValue) {
+                            logRound.Info.End = line.Date;
+                        }
+                        logRound.Info.Playing = false;
+                    }
 
-                round.Add(logRound.Info);
+                    this.threadLocalVariable.Value.currentRoundId = line.Line.Substring(index + 30);
+                    this.threadLocalVariable.Value.currentRoundStart = line.Date;
 
-                logRound.Info.Round = !Stats.EndedShow ? round.Count : Stats.SavedRoundCount + round.Count;
+                    logRound.FindingPosition = false;
 
-                Stats.IsShowStarting = false;
-            } else if (logRound.Info != null && line.Line.IndexOf("[GameSession] Changing state from Countdown to Playing", StringComparison.OrdinalIgnoreCase) != -1) {
-                if (line.Date > Stats.LastPrecountdownStateDate) {
-                    Stats.LastPrecountdownStateDate = line.Date;
-                    Stats.PrecountdownDate = DateTime.MinValue;
-                }
-                logRound.Info.Start = line.Date;
-                logRound.Info.Playing = true;
-            } else if (logRound.Info != null && !string.IsNullOrEmpty(this.playerName) && (line.Line.IndexOf($"[ROUNDMANAGER] Player {this.playerName} has qualified", StringComparison.OrdinalIgnoreCase) != -1
-                                                                                           || line.Line.IndexOf($"[ROUNDMANAGER] Player {this.playerName} has won", StringComparison.OrdinalIgnoreCase) != -1)) {
-                logRound.Info.Finish = logRound.Info.End == DateTime.MinValue ? line.Date : logRound.Info.End;
-                if (line.Date > Stats.LastRoundLoad && !Stats.SucceededPlayerNames.Contains(this.playerName)) {
-                    Stats.SucceededPlayerNames.Add(this.playerName);
-                    Stats.NumPlayersSucceeded++;
-                    Stats.NumPlayersPcSucceeded++;
-                    this.UpdatePersonalBestLog(logRound.Info);
-                }
-                if (line.Line.LastIndexOf($" has won", StringComparison.OrdinalIgnoreCase) != -1) {
-                    logRound.Info.Position = 1;
-                    logRound.Info.Tier = 1;
-                    logRound.Info.Crown = true;
-                } else {
-                    logRound.FindingPosition = true;
-                }
-            } else if (line.Date > Stats.LastRoundLoad && (index = line.Line.IndexOf("[ROUNDMANAGER] Player ", StringComparison.OrdinalIgnoreCase)) != -1 &&
-                                                           (line.Line.LastIndexOf(" has qualified", StringComparison.OrdinalIgnoreCase) != -1
-                                                            || line.Line.LastIndexOf(" has won", StringComparison.OrdinalIgnoreCase) != -1)) {
-                int index2 = line.Line.LastIndexOf(" has ", StringComparison.OrdinalIgnoreCase);
-                string remotePlayerName = line.Line.Substring(index + 22, index2 - (index + 22));
-                if (!Stats.SucceededPlayerNames.Contains(remotePlayerName)) {
-                    Stats.SucceededPlayerNames.Add(remotePlayerName);
-                    Stats.NumPlayersSucceeded++;
-                    Stats.NumPlayersPcSucceeded++;
-                }
-            } else if (line.Line.IndexOf("[ROUNDMANAGER] Loading round", StringComparison.OrdinalIgnoreCase) != -1
-                       || line.Line.EndsWith(": Playing", StringComparison.OrdinalIgnoreCase)
-                       || line.Line.EndsWith(": Succeeded", StringComparison.OrdinalIgnoreCase)
-                       || line.Line.EndsWith(": Failed", StringComparison.OrdinalIgnoreCase)
-                       || line.Line.EndsWith(": NotParticipating", StringComparison.OrdinalIgnoreCase)) {
-                //
-                // "[GameSession] Changing state from Playing to GameOver" line is not present in FinalBeans logs
-                //
-                // "[ROUNDMANAGER] - Loading round" is used in FinalBeans logs to possibly indicate a round end (ONLY WHEN GAME STARTED WITH 1 PLAYER!)
-                //
-                // "Playing" | "Succeeded" | "Failed | "NotParticipating" are also (sometimes) used to indicate a round end
-                //
-                if (line.Date > Stats.LastRoundLoad) {
-                    Stats.LastRoundLoad = line.Date;
+                    if (round.Count > 0 || Stats.EndedShow) {
+                        logRound.Info = new RoundInfo {
+                            PrivateLobby = this.threadLocalVariable.Value.isPrivateLobby,
+                            InParty = this.threadLocalVariable.Value.currentlyInParty,
+                            // ShowName = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate),
+                            // ShowNameId = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate, true),
+                            ShowName = !string.IsNullOrEmpty(Multilingual.GetShowName(this.threadLocalVariable.Value.currentShowNameId)) ? Multilingual.GetShowName(this.threadLocalVariable.Value.currentShowNameId) :
+                                       !string.IsNullOrWhiteSpace(this.threadLocalVariable.Value.currentShowNameId) ? this.threadLocalVariable.Value.currentShowNameId :
+                                       this.threadLocalVariable.Value.selectedShowIndex == 0 ? Multilingual.GetShowName("main_show") : Multilingual.GetShowName("ltm_show"),
+                            ShowNameId = !string.IsNullOrWhiteSpace(this.threadLocalVariable.Value.currentShowNameId) ? this.threadLocalVariable.Value.currentShowNameId :
+                                         this.threadLocalVariable.Value.selectedShowIndex == 0 ? "main_show" : "ltm_show",
+                            IsTeam = this.IsTeamException(this.threadLocalVariable.Value.currentRoundId),
+                            Name = this.VerifiedRoundId(this.threadLocalVariable.Value.currentRoundId),
+                            RoundId = this.threadLocalVariable.Value.currentRoundId,
+                            Start = this.threadLocalVariable.Value.currentRoundStart
+                        };
+
+                        if (this.IsRealFinalRound(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
+                            logRound.Info.IsFinal = true;
+                        } else if (this.IsModeException(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
+                            logRound.Info.IsFinal = this.IsModeFinalException(logRound.Info.RoundId);
+                        } else {
+                            logRound.Info.IsFinal = this.StatsForm.StatLookup.TryGetValue(logRound.Info.Name, out LevelStats levelStats) && levelStats.IsFinal;
+                        }
+
+                        round.Add(logRound.Info);
+
+                        logRound.Info.Round = !Stats.EndedShow ? round.Count : Stats.LastPlayedRoundNum + round.Count;
+                    }
+
+                    logRound.PlayersInfo = new RoundInfo();
+
+                } else if (line.Line.IndexOf("[CameraDirector] Adding Spectator target", StringComparison.OrdinalIgnoreCase) != -1) {
+                    //
+                    // "[CameraDirector] Adding Spectator target" in FinalBeans logs means a "remote" player is present (playing -OR- spectating, we can't tell...)
+                    //
+                    if (logRound.PlayersInfo != null) {
+                        logRound.PlayersInfo.Players++;
+                        int playerId = int.Parse(line.Line.Substring(line.Line.IndexOf("playerID: ", StringComparison.OrdinalIgnoreCase) + 10));
+                        string platformId = line.Line.Substring(line.Line.IndexOf("(", StringComparison.OrdinalIgnoreCase) + 1, line.Line.IndexOf(")", StringComparison.OrdinalIgnoreCase) - line.Line.IndexOf("(", StringComparison.OrdinalIgnoreCase) - 1);
+                        switch (platformId) {
+                            case "ps4":
+                                logRound.PlayersInfo.PlayersPs4++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "ps4");
+                                }
+                                break;
+                            case "ps5":
+                                logRound.PlayersInfo.PlayersPs5++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "ps5");
+                                }
+                                break;
+                            case "xb1":
+                                logRound.PlayersInfo.PlayersXb1++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "xb1");
+                                }
+                                break;
+                            case "xsx":
+                                logRound.PlayersInfo.PlayersXsx++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "xsx");
+                                }
+                                break;
+                            case "switch":
+                                logRound.PlayersInfo.PlayersSw++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "switch");
+                                }
+                                break;
+                            case "win":
+                                logRound.PlayersInfo.PlayersPc++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "win");
+                                }
+                                break;
+                            case "android":
+                                logRound.PlayersInfo.PlayersAndroid++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "android");
+                                }
+                                break;
+                            case "ios":
+                                logRound.PlayersInfo.PlayersIos++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "ios");
+                                }
+                                break;
+                            case "bots":
+                                logRound.PlayersInfo.PlayersBots++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "bots");
+                                }
+                                break;
+                            default:
+                                logRound.PlayersInfo.PlayersEtc++;
+                                if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                    Stats.ReadyPlayerIds.Add(playerId, "etc");
+                                }
+                                break;
+                        }
+                    }
+                } else if (line.Line.IndexOf("[CameraDirector].UseCloseShot, current camera target type is Intro", StringComparison.OrdinalIgnoreCase) != -1) {
+                    //
+                    // "[CameraDirector].UseCloseShot, current camera target type is Intro" in FinalBeans logs means YOU will play
+                    //
+                    if (logRound.PlayersInfo != null) {
+                        logRound.PlayersInfo.Participating = true;
+                        logRound.PlayersInfo.Players++;
+                        logRound.PlayersInfo.PlayersPc++;
+                        if (line.Date > Stats.LastRoundLoad && !Stats.ReadyPlayerIds.ContainsKey(logRound.CurrentPlayerID)) {
+                            Stats.ReadyPlayerIds.Add(logRound.CurrentPlayerID, "win");
+                        }
+                    }
+                } else if (line.Line.IndexOf("[GameSession] Changing state from Precountdown to Countdown", StringComparison.OrdinalIgnoreCase) != -1) {
+                    if (line.Date > Stats.LastCountdownState) {
+                        Stats.LastCountdownState = line.Date;
+                        Stats.CountdownStartDate = line.Date;
+                    }
+                } else if (line.Line.IndexOf("[RoundManager] OnGameStarted", StringComparison.OrdinalIgnoreCase) != -1) {
+                    if (!Stats.EndedShow && round.Count == 0) {
+                        logRound.Info = new RoundInfo {
+                            PrivateLobby = this.threadLocalVariable.Value.isPrivateLobby,
+                            InParty = this.threadLocalVariable.Value.currentlyInParty,
+                            // ShowName = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate),
+                            // ShowNameId = this.GetShowNameFromLastGamesDir(this.threadLocalVariable.Value.lastGameDate, true),
+                            ShowName = !string.IsNullOrEmpty(Multilingual.GetShowName(this.threadLocalVariable.Value.currentShowNameId)) ? Multilingual.GetShowName(this.threadLocalVariable.Value.currentShowNameId) :
+                                       !string.IsNullOrWhiteSpace(this.threadLocalVariable.Value.currentShowNameId) ? this.threadLocalVariable.Value.currentShowNameId :
+                                       this.threadLocalVariable.Value.selectedShowIndex == 0 ? Multilingual.GetShowName("main_show") : Multilingual.GetShowName("ltm_show"),
+                            ShowNameId = !string.IsNullOrWhiteSpace(this.threadLocalVariable.Value.currentShowNameId) ? this.threadLocalVariable.Value.currentShowNameId :
+                                         this.threadLocalVariable.Value.selectedShowIndex == 0 ? "main_show" : "ltm_show",
+                            IsTeam = this.IsTeamException(this.threadLocalVariable.Value.currentRoundId),
+                            Name = this.VerifiedRoundId(this.threadLocalVariable.Value.currentRoundId),
+                            RoundId = this.threadLocalVariable.Value.currentRoundId,
+                            Start = this.threadLocalVariable.Value.currentRoundStart,
+                            Round = 1
+                        };
+
+                        if (this.IsRealFinalRound(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
+                            logRound.Info.IsFinal = true;
+                        } else if (this.IsModeException(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
+                            logRound.Info.IsFinal = this.IsModeFinalException(logRound.Info.RoundId);
+                        } else {
+                            logRound.Info.IsFinal = this.StatsForm.StatLookup.TryGetValue(logRound.Info.Name, out LevelStats levelStats) && levelStats.IsFinal;
+                        }
+
+                        round.Add(logRound.Info);
+                    }
+
+                    if (logRound.Info != null && logRound.PlayersInfo != null) {
+                        logRound.Info.Participating = logRound.PlayersInfo.Participating;
+                        logRound.Info.Players = logRound.PlayersInfo.Players;
+                        logRound.Info.PlayersPs4 = logRound.PlayersInfo.PlayersPs4;
+                        logRound.Info.PlayersPs5 = logRound.PlayersInfo.PlayersPs5;
+                        logRound.Info.PlayersXb1 = logRound.PlayersInfo.PlayersXb1;
+                        logRound.Info.PlayersXsx = logRound.PlayersInfo.PlayersXsx;
+                        logRound.Info.PlayersSw = logRound.PlayersInfo.PlayersSw;
+                        logRound.Info.PlayersPc = logRound.PlayersInfo.PlayersPc;
+                        logRound.Info.PlayersAndroid = logRound.PlayersInfo.PlayersAndroid;
+                        logRound.Info.PlayersIos = logRound.PlayersInfo.PlayersIos;
+                        logRound.Info.PlayersBots = logRound.PlayersInfo.PlayersBots;
+                        logRound.Info.PlayersEtc = logRound.PlayersInfo.PlayersEtc;
+                    }
+                } else if (line.Line.IndexOf("[GameSession] Changing state from Countdown to Playing", StringComparison.OrdinalIgnoreCase) != -1) {
+                    if (logRound.Info != null) {
+                        logRound.Info.Start = line.Date;
+                        logRound.Info.Playing = true;
+                    }
+
+                    Stats.IsShowStarting = false;
+
+                    if (line.Date > Stats.LastCountdownState) {
+                        Stats.LastCountdownState = line.Date;
+                        Stats.CountdownStartDate = DateTime.MinValue;
+                    }
+                } else if (!string.IsNullOrEmpty(this.playerName) && (line.Line.IndexOf($"[ROUNDMANAGER] Player {this.playerName} has qualified", StringComparison.OrdinalIgnoreCase) != -1
+                                                                      || line.Line.IndexOf($"[ROUNDMANAGER] Player {this.playerName} has won", StringComparison.OrdinalIgnoreCase) != -1)) {
+                    if (logRound.Info != null) {
+                        logRound.Info.Finish = logRound.Info.End == DateTime.MinValue ? line.Date : logRound.Info.End;
+                        if (line.Date > Stats.LastRoundLoad && !Stats.SucceededPlayerNames.Contains(this.playerName)) {
+                            Stats.SucceededPlayerNames.Add(this.playerName);
+                            Stats.NumPlayersSucceeded++;
+                            Stats.NumPlayersPcSucceeded++;
+                            this.UpdatePersonalBestLog(logRound.Info);
+                        }
+                        if (line.Line.LastIndexOf($" has won", StringComparison.OrdinalIgnoreCase) != -1) {
+                            logRound.Info.Position = 1;
+                            logRound.Info.Tier = 1;
+                            logRound.Info.Crown = true;
+                        } else {
+                            logRound.FindingPosition = true;
+                        }
+                    }
+                } else if ((index = line.Line.IndexOf("[ROUNDMANAGER] Player ", StringComparison.OrdinalIgnoreCase)) != -1
+                                    && (line.Line.LastIndexOf(" has qualified", StringComparison.OrdinalIgnoreCase) != -1
+                                        || line.Line.LastIndexOf(" has won", StringComparison.OrdinalIgnoreCase) != -1)) {
+                    int index2 = line.Line.LastIndexOf(" has ", StringComparison.OrdinalIgnoreCase);
+                    string remotePlayerName = line.Line.Substring(index + 22, index2 - (index + 22));
+                    if (line.Date > Stats.LastRoundLoad && !Stats.SucceededPlayerNames.Contains(remotePlayerName)) {
+                        Stats.SucceededPlayerNames.Add(remotePlayerName);
+                        Stats.NumPlayersSucceeded++;
+                        Stats.NumPlayersPcSucceeded++;
+                    }
+                } else if (line.Line.IndexOf("[ROUNDMANAGER] Loading round", StringComparison.OrdinalIgnoreCase) != -1
+                           || line.Line.EndsWith(": Playing", StringComparison.OrdinalIgnoreCase)
+                           || line.Line.EndsWith(": Succeeded", StringComparison.OrdinalIgnoreCase)
+                           || line.Line.EndsWith(": Failed", StringComparison.OrdinalIgnoreCase)
+                           || line.Line.EndsWith(": NotParticipating", StringComparison.OrdinalIgnoreCase)) {
+                    //
+                    // "[GameSession] Changing state from Playing to GameOver" line is not present in FinalBeans logs
+                    //
+                    // "[ROUNDMANAGER] - Loading round" is generally used in FinalBeans logs to indicate a round end
+                    //
+                    // "Playing" | "Succeeded" entries = "local" player qualified for the next round
+                    //
+                    // "Failed" = "local" player NOT qualified for the next round
+                    //
+                    // "NotParticipating" = "local" player didn't played the current round
+                    //
                     if (Stats.InShow && Stats.LastPlayedRoundStart.HasValue && !Stats.LastPlayedRoundEnd.HasValue) {
                         Stats.LastPlayedRoundEnd = line.Date;
                     }
                     Stats.IsLastPlayedRoundStillPlaying = false;
-                }
-                if (logRound.Info != null) {
-                    if (logRound.Info.End == DateTime.MinValue) {
-                        logRound.Info.End = line.Date;
-                    }
-                    logRound.Info.Playing = false;
-                }
-            } else if (logRound.Info != null && !Stats.EndedShow && logRound.FindingPosition && (index = line.Line.IndexOf("[ClientGameSession] NumPlayersAchievingObjective=")) != -1) {
-                int position = int.Parse(line.Line.Substring(index + 49));
-                if (position > 0) {
-                    logRound.FindingPosition = false;
-                    logRound.Info.Position = position;
-                }
-            } else if (logRound.Info != null && !Stats.EndedShow && line.Line.IndexOf("[MatchLifecycle] Local player eliminated", StringComparison.OrdinalIgnoreCase) != -1) {
-                Stats.SavedRoundCount = logRound.Info.Round;
 
-                if (logRound.Info.End == DateTime.MinValue) {
-                    Stats.LastPlayedRoundStart = logRound.Info.Start;
-                    Stats.IsLastPlayedRoundStillPlaying = true;
-                    logRound.Info.End = line.Date;
-                }
-                logRound.Info.Playing = false;
-                //
-                // No " == [CompletedEpisodeDto] ==" (show summary) info in FinalBeans logs
-                //
-                // "RecordEscapeDuringAGame" setting MUST always be 'true' to save game stats
-                //
-                if (!string.IsNullOrEmpty(this.playerName) && this.StatsForm.CurrentSettings.RecordEscapeDuringAGame) {
-                    DateTime showStart = DateTime.MinValue;
-                    DateTime showEnd = logRound.Info.End;
-                    for (int i = 0; i < round.Count; i++) {
-                        if (i == 0) {
-                            showStart = round[i].Start;
+                    if (logRound.Info != null) {
+                        if (logRound.Info.End == DateTime.MinValue) {
+                            logRound.Info.End = line.Date;
                         }
-                        round[i].ShowStart = showStart;
-                        round[i].ShowEnd = showEnd;
-                        round[i].Playing = false;
-                        // round[i].Round = i + 1;
-                        if (i == (round.Count - 1)) {
-                            for (int j = i; j >= 0; j--) {
-                                if (string.IsNullOrEmpty(round[j].Name)) {
-                                    round.RemoveAt(j);
-                                    continue;
+                        if (line.Line.EndsWith(": Playing", StringComparison.OrdinalIgnoreCase)
+                            || line.Line.EndsWith(": Succeeded", StringComparison.OrdinalIgnoreCase)) {
+                            if (logRound.Info.Finish == null) {
+                                logRound.Info.Finish = logRound.Info.End;
+                            }
+                            logRound.Info.Qualified = true;
+                        }
+                        logRound.Info.Playing = false;
+                    }
+                } else if ((index = line.Line.IndexOf("[ClientGameSession] NumPlayersAchievingObjective=")) != -1) {
+                    if (logRound.Info != null && !Stats.EndedShow && logRound.FindingPosition) {
+                        int position = int.Parse(line.Line.Substring(index + 49));
+                        if (position > 0) {
+                            logRound.FindingPosition = false;
+                            logRound.Info.Position = position;
+                        }
+                    }
+                } else if (line.Line.IndexOf("[MatchLifecycle] Local player eliminated", StringComparison.OrdinalIgnoreCase) != -1) {
+                    if (logRound.Info != null && !Stats.EndedShow) {
+                        Stats.LastPlayedRoundNum = logRound.Info.Round;
+                        if (logRound.Info.End == DateTime.MinValue) {
+                            Stats.LastPlayedRoundStart = logRound.Info.Start;
+                            Stats.IsLastPlayedRoundStillPlaying = true;
+                            logRound.Info.End = line.Date;
+                        }
+                        logRound.Info.Playing = false;
+                        //
+                        // No " == [CompletedEpisodeDto] ==" (show summary) info in FinalBeans logs
+                        //
+                        // "RecordEscapeDuringAGame" setting MUST always be 'true' to save game stats
+                        //
+                        if (!string.IsNullOrEmpty(this.playerName) && this.StatsForm.CurrentSettings.RecordEscapeDuringAGame) {
+                            DateTime showStart = DateTime.MinValue;
+                            DateTime showEnd = logRound.Info.End;
+                            for (int i = 0; i < round.Count; i++) {
+                                if (i == 0) {
+                                    showStart = round[i].Start;
                                 }
-                                //
-                                // Qualification info is not always present in FinalBeans logs (mostly in "Survival" rounds)
-                                // So no "Finish" time set when it happens (it's an issue!)
-                                //
-                                // Manually set "Finish" time / set "Qualified" flag to 'true' for any previous round
-                                //
-                                for (int k = j; k > 0; k--) {
-                                    if (!round[k - 1].Finish.HasValue) {
-                                        round[k - 1].Finish = round[k - 1].End;
+                                round[i].ShowStart = showStart;
+                                round[i].ShowEnd = showEnd;
+                                round[i].Playing = false;
+                                if (i == (round.Count - 1)) {
+                                    for (int j = i; j >= 0; j--) {
+                                        if (string.IsNullOrEmpty(round[j].Name)) {
+                                            round.RemoveAt(j);
+                                            continue;
+                                        }
+                                        //
+                                        // Qualification info is not always present in FinalBeans logs (mostly in "Survival" rounds)
+                                        // So no "Finish" time set when it happens (it's an issue!)
+                                        //
+                                        // Manually set "Finish" time / set "Qualified" flag to 'true' for any previous round
+                                        //
+                                        for (int k = j; k > 0; k--) {
+                                            if (!round[k - 1].Finish.HasValue) {
+                                                round[k - 1].Finish = round[k - 1].End;
+                                            }
+                                            round[k - 1].Qualified = true;
+                                        }
                                     }
-                                    round[k - 1].Qualified = true;
                                 }
                             }
                             if (round.Count > 0) {
                                 round[round.Count - 1].LastRound = true;
-                            }
-                            //
-                            // No "SessionId" info in FinalBeans logs
-                            //
-                            // this.StatsForm.UpdateServerConnectionLog(this.threadLocalVariable.Value.currentSessionId, false);
-                            logRound.Info = null;
-                            Stats.EndedShow = true;
-                            return true;
-                        }
-                    }
-                }
-                logRound.Info = null;
-                Stats.EndedShow = true;
-            }
-            //
-            // Not present in FinalBeans logs
-            //
-            /*
-            } else if (!Stats.EndedShow && line.Line.IndexOf("[FG_UnityInternetNetworkManager] Client connected to Server", StringComparison.OrdinalIgnoreCase) != -1) {
-                if (!Stats.IsConnectedToServer) {
-                    Stats.IsConnectedToServer = true;
-                    Stats.ConnectedToServerDate = line.Date;
-                    int ipIndex = line.Line.IndexOf("IP:", StringComparison.OrdinalIgnoreCase) + 3;
-                    Stats.LastServerIp = line.Line.Substring(ipIndex);
-                }
-            } else if ((index = line.Line.IndexOf("[HandleSuccessfulLogin] Session: ", StringComparison.OrdinalIgnoreCase)) != -1) {
-                this.threadLocalVariable.Value.currentSessionId = line.Line.Substring(index + 33);
-                if ((DateTime.UtcNow - Stats.ConnectedToServerDate).TotalMinutes <= 40) {
-                    this.UpdateServerConnectionLog(this.threadLocalVariable.Value.currentSessionId, this.threadLocalVariable.Value.selectedShowId);
-                }
-            } else if (logRound.Info != null && logRound.CountingPlayers && (line.Line.IndexOf("[ClientGameManager] Finalising spawn", StringComparison.OrdinalIgnoreCase) != -1 || line.Line.IndexOf("[ClientGameManager] Added player ", StringComparison.OrdinalIgnoreCase) != -1)) {
-                logRound.Info.Players++;
-            } else if (logRound.Info != null && logRound.GetCurrentPlayerID && line.Line.IndexOf("[ClientGameManager] Handling bootstrap for local player FallGuy", StringComparison.OrdinalIgnoreCase) != -1 && (index = line.Line.IndexOf("playerID = ", StringComparison.OrdinalIgnoreCase)) != -1) {
-                logRound.GetCurrentPlayerID = false;
-                int prevIndex = line.Line.IndexOf(",", index + 11);
-                logRound.CurrentPlayerID = int.Parse(line.Line.Substring(index + 11, prevIndex - index - 11));
-            } else if (logRound.Info != null && line.Line.IndexOf($"HandleServerPlayerProgress PlayerId={logRound.CurrentPlayerID} is succeeded=", StringComparison.OrdinalIgnoreCase) != -1) {
-                if (line.Line.IndexOf("succeeded=True", StringComparison.OrdinalIgnoreCase) != -1) {
-                    logRound.Info.Finish = logRound.Info.End == DateTime.MinValue ? line.Date : logRound.Info.End;
-                    if (line.Date > Stats.LastRoundLoad && !Stats.SucceededPlayerIds.Contains(logRound.CurrentPlayerID)) {
-                        Stats.SucceededPlayerIds.Add(logRound.CurrentPlayerID);
-                        Stats.NumPlayersSucceeded++;
-                        if (Stats.ReadyPlayerIds.TryGetValue(logRound.CurrentPlayerID, out string platformId)) {
-                            switch (platformId) {
-                                case "ps4":
-                                case "ps5":
-                                    Stats.NumPlayersPsSucceeded++; break;
-                                case "xb1":
-                                case "xsx":
-                                    Stats.NumPlayersXbSucceeded++; break;
-                                case "switch":
-                                    Stats.NumPlayersSwSucceeded++; break;
-                                case "win":
-                                    Stats.NumPlayersPcSucceeded++; break;
-                                case "android":
-                                case "ios":
-                                    Stats.NumPlayersMbSucceeded++; break;
+                                //
+                                // No "SessionId" info in FinalBeans logs
+                                //
+                                // this.StatsForm.UpdateServerConnectionLog(this.threadLocalVariable.Value.currentSessionId, false);
+                                //
+                                Stats.EndedShow = true;
+                                return true;
                             }
                         }
-                        this.UpdatePersonalBestLog(logRound.Info);
+                        Stats.EndedShow = true;
                     }
-                    logRound.FindingPosition = true;
-                } else if (line.Line.IndexOf("succeeded=False", StringComparison.OrdinalIgnoreCase) != -1) {
-                    if (line.Date > Stats.LastRoundLoad && !Stats.EliminatedPlayerIds.Contains(logRound.CurrentPlayerID)) {
-                        Stats.EliminatedPlayerIds.Add(logRound.CurrentPlayerID);
-                        Stats.NumPlayersEliminated++;
-                        if (Stats.ReadyPlayerIds.TryGetValue(logRound.CurrentPlayerID, out string platformId)) {
-                            switch (platformId) {
-                                case "ps4":
-                                case "ps5":
-                                    Stats.NumPlayersPsEliminated++; break;
-                                case "xb1":
-                                case "xsx":
-                                    Stats.NumPlayersXbEliminated++; break;
-                                case "switch":
-                                    Stats.NumPlayersSwEliminated++; break;
-                                case "win":
-                                    Stats.NumPlayersPcEliminated++; break;
-                                case "android":
-                                case "ios":
-                                    Stats.NumPlayersMbEliminated++; break;
-                            }
+                    //
+                    // Not present in FinalBeans logs
+                    //
+                    /*
+                    } else if (!Stats.EndedShow && line.Line.IndexOf("[FG_UnityInternetNetworkManager] Client connected to Server", StringComparison.OrdinalIgnoreCase) != -1) {
+                        if (!Stats.IsConnectedToServer) {
+                            Stats.IsConnectedToServer = true;
+                            Stats.ConnectedToServerDate = line.Date;
+                            int ipIndex = line.Line.IndexOf("IP:", StringComparison.OrdinalIgnoreCase) + 3;
+                            Stats.LastServerIp = line.Line.Substring(ipIndex);
                         }
-                    }
-                    logRound.FindingPosition = true;
-                }
-            } else if (line.Date > Stats.LastRoundLoad && (index = line.Line.IndexOf("HandleServerPlayerProgress PlayerId=", StringComparison.OrdinalIgnoreCase)) != -1) {
-                if (line.Line.IndexOf("succeeded=True", StringComparison.OrdinalIgnoreCase) != -1) {
-                    int prevIndex = line.Line.IndexOf(" ", index + 36);
-                    int playerId = int.Parse(line.Line.Substring(index + 36, prevIndex - index - 36));
-                    if (!Stats.SucceededPlayerIds.Contains(playerId)) {
-                        Stats.SucceededPlayerIds.Add(playerId);
-                        Stats.NumPlayersSucceeded++;
-                        if (Stats.ReadyPlayerIds.TryGetValue(playerId, out string platformId)) {
-                            switch (platformId) {
-                                case "ps4":
-                                case "ps5":
-                                    Stats.NumPlayersPsSucceeded++; break;
-                                case "xb1":
-                                case "xsx":
-                                    Stats.NumPlayersXbSucceeded++; break;
-                                case "switch":
-                                    Stats.NumPlayersSwSucceeded++; break;
-                                case "win":
-                                    Stats.NumPlayersPcSucceeded++; break;
-                                case "android":
-                                case "ios":
-                                    Stats.NumPlayersMbSucceeded++; break;
-                            }
+                    } else if ((index = line.Line.IndexOf("[HandleSuccessfulLogin] Session: ", StringComparison.OrdinalIgnoreCase)) != -1) {
+                        this.threadLocalVariable.Value.currentSessionId = line.Line.Substring(index + 33);
+                        if ((DateTime.UtcNow - Stats.ConnectedToServerDate).TotalMinutes <= 40) {
+                            this.UpdateServerConnectionLog(this.threadLocalVariable.Value.currentSessionId, this.threadLocalVariable.Value.selectedShowId);
                         }
-                    }
-                } else if (line.Line.IndexOf("succeeded=False", StringComparison.OrdinalIgnoreCase) != -1) {
-                    int prevIndex = line.Line.IndexOf(" ", index + 36);
-                    int playerId = int.Parse(line.Line.Substring(index + 36, prevIndex - index - 36));
-                    if (!Stats.EliminatedPlayerIds.Contains(playerId) && Stats.ReadyPlayerIds.ContainsKey(playerId)) {
-                        Stats.EliminatedPlayerIds.Add(playerId);
-                        Stats.NumPlayersEliminated++;
-                        if (Stats.ReadyPlayerIds.TryGetValue(playerId, out string platformId)) {
-                            switch (platformId) {
-                                case "ps4":
-                                case "ps5":
-                                    Stats.NumPlayersPsEliminated++; break;
-                                case "xb1":
-                                case "xsx":
-                                    Stats.NumPlayersXbEliminated++; break;
-                                case "switch":
-                                    Stats.NumPlayersSwEliminated++; break;
-                                case "win":
-                                    Stats.NumPlayersPcEliminated++; break;
-                                case "android":
-                                case "ios":
-                                    Stats.NumPlayersMbEliminated++; break;
-                            }
-                        }
-                    }
-                }
-            } else if (line.Line.IndexOf(" == [CompletedEpisodeDto] ==", StringComparison.OrdinalIgnoreCase) != -1) {
-                if (logRound.Info == null || Stats.EndedShow) return false;
-
-                Stats.SavedRoundCount = logRound.Info.Round;
-                Stats.EndedShow = true;
-
-                if (logRound.Info.End == DateTime.MinValue) {
-                    Stats.LastPlayedRoundStart = logRound.Info.Start;
-                    Stats.IsLastPlayedRoundStillPlaying = true;
-                    logRound.Info.End = line.Date;
-                }
-                logRound.Info.Playing = false;
-
-                RoundInfo roundInfo = null;
-                StringReader sr = new StringReader(line.Line);
-                string detail;
-                bool foundRound = false;
-                int maxRound = 0;
-                DateTime showStart = DateTime.MinValue;
-                int questKudos = 0;
-                while ((detail = sr.ReadLine()) != null) {
-                    if (detail.IndexOf("[Round ", StringComparison.OrdinalIgnoreCase) == 0) {
-                        foundRound = true;
-                        int roundNum = detail[7] - 0x30 + 1;
-                        string roundName = detail.Substring(11, detail.Length - 12);
-
-                        if (roundNum - 1 < round.Count) {
-                            if (roundNum > maxRound) {
-                                maxRound = roundNum;
-                            }
-
-                            roundInfo = round[roundNum - 1];
-
-                            if (string.IsNullOrEmpty(roundInfo.Name)) {
-                                return false;
-                            }
-
-                            if (string.Equals(roundInfo.ShowNameId, "wle_mrs_shuffle_show") || string.Equals(roundInfo.ShowNameId, "wle_shuffle_discover") || string.Equals(roundInfo.ShowNameId, "wle_mrs_shuffle_show_squads")) {
-                                if (round.Count > 1 && roundNum != round.Count) {
-                                    roundInfo.IsFinal = false;
+                    } else if (logRound.Info != null && logRound.CountingPlayers && (line.Line.IndexOf("[ClientGameManager] Finalising spawn", StringComparison.OrdinalIgnoreCase) != -1 || line.Line.IndexOf("[ClientGameManager] Added player ", StringComparison.OrdinalIgnoreCase) != -1)) {
+                        logRound.Info.Players++;
+                    } else if (logRound.Info != null && logRound.GetCurrentPlayerID && line.Line.IndexOf("[ClientGameManager] Handling bootstrap for local player FallGuy", StringComparison.OrdinalIgnoreCase) != -1 && (index = line.Line.IndexOf("playerID = ", StringComparison.OrdinalIgnoreCase)) != -1) {
+                        logRound.GetCurrentPlayerID = false;
+                        int prevIndex = line.Line.IndexOf(",", index + 11);
+                        logRound.CurrentPlayerID = int.Parse(line.Line.Substring(index + 11, prevIndex - index - 11));
+                    } else if (logRound.Info != null && line.Line.IndexOf($"HandleServerPlayerProgress PlayerId={logRound.CurrentPlayerID} is succeeded=", StringComparison.OrdinalIgnoreCase) != -1) {
+                        if (line.Line.IndexOf("succeeded=True", StringComparison.OrdinalIgnoreCase) != -1) {
+                            logRound.Info.Finish = logRound.Info.End == DateTime.MinValue ? line.Date : logRound.Info.End;
+                            if (line.Date > Stats.LastRoundLoad && !Stats.SucceededPlayerIds.Contains(logRound.CurrentPlayerID)) {
+                                Stats.SucceededPlayerIds.Add(logRound.CurrentPlayerID);
+                                Stats.NumPlayersSucceeded++;
+                                if (Stats.ReadyPlayerIds.TryGetValue(logRound.CurrentPlayerID, out string platformId)) {
+                                    switch (platformId) {
+                                        case "ps4":
+                                        case "ps5":
+                                            Stats.NumPlayersPsSucceeded++; break;
+                                        case "xb1":
+                                        case "xsx":
+                                            Stats.NumPlayersXbSucceeded++; break;
+                                        case "switch":
+                                            Stats.NumPlayersSwSucceeded++; break;
+                                        case "win":
+                                            Stats.NumPlayersPcSucceeded++; break;
+                                        case "android":
+                                        case "ios":
+                                            Stats.NumPlayersMbSucceeded++; break;
+                                    }
                                 }
-                                roundName = this.StatsForm.ReplaceLevelIdInShuffleShow(roundInfo.ShowNameId, roundName);
+                                this.UpdatePersonalBestLog(logRound.Info);
                             }
-
-                            if (!string.Equals(roundInfo.Name, roundName, StringComparison.OrdinalIgnoreCase)) {
-                                return false;
+                            logRound.FindingPosition = true;
+                        } else if (line.Line.IndexOf("succeeded=False", StringComparison.OrdinalIgnoreCase) != -1) {
+                            if (line.Date > Stats.LastRoundLoad && !Stats.EliminatedPlayerIds.Contains(logRound.CurrentPlayerID)) {
+                                Stats.EliminatedPlayerIds.Add(logRound.CurrentPlayerID);
+                                Stats.NumPlayersEliminated++;
+                                if (Stats.ReadyPlayerIds.TryGetValue(logRound.CurrentPlayerID, out string platformId)) {
+                                    switch (platformId) {
+                                        case "ps4":
+                                        case "ps5":
+                                            Stats.NumPlayersPsEliminated++; break;
+                                        case "xb1":
+                                        case "xsx":
+                                            Stats.NumPlayersXbEliminated++; break;
+                                        case "switch":
+                                            Stats.NumPlayersSwEliminated++; break;
+                                        case "win":
+                                            Stats.NumPlayersPcEliminated++; break;
+                                        case "android":
+                                        case "ios":
+                                            Stats.NumPlayersMbEliminated++; break;
+                                    }
+                                }
                             }
-
-                            roundInfo.VerifyName();
-
-                            if (roundNum == 1) {
-                                showStart = roundInfo.Start;
+                            logRound.FindingPosition = true;
+                        }
+                    } else if (line.Date > Stats.LastRoundLoad && (index = line.Line.IndexOf("HandleServerPlayerProgress PlayerId=", StringComparison.OrdinalIgnoreCase)) != -1) {
+                        if (line.Line.IndexOf("succeeded=True", StringComparison.OrdinalIgnoreCase) != -1) {
+                            int prevIndex = line.Line.IndexOf(" ", index + 36);
+                            int playerId = int.Parse(line.Line.Substring(index + 36, prevIndex - index - 36));
+                            if (!Stats.SucceededPlayerIds.Contains(playerId)) {
+                                Stats.SucceededPlayerIds.Add(playerId);
+                                Stats.NumPlayersSucceeded++;
+                                if (Stats.ReadyPlayerIds.TryGetValue(playerId, out string platformId)) {
+                                    switch (platformId) {
+                                        case "ps4":
+                                        case "ps5":
+                                            Stats.NumPlayersPsSucceeded++; break;
+                                        case "xb1":
+                                        case "xsx":
+                                            Stats.NumPlayersXbSucceeded++; break;
+                                        case "switch":
+                                            Stats.NumPlayersSwSucceeded++; break;
+                                        case "win":
+                                            Stats.NumPlayersPcSucceeded++; break;
+                                        case "android":
+                                        case "ios":
+                                            Stats.NumPlayersMbSucceeded++; break;
+                                    }
+                                }
                             }
-                            roundInfo.ShowStart = showStart;
-                            roundInfo.Playing = false;
-                            roundInfo.Round = roundNum;
-                        } else {
+                        } else if (line.Line.IndexOf("succeeded=False", StringComparison.OrdinalIgnoreCase) != -1) {
+                            int prevIndex = line.Line.IndexOf(" ", index + 36);
+                            int playerId = int.Parse(line.Line.Substring(index + 36, prevIndex - index - 36));
+                            if (!Stats.EliminatedPlayerIds.Contains(playerId) && Stats.ReadyPlayerIds.ContainsKey(playerId)) {
+                                Stats.EliminatedPlayerIds.Add(playerId);
+                                Stats.NumPlayersEliminated++;
+                                if (Stats.ReadyPlayerIds.TryGetValue(playerId, out string platformId)) {
+                                    switch (platformId) {
+                                        case "ps4":
+                                        case "ps5":
+                                            Stats.NumPlayersPsEliminated++; break;
+                                        case "xb1":
+                                        case "xsx":
+                                            Stats.NumPlayersXbEliminated++; break;
+                                        case "switch":
+                                            Stats.NumPlayersSwEliminated++; break;
+                                        case "win":
+                                            Stats.NumPlayersPcEliminated++; break;
+                                        case "android":
+                                        case "ios":
+                                            Stats.NumPlayersMbEliminated++; break;
+                                    }
+                                }
+                            }
+                        }
+                    } else if (line.Line.IndexOf(" == [CompletedEpisodeDto] ==", StringComparison.OrdinalIgnoreCase) != -1) {
+                        if (logRound.Info == null || Stats.EndedShow) return false;
+
+                        Stats.SavedRoundCount = logRound.Info.Round;
+                        Stats.EndedShow = true;
+
+                        if (logRound.Info.End == DateTime.MinValue) {
+                            Stats.LastPlayedRoundStart = logRound.Info.Start;
+                            Stats.IsLastPlayedRoundStillPlaying = true;
+                            logRound.Info.End = line.Date;
+                        }
+                        logRound.Info.Playing = false;
+
+                        RoundInfo roundInfo = null;
+                        StringReader sr = new StringReader(line.Line);
+                        string detail;
+                        bool foundRound = false;
+                        int maxRound = 0;
+                        DateTime showStart = DateTime.MinValue;
+                        int questKudos = 0;
+                        while ((detail = sr.ReadLine()) != null) {
+                            if (detail.IndexOf("[Round ", StringComparison.OrdinalIgnoreCase) == 0) {
+                                foundRound = true;
+                                int roundNum = detail[7] - 0x30 + 1;
+                                string roundName = detail.Substring(11, detail.Length - 12);
+
+                                if (roundNum - 1 < round.Count) {
+                                    if (roundNum > maxRound) {
+                                        maxRound = roundNum;
+                                    }
+
+                                    roundInfo = round[roundNum - 1];
+
+                                    if (string.IsNullOrEmpty(roundInfo.Name)) {
+                                        return false;
+                                    }
+
+                                    if (string.Equals(roundInfo.ShowNameId, "wle_mrs_shuffle_show") || string.Equals(roundInfo.ShowNameId, "wle_shuffle_discover") || string.Equals(roundInfo.ShowNameId, "wle_mrs_shuffle_show_squads")) {
+                                        if (round.Count > 1 && roundNum != round.Count) {
+                                            roundInfo.IsFinal = false;
+                                        }
+                                        roundName = this.StatsForm.ReplaceLevelIdInShuffleShow(roundInfo.ShowNameId, roundName);
+                                    }
+
+                                    if (!string.Equals(roundInfo.Name, roundName, StringComparison.OrdinalIgnoreCase)) {
+                                        return false;
+                                    }
+
+                                    roundInfo.VerifyName();
+
+                                    if (roundNum == 1) {
+                                        showStart = roundInfo.Start;
+                                    }
+                                    roundInfo.ShowStart = showStart;
+                                    roundInfo.Playing = false;
+                                    roundInfo.Round = roundNum;
+                                } else {
+                                    return false;
+                                }
+
+                                if (roundInfo.End == DateTime.MinValue) {
+                                    roundInfo.End = line.Date;
+                                }
+                                if (roundInfo.Start == DateTime.MinValue) {
+                                    roundInfo.Start = roundInfo.End;
+                                }
+                            } else if (foundRound) {
+                                if (detail.IndexOf("> Qualified: ", StringComparison.OrdinalIgnoreCase) == 0) {
+                                    char qualified = detail[13];
+                                    roundInfo.Qualified = qualified == 'T';
+                                } else if (detail.IndexOf("> Position: ", StringComparison.OrdinalIgnoreCase) == 0) {
+                                    roundInfo.Position = int.Parse(detail.Substring(12));
+                                } else if (detail.IndexOf("> Team Score: ", StringComparison.OrdinalIgnoreCase) == 0) {
+                                    roundInfo.Score = int.Parse(detail.Substring(14));
+                                } else if (detail.IndexOf("> Kudos: ", StringComparison.OrdinalIgnoreCase) == 0) {
+                                    roundInfo.Kudos += int.Parse(detail.Substring(9));
+                                } else if (detail.IndexOf("> Bonus Tier: ", StringComparison.OrdinalIgnoreCase) == 0 && detail.Length == 15) {
+                                    char tier = detail[14];
+                                    roundInfo.Tier = roundInfo.Qualified ? tier - 0x30 + 1 : 0;
+                                } else if (detail.IndexOf("> Bonus Kudos: ", StringComparison.OrdinalIgnoreCase) == 0) {
+                                    roundInfo.Kudos += int.Parse(detail.Substring(15));
+                                }
+                            } else {
+                                if (detail.IndexOf("> Kudos: ", StringComparison.OrdinalIgnoreCase) == 0) {
+                                    questKudos = int.Parse(detail.Substring(9));
+                                    //> Fame:, > Crowns:, > CurrentCrownShards:
+                                }
+                            }
+                        }
+
+                        if (round.Count > maxRound) {
                             return false;
                         }
 
-                        if (roundInfo.End == DateTime.MinValue) {
-                            roundInfo.End = line.Date;
+                        if (roundInfo != null) {
+                            roundInfo.Kudos += questKudos;
                         }
-                        if (roundInfo.Start == DateTime.MinValue) {
-                            roundInfo.Start = roundInfo.End;
+
+                        DateTime showEnd = logRound.Info.End;
+                        for (int i = 0; i < round.Count; i++) {
+                            round[i].ShowEnd = showEnd;
                         }
-                    } else if (foundRound) {
-                        if (detail.IndexOf("> Qualified: ", StringComparison.OrdinalIgnoreCase) == 0) {
-                            char qualified = detail[13];
-                            roundInfo.Qualified = qualified == 'T';
-                        } else if (detail.IndexOf("> Position: ", StringComparison.OrdinalIgnoreCase) == 0) {
-                            roundInfo.Position = int.Parse(detail.Substring(12));
-                        } else if (detail.IndexOf("> Team Score: ", StringComparison.OrdinalIgnoreCase) == 0) {
-                            roundInfo.Score = int.Parse(detail.Substring(14));
-                        } else if (detail.IndexOf("> Kudos: ", StringComparison.OrdinalIgnoreCase) == 0) {
-                            roundInfo.Kudos += int.Parse(detail.Substring(9));
-                        } else if (detail.IndexOf("> Bonus Tier: ", StringComparison.OrdinalIgnoreCase) == 0 && detail.Length == 15) {
-                            char tier = detail[14];
-                            roundInfo.Tier = roundInfo.Qualified ? tier - 0x30 + 1 : 0;
-                        } else if (detail.IndexOf("> Bonus Kudos: ", StringComparison.OrdinalIgnoreCase) == 0) {
-                            roundInfo.Kudos += int.Parse(detail.Substring(15));
+
+                        if (logRound.Info.Qualified) {
+                            logRound.Info.Crown = true;
+                            logRound.InLoadingGameScreen = false;
+                            logRound.CountingPlayers = false;
+                            logRound.GetCurrentPlayerID = false;
+                            logRound.FindingPosition = false;
                         }
-                    } else {
-                        if (detail.IndexOf("> Kudos: ", StringComparison.OrdinalIgnoreCase) == 0) {
-                            questKudos = int.Parse(detail.Substring(9));
-                            //> Fame:, > Crowns:, > CurrentCrownShards:
-                        }
-                    }
+                        logRound.Info = null;
+                        return true;
+                    */
                 }
+            } catch {
+                this.ResetVariablesUsedForOverlay();
 
-                if (round.Count > maxRound) {
-                    return false;
-                }
-
-                if (roundInfo != null) {
-                    roundInfo.Kudos += questKudos;
-                }
-
-                DateTime showEnd = logRound.Info.End;
-                for (int i = 0; i < round.Count; i++) {
-                    round[i].ShowEnd = showEnd;
-                }
-
-                if (logRound.Info.Qualified) {
-                    logRound.Info.Crown = true;
-                    logRound.InLoadingGameScreen = false;
-                    logRound.CountingPlayers = false;
-                    logRound.GetCurrentPlayerID = false;
-                    logRound.FindingPosition = false;
-                }
+                logRound.FindingPosition = false;
                 logRound.Info = null;
-                return true;
+                logRound.PlayersInfo = null;
+                Stats.IsShowStarting = false;
+                Stats.InShow = false;
+                Stats.EndedShow = true;
+
+                round.Clear();
             }
-            */
+            // } catch (Exception ex) {
+            //     MessageBox.Show(ex.ToString(), @"LogFileWatcher Exception", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            // }
             return false;
         }
     }
