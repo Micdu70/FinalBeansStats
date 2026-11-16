@@ -1,7 +1,14 @@
+## v2.1
+- Add: Support for new FS4 rounds/shows [v2.0]
+- New: "Spanish" language is now available [v2.0]
+- New: [Overlay] Countdown info before round start [v2.0]
+- Change: You can now move shows to "LTM" profile [v2.1]
+- Change: Removed option to fix the show name of one (or multiple) show(s) [v2.0]
+- General bug fixes && improvements [v2.0]
 ## v2.0
 - Add: Support for new FS4 rounds/shows
-- New: "Español" (Spanish) language is available
-- New: Countdown info before round start (Overlay)
+- New: "Spanish" language is now available
+- New: [Overlay] Countdown info before round start
 - Change: Removed option to fix the show name of one (or multiple) show(s)
 - General bug fixes && improvements
 ## v1.8

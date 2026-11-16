@@ -35,9 +35,7 @@ namespace FinalBeansStats {
 
                 List<string> addedShowList = new List<string>();
                 foreach (string showId in this.StatsForm.PublicShowIdList) {
-                    if (!string.Equals(showId, "ltm_show")) {
-                        Shows.Add(Multilingual.GetShowName(showId), showId);
-                    }
+                    Shows.Add(Multilingual.GetShowName(showId), showId);
                     addedShowList.Add(showId);
                 }
                 foreach (string showId in this.StatsForm.PublicShowIdList2) {
