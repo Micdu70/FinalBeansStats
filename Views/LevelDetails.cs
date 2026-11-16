@@ -942,7 +942,7 @@ namespace FinalBeansStats {
                 if (((Grid)sender).SelectedCells.Count > 0) {
                     if (((Grid)sender).SelectedRows.Count == 1) {
                         RoundInfo info = ((Grid)sender).Rows[((DataGridView)sender).SelectedRows[0].Index].DataBoundItem as RoundInfo;
-                        if (info.Finish.HasValue) {
+                        if (info.Finish.HasValue && info.LastRound) {
                             if (((Grid)sender).MenuSeparator1 != null && !((Grid)sender).CMenu.Items.Contains(((Grid)sender).MenuSeparator1)) {
                                 ((Grid)sender).CMenu.Items.Add(((Grid)sender).MenuSeparator1);
                             }
@@ -1164,7 +1164,7 @@ namespace FinalBeansStats {
         private void deleteFinishTime_Click(object sender, EventArgs e) {
             if (this.statType != StatType.Shows && this.gridDetails.SelectedCells.Count > 0 && this.gridDetails.SelectedRows.Count == 1) {
                 RoundInfo ri = this.gridDetails.Rows[this.gridDetails.SelectedCells[0].RowIndex].DataBoundItem as RoundInfo;
-                if (ri.Finish.HasValue) {
+                if (ri.Finish.HasValue && ri.LastRound) {
                     if (Messenger.MessageBox(Multilingual.GetWord("message_delete_finish_time"),
                             Multilingual.GetWord("message_delete_finish_time_caption"),
                             MsgIcon.Question, MessageBoxButtons.YesNo, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this) == DialogResult.Yes) {

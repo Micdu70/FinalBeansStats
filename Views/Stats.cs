@@ -9,7 +9,9 @@ using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+#if AllowUpdate
 using System.Net;
+#endif
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -129,8 +131,6 @@ namespace FinalBeansStats {
         public static MetroThemeStyle CurrentTheme = MetroThemeStyle.Dark;
         public static bool InstalledEmojiFont;
 
-        public static int SelectedShowIndex;
-
         // public static string LastShowNameId = null;
         public static string LastRoundId = null;
         public static string LastRoundName = null;
@@ -155,16 +155,12 @@ namespace FinalBeansStats {
         public static long LastServerPing = 0;
         public static bool IsBadServerPing = false;
 
-        public static DateTime LastPrecountdownStateDate = DateTime.MinValue;
-        public static DateTime PrecountdownDate = DateTime.MinValue;
-
         public static readonly List<string> SucceededPlayerNames = new List<string>();
         public static readonly List<int> SucceededPlayerIds = new List<int>();
         public static readonly List<int> EliminatedPlayerIds = new List<int>();
         public static readonly Dictionary<int, string> ReadyPlayerIds = new Dictionary<int, string>();
 
         // public static string SavedSessionId { get; set; }
-        public static int SavedRoundCount { get; set; }
         public static int NumPlayersSucceeded { get; set; }
         public static int NumPlayersPsSucceeded { get; set; }
         public static int NumPlayersXbSucceeded { get; set; }
@@ -179,6 +175,9 @@ namespace FinalBeansStats {
         public static int NumPlayersPcEliminated { get; set; }
         public static bool IsLastPlayedRoundStillPlaying { get; set; }
         public static DateTime LastRoundLoad { get; set; } = DateTime.MinValue;
+        public static DateTime LastCountdownState = DateTime.MinValue;
+        public static DateTime CountdownStartDate = DateTime.MinValue;
+        public static int LastPlayedRoundNum { get; set; }
         public static DateTime? LastPlayedRoundStart { get; set; }
         public static DateTime? LastPlayedRoundEnd { get; set; }
 
@@ -258,8 +257,13 @@ namespace FinalBeansStats {
         private DWM_WINDOW_CORNER_PREFERENCE windowConerPreference = DWM_WINDOW_CORNER_PREFERENCE.DWMWCP_ROUNDSMALL;
         private string mainWndTitle;
         private bool isStartingUp = true;
+#if AllowUpdate
         private bool isAvailableNewVersion;
         private string availableNewVersion;
+#else
+        private readonly bool isAvailableNewVersion = false;
+        private readonly string availableNewVersion = null;
+#endif
         private int profileWithLinkedCustomShow = -1;
         private Toast toast;
         public Point screenCenter;
@@ -275,7 +279,7 @@ namespace FinalBeansStats {
 
         private readonly int currentGlobalDbVersion = 0;
 
-        private readonly int currentSettingsVersionFB = 7;
+        private readonly int currentSettingsVersionFB = 8;
 
         /* -------------------------------------------------------- */
 
@@ -618,7 +622,10 @@ namespace FinalBeansStats {
             this.RunDatabaseTask(initUserSettingsTask, false);
 
 #if AllowUpdate
-            this.RemoveBackupFiles();
+            if (this.CurrentSettings.ShowChangelog) {
+                this.RemoveBackupFile();
+                this.RemoveUselessConfigFile();
+            }
 #endif
 
             this.InitializeComponent();
@@ -696,13 +703,20 @@ namespace FinalBeansStats {
                             this.CurrentSettings.Multilingual = (int)initFinalBeansStats.selectedLanguage;
                             this.StatsDB.BeginTrans();
                             if (initFinalBeansStats.autoGenerateProfiles) {
-                                int profileOrder = this.PublicShowIdList.Length + this.PublicShowIdList2.Length;
+                                int profileOrder = this.PublicShowIdList.Length + this.PublicShowIdList2.Length - 2; // minus 2 => "Mix it Up! [FS2]" & "Mix it Up! [FS4]"
                                 for (int i = this.PublicShowIdList2.Length; i >= 1; i--) {
                                     string showId = this.PublicShowIdList2[i - 1];
+                                    if (string.Equals(showId, "fs2_mix_it_up") || string.Equals(showId, "show_finalbeans_fs4_variations")) continue;
+
                                     this.Profiles.Insert(new Profiles { ProfileId = profileOrder - 1, ProfileName = Multilingual.GetShowName(showId), ProfileOrder = profileOrder, LinkedShowId = showId, DoNotCombineShows = true });
                                     profileOrder--;
+
+                                    if (string.Equals(showId, "big_shots_trials")) {
+                                        this.Profiles.Insert(new Profiles { ProfileId = profileOrder - 1, ProfileName = Multilingual.GetShowName("mix_it_up"), ProfileOrder = profileOrder, LinkedShowId = "mix_it_up", DoNotCombineShows = false });
+                                        profileOrder--;
+                                    }
                                 }
-                                for (int i = this.PublicShowIdList.Length; i >= 1; i--) {
+                                for (int i = this.PublicShowIdList.Length - 1; i >= 1; i--) {
                                     string showId = this.PublicShowIdList[i - 1];
                                     this.Profiles.Insert(new Profiles { ProfileId = profileOrder - 1, ProfileName = Multilingual.GetShowName(showId), ProfileOrder = profileOrder, LinkedShowId = showId, DoNotCombineShows = false });
                                     profileOrder--;
@@ -1500,8 +1514,19 @@ namespace FinalBeansStats {
         }
 
 #if AllowUpdate
-        private void RemoveBackupFiles() {
+        private void RemoveBackupFile() {
             foreach (string file in Directory.EnumerateFiles(CURRENTDIR, "*.bak")) {
+                try {
+                    File.SetAttributes(file, FileAttributes.Normal);
+                    File.Delete(file);
+                } catch {
+                    // ignored
+                }
+            }
+        }
+
+        private void RemoveUselessConfigFile() {
+            foreach (string file in Directory.EnumerateFiles(CURRENTDIR, "*.exe.config")) {
                 try {
                     File.SetAttributes(file, FileAttributes.Normal);
                     File.Delete(file);
@@ -1515,6 +1540,49 @@ namespace FinalBeansStats {
         private void UpdateDatabase() {
             for (int version = this.CurrentSettings.Version_FB; version < currentSettingsVersionFB; version++) {
                 switch (version) {
+                    case 7: {
+                            if (string.Equals(this.CurrentSettings.OverlayBackgroundResourceName, "background_rave_royale")) {
+                                this.CurrentSettings.OverlayBackground = 15;
+                            }
+
+                            List<Profiles> profileList = this.Profiles.FindAll().ToList();
+
+                            bool isUpdateProfiles = false;
+                            foreach (Profiles p in profileList) {
+                                if (string.Equals(p.LinkedShowId, "mix_it_up")) {
+                                    p.DoNotCombineShows = false;
+                                    isUpdateProfiles = true;
+                                    break;
+                                }
+                            }
+                            if (isUpdateProfiles) {
+                                this.StatsDB.BeginTrans();
+                                this.Profiles.DeleteAll();
+                                this.Profiles.InsertBulk(profileList);
+                                this.StatsDB.Commit();
+                            }
+
+                            List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
+                                                             select ri).ToList();
+
+                            string[] knownRoundIds = this.StatLookup.Keys.ToArray();
+                            Array.Sort(knownRoundIds);
+                            Array.Reverse(knownRoundIds);
+                            foreach (RoundInfo ri in roundInfoList) {
+                                foreach (string knownRoundId in knownRoundIds) {
+                                    if (ri.Name.StartsWith(knownRoundId, StringComparison.OrdinalIgnoreCase)) {
+                                        ri.Name = knownRoundId;
+                                        break;
+                                    }
+                                }
+                            }
+                            this.StatsDB.BeginTrans();
+                            this.RoundDetails.Update(roundInfoList);
+                            this.PersonalBestLog.DeleteAll();
+                            this.PersonalBestLogCache.Clear();
+                            this.StatsDB.Commit();
+                            break;
+                        }
                     case 6: {
                             if (this.CurrentSettings.Multilingual >= 2) {
                                 ++this.CurrentSettings.Multilingual;
@@ -1523,6 +1591,7 @@ namespace FinalBeansStats {
                             }
 
                             if (string.Equals(this.CurrentSettings.OverlayBackgroundResourceName, "background_frightful_final_ween")) {
+                                this.CurrentSettings.OverlayBackground = 15;
                                 this.CurrentSettings.OverlayBackgroundResourceName = "background_rave_royale";
                                 this.CurrentSettings.OverlayTabResourceName = "tab_unselected_rave_royale";
                             }
@@ -1569,8 +1638,6 @@ namespace FinalBeansStats {
                             this.RoundDetails.Update(roundInfoList);
                             this.StatsDB.Commit();
                             break;
-
-
                         }
                     case 5: {
                             List<RoundInfo> roundInfoList = (from ri in this.RoundDetails.FindAll()
@@ -1740,7 +1807,7 @@ namespace FinalBeansStats {
                 OverlayFixedPositionY = null,
                 OverlayFixedWidth = 786,
                 OverlayFixedHeight = 134,
-                OverlayBackground = 8,
+                OverlayBackground = 15,
                 OverlayBackgroundResourceName = "background_rave_royale",
                 OverlayTabResourceName = "tab_unselected_rave_royale",
                 OverlayBackgroundOpacity = 100,
@@ -1758,7 +1825,7 @@ namespace FinalBeansStats {
                 OnlyShowPing = false,
                 OnlyShowFinalStreak = false,
                 CycleTimeSeconds = 5,
-                OverlayVisible = false,
+                OverlayVisible = true,
                 OverlayNotOnTop = false,
                 PlayerByConsoleType = false,
                 ColorByRoundType = true,

@@ -4,13 +4,14 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
 namespace FinalBeansStats {
     public sealed partial class Overlay : Form {
+        private const int UpdateDelay = 100;
+        private const int FramesPerSecond = 1000 / UpdateDelay;
         private const int WM_NCLBUTTONDOWN = 0xA1;
         private const int HT_CAPTION = 0x2;
 
@@ -25,13 +26,13 @@ namespace FinalBeansStats {
         private Thread timer;
         public bool saveDisplayChange;
         public bool flippedImage;
-        private int frameCount;
+        private int framesCount;
         private bool isTimeToSwitch;
         private int switchCount;
         private Bitmap Background, DrawImage;
         private Graphics DrawGraphics;
         private RoundInfo lastRound;
-        private int savedRoundNum;
+        private DateTime levelStart;
         private string levelId;
         private string levelName;
         private int levelTimeLimit;
@@ -601,13 +602,13 @@ namespace FinalBeansStats {
             while (this.StatsForm != null && !this.StatsForm.IsDisposed && !this.StatsForm.Disposing) {
                 try {
                     if (this.IsHandleCreated && !this.StatsForm.Disposing && !this.StatsForm.IsDisposed) {
-                        this.frameCount++;
-                        this.isTimeToSwitch = this.frameCount % (this.StatsForm.CurrentSettings.CycleTimeSeconds * 20) == 0;
+                        this.framesCount++;
+                        this.isTimeToSwitch = this.framesCount % (this.StatsForm.CurrentSettings.CycleTimeSeconds * FramesPerSecond) == 0;
                         this.Invoke((Action)this.UpdateInfo);
                     }
 
                     this.StatsForm.UpdateDates();
-                    Thread.Sleep(50);
+                    Thread.Sleep(UpdateDelay);
                 } catch {
                     // ignored
                 }
@@ -1003,9 +1004,9 @@ namespace FinalBeansStats {
                 TimeSpan runningTime = start > currentUtc ? currentUtc - this.startTime : currentUtc - start;
                 int maxRunningTime = 30; // in minutes
 
-                if (!Stats.IsDisplayOverlayTime) {
+                if (!Stats.IsDisplayOverlayTime || Stats.IsShowStarting) {
                     this.lblDuration.TextRight = "-";
-                } else if (!Stats.IsShowStarting && Stats.LastPlayedRoundEnd.HasValue && Stats.LastPlayedRoundEnd > Stats.LastPlayedRoundStart) {
+                } else if (Stats.LastPlayedRoundEnd.HasValue && Stats.LastPlayedRoundEnd > Stats.LastPlayedRoundStart) {
                     TimeSpan time = Stats.LastPlayedRoundEnd.Value - Stats.LastPlayedRoundStart.Value;
                     bool isExtraTime = timeLimit > 0 && TimeSpan.FromSeconds(timeLimit) < time;
                     this.lblDuration.TextRight = timeLimit > 0 ? $"{(isExtraTime ? "+ " : "")}{TimeSpan.FromSeconds(timeLimit) - time:m\\:ss\\.fff}" : $"{time:m\\:ss\\.fff}";
@@ -1051,19 +1052,24 @@ namespace FinalBeansStats {
                     int maxRunningTime = 30; // in minutes
                     float fBrightness = 0.7f;
 
-                    if (!Stats.IsDisplayOverlayTime) {
-                        this.lblFinish.TextRight = "-";
-                        this.lblFinish.ForeColor = this.ForeColor;
-                    } else if (Stats.PrecountdownDate != DateTime.MinValue) {
+                    if (Stats.CountdownStartDate != DateTime.MinValue) {
                         int precountDuration = 5; // in seconds
-                        double secondsDiff = (Stats.PrecountdownDate - currentUtc).TotalSeconds;
-                        this.lblFinish.TextRight = secondsDiff > -5.0 ? $"{precountDuration + (int)Math.Ceiling(secondsDiff):N0}" : "Go!";
+                        double secondsDiff = (Stats.CountdownStartDate - currentUtc).TotalSeconds;
+                        if (secondsDiff > -5.0) {
+                            this.lblFinish.TextRight = $"{precountDuration + (int)Math.Ceiling(secondsDiff):N0}";
+                        } else {
+                            this.lblFinish.TextRight = secondsDiff > -6.0 ? "Go!" : "-";
+                        }
                         this.lblFinish.ForeColor = secondsDiff > -1.0 ? Color.FromArgb(240, 210, 230)
                                                  : secondsDiff > -2.0 ? Color.FromArgb(240, 190, 215)
                                                  : secondsDiff > -3.0 ? Color.FromArgb(220, 200, 235)
                                                  : secondsDiff > -4.0 ? Color.FromArgb(140, 200, 235)
                                                  : secondsDiff > -5.0 ? Color.FromArgb(240, 190, 175)
-                                                 : Color.FromArgb(220, 235, 235);
+                                                 : secondsDiff > -6.0 ? Color.FromArgb(220, 235, 235)
+                                                 : this.ForeColor;
+                    } else if (!Stats.IsDisplayOverlayTime || Stats.IsShowStarting) {
+                        this.lblFinish.TextRight = "-";
+                        this.lblFinish.ForeColor = this.ForeColor;
                     } else if (finish.HasValue) {
                         TimeSpan time = finish.GetValueOrDefault(start) - start;
                         if (this.lastRound.Crown) {
@@ -1175,16 +1181,14 @@ namespace FinalBeansStats {
                 this.lblProfile.Text = this.StatsForm.GetCurrentProfileName();
 
                 if (this.lastRound != null && !string.IsNullOrEmpty(this.lastRound.Name)) {
-                    bool isRoundInfoNeedRefresh = true; // Not optimized but needed for FinalBeans
-                                                        // || Stats.IsOverlayRoundInfoNeedRefresh
-                                                        // || this.savedRoundNum != this.lastRound.Round
-                                                        // || this.lastRound.Round == -1;
+                    bool isRoundInfoNeedRefresh = this.lastRound.Start != this.levelStart ||
+                                                  Stats.IsOverlayRoundInfoNeedRefresh;
                     if (isRoundInfoNeedRefresh) {
                         if (Stats.IsOverlayRoundInfoNeedRefresh) {
                             Stats.IsOverlayRoundInfoNeedRefresh = false;
                         }
-                        this.savedRoundNum = this.lastRound.Round;
 
+                        this.levelStart = this.lastRound.Start;
                         this.levelId = this.lastRound.Name;
 
                         if (this.StatsForm.StatLookup.TryGetValue(this.levelId, out this.levelStats)) {
@@ -1212,7 +1216,7 @@ namespace FinalBeansStats {
                     this.SetPlayersLabel(this.levelType, this.recordType, overlaySetting);
 
                     if (this.isTimeToSwitch) {
-                        this.frameCount = 0;
+                        this.framesCount = 0;
                         this.switchCount ^= 1;
                     }
 
