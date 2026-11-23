@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using MetroFramework;
 using MetroFramework.Controls;
 using ScottPlot;
-using ScottPlot.Plottable;
+using ScottPlot.Plottables;
+using Color = System.Drawing.Color;
+using Label = System.Windows.Forms.Label;
 
 namespace FinalBeansStats {
     public partial class LevelStatsDisplay : MetroFramework.Forms.MetroForm {
@@ -31,16 +32,6 @@ namespace FinalBeansStats {
             this.Opacity = 0;
         }
 
-        private class CustomPalette : IPalette {
-            public string Name => "Custom Palette";
-            public string Description => "Custom Palette";
-
-            public Color[] Colors { get; } = {
-                Color.FromArgb(31, 119, 180), Color.FromArgb(255, 215, 0), Color.FromArgb(192, 192, 192), Color.FromArgb(205, 127, 50), Color.FromArgb(255, 20, 147),
-                Color.FromArgb(128, 0, 128), Color.FromArgb(227, 119, 194), Color.FromArgb(127, 127, 127), Color.FromArgb(188, 189, 34), Color.FromArgb(23, 190, 207)
-            };
-        }
-
         private void RoundStatsDisplay_Load(object sender, EventArgs e) {
             this.SetTheme(Stats.CurrentTheme);
             this.ChangeLanguage();
@@ -49,7 +40,9 @@ namespace FinalBeansStats {
             this.cboRoundList.DisplayMember = "Value";
             this.cboRoundList.ValueMember = "Key";
 
-            this.formsPlot.Plot.Legend(location: Alignment.UpperRight);
+            this.formsPlot.Plot.Legend.SetBestFontOnEachRender = true;
+            this.formsPlot.Plot.ShowLegend(Alignment.UpperRight);
+            this.formsPlot.UserInputProcessor.IsEnabled = false;
             this.SetGraph(this.cboRoundList.SelectedItem);
             this.isInitComplete = true;
         }
@@ -60,11 +53,18 @@ namespace FinalBeansStats {
 
         private void SetTheme(MetroThemeStyle theme) {
             this.SuspendLayout();
+            ScottPlot.Color figureColor = ScottPlot.Color.FromColor(theme == MetroThemeStyle.Dark ? Color.FromArgb(17, 17, 17) : Color.White);
+            ScottPlot.Color axesColor = ScottPlot.Color.FromColor(theme == MetroThemeStyle.Dark ? Color.WhiteSmoke : Color.DimGray);
+            this.formsPlot.Plot.SetStyle(new PlotStyle {
+                FigureBackgroundColor = figureColor,
+                DataBackgroundColor = figureColor,
+                AxisColor = axesColor,
+                GridMajorLineColor = ScottPlot.Color.FromColor(theme == MetroThemeStyle.Dark ? Color.FromArgb(64, 64, 64) : Color.LightGray),
+                LegendBackgroundColor = figureColor,
+                LegendFontColor = axesColor,
+                LegendOutlineColor = axesColor
+            });
             if (theme == MetroThemeStyle.Dark) {
-                this.formsPlot.Plot.Style(ScottPlot.Style.Black);
-                this.formsPlot.Plot.Style(figureBackground: Color.FromArgb(17, 17, 17));
-                this.formsPlot.Plot.Style(dataBackground: Color.FromArgb(17, 17, 17));
-                this.formsPlot.Plot.Style(tick: Color.WhiteSmoke);
                 foreach (Control c1 in Controls) {
                     if (c1 is MetroComboBox mcbo1) {
                         mcbo1.Theme = theme;
@@ -81,8 +81,6 @@ namespace FinalBeansStats {
         }
 
         private void SetGraph(object selectedItem) {
-            //this.formsPlot.Plot.Grid(false);
-            //this.formsPlot.Plot.Frameless();
             KeyValuePair<string, string> selectedRoundPair = (KeyValuePair<string, string>)selectedItem;
             string levelId = selectedRoundPair.Key;
 
@@ -121,8 +119,6 @@ namespace FinalBeansStats {
             this.lblRoundTime.Text = $@"{Multilingual.GetWord("level_round_played_prefix")} {(int)playTime.TotalHours}{Multilingual.GetWord("main_hour")}{playTime:mm}{Multilingual.GetWord("main_min")}{playTime:ss}{Multilingual.GetWord("main_sec")} {Multilingual.GetWord("level_round_played_suffix")}";
             double[] values = this.levelMedalInfo[levelId];
 
-            this.formsPlot.Plot.Palette = new CustomPalette();
-
             this.goldMedalPercent = $@"{Math.Round((values[1] / values[0]) * 100, 2)}%";
             this.silverMedalPercent = $@"{Math.Round((values[2] / values[0]) * 100, 2)}%";
             this.bronzeMedalPercent = $@"{Math.Round((values[3] / values[0]) * 100, 2)}%";
@@ -151,31 +147,31 @@ namespace FinalBeansStats {
 
 
 
-            this.radialGauges = this.formsPlot.Plot.AddRadialGauge(values);
+            this.radialGauges = this.formsPlot.Plot.Add.RadialGaugePlot(values);
+            this.radialGauges.Colors = new[] {
+                ScottPlot.Color.FromColor(Color.FromArgb(31, 119, 180)), ScottPlot.Color.FromColor(Color.FromArgb(255, 215, 0)),
+                ScottPlot.Color.FromColor(Color.FromArgb(192, 192, 192)), ScottPlot.Color.FromColor(Color.FromArgb(205, 127, 50)),
+                ScottPlot.Color.FromColor(Color.FromArgb(255, 20, 147)), ScottPlot.Color.FromColor(Color.FromArgb(128, 0, 128))
+            };
             this.radialGauges.OrderInsideOut = false;
-            //this.radialGauges.Clockwise = false;
             this.radialGauges.SpaceFraction = .1;
-            //this.radialGauges.BackgroundTransparencyFraction = .3;
-            //this.radialGauges.StartingAngle = 270;
-            this.radialGauges.EndCap = System.Drawing.Drawing2D.LineCap.Round;
-            this.radialGauges.LabelPositionFraction = 0;
-            this.radialGauges.FontSizeFraction = .7;
-            //this.radialGauges.Font.Color = Color.Black;
+            this.radialGauges.StartingAngle = 270;
+            this.radialGauges.EndCap = SkiaSharp.SKStrokeCap.Round;
+            this.radialGauges.ShowLevels = false;
             this.radialGauges.Labels = this.labelList;
 
-            this.formsPlot.Plot.AxisZoom(.9, .9);
-            this.formsPlot.Plot.YAxis.SetBoundary(0, 0);
-            this.formsPlot.Plot.XAxis.SetBoundary(0, 0);
-            this.formsPlot.Refresh();
+            for (int i = 0; i < values.Length; i++) {
+                int gaugePosition = values.Length - i;
+                double labelY = (double)gaugePosition / values.Length - 0.01;
+                Text valueLabel = this.formsPlot.Plot.Add.Text(values[i] == 0 ? string.Empty : values[i].ToString(), 0, labelY);
+                valueLabel.Alignment = Alignment.MiddleCenter;
+                valueLabel.LabelFontSize = 20;
+                valueLabel.LabelFontColor = ScottPlot.Color.FromColor(this.Theme == MetroThemeStyle.Dark ? Color.WhiteSmoke : Color.Black);
+                valueLabel.LabelBold = true;
+            }
 
-            // this.formsPlot.Configuration.Pan = false;
-            // this.formsPlot.Configuration.Zoom = false;
-            // this.formsPlot.Configuration.ScrollWheelZoom = false;
-            // this.formsPlot.Configuration.RightClickDragZoom = false;
-            // this.formsPlot.Configuration.MiddleClickAutoAxis = false;
-            // this.formsPlot.Configuration.DoubleClickBenchmark = false;
-            // this.formsPlot.Configuration.LockHorizontalAxis = true;
-            // this.formsPlot.Configuration.LockVerticalAxis = true;
+            this.formsPlot.Plot.HideAxesAndGrid();
+            this.formsPlot.Refresh();
 
             var pb = this.formsPlot.Controls.OfType<PictureBox>().FirstOrDefault();
             if (pb != null) {
@@ -184,9 +180,9 @@ namespace FinalBeansStats {
         }
 
         private void Medal_MouseEnter(object sender, EventArgs e) {
-            this.Cursor = this.Theme == MetroThemeStyle.Light
-                ? new System.Windows.Forms.Cursor(Properties.Resources.transform_icon.GetHicon())
-                : new System.Windows.Forms.Cursor(Properties.Resources.transform_gray_icon.GetHicon());
+            this.Cursor = this.Theme == MetroThemeStyle.Dark
+                          ? new System.Windows.Forms.Cursor(Properties.Resources.transform_gray_icon.GetHicon())
+                          : new System.Windows.Forms.Cursor(Properties.Resources.transform_icon.GetHicon());
         }
 
         private void Medal_MouseLeave(object sender, EventArgs e) {

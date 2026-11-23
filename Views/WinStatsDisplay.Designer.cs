@@ -29,7 +29,7 @@
             this.chkWins = new MetroFramework.Controls.MetroCheckBox();
             this.chkFinals = new MetroFramework.Controls.MetroCheckBox();
             this.chkShows = new MetroFramework.Controls.MetroCheckBox();
-            this.formsPlot = new ScottPlot.FormsPlot();
+            this.formsPlot = new ScottPlot.WinForms.FormsPlot();
             ((System.ComponentModel.ISupportInitialize)(this.picSwitchGraphStyle)).BeginInit();
             this.SuspendLayout();
             // 
@@ -105,7 +105,7 @@
             this.formsPlot.Location = new System.Drawing.Point(0, 58);
             this.formsPlot.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.formsPlot.Name = "formsPlot";
-            this.formsPlot.Size = new System.Drawing.Size(1280, 860);
+            this.formsPlot.Size = new System.Drawing.Size(1280, 840);
             this.formsPlot.TabIndex = 5;
             this.formsPlot.MouseLeave += new System.EventHandler(this.formsPlot_MouseLeave);
             this.formsPlot.MouseMove += new System.Windows.Forms.MouseEventHandler(this.formsPlot_MouseMove);
@@ -138,7 +138,7 @@
         }
         
         #endregion
-        private ScottPlot.FormsPlot formsPlot;
+        private ScottPlot.WinForms.FormsPlot formsPlot;
         private System.Windows.Forms.PictureBox picSwitchGraphStyle;
         private MetroFramework.Controls.MetroCheckBox chkWins;
         private MetroFramework.Controls.MetroCheckBox chkFinals;

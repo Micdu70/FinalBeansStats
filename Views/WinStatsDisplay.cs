@@ -7,7 +7,8 @@ using System.Windows.Forms;
 using MetroFramework;
 using MetroFramework.Controls;
 using ScottPlot;
-using ScottPlot.Plottable;
+using ScottPlot.Plottables;
+using Color = System.Drawing.Color;
 
 namespace FinalBeansStats {
     public partial class WinStatsDisplay : MetroFramework.Forms.MetroForm {
@@ -22,54 +23,80 @@ namespace FinalBeansStats {
         }
 
         private double yMax;
-        private ScatterPlot MyScatterPlot1, MyScatterPlot2, MyScatterPlot3;
+        private Scatter MyScatterPlot1, MyScatterPlot2, MyScatterPlot3;
         private BarPlot MyBarPlot1, MyBarPlot2, MyBarPlot3;
         private LollipopPlot MyLollipopPlot1, MyLollipopPlot2, MyLollipopPlot3;
-        private MarkerPlot HighlightedDate;
+        private Marker HighlightedDate;
         private Tooltip tooltip;
 
         private void WinStatsDisplay_Load(object sender, EventArgs e) {
             this.SetTheme(Stats.CurrentTheme);
             this.ChangeLanguage();
-            //this.formsPlot.Plot.Title("Title");
-            //this.formsPlot.Plot.XLabel("Horizontal Axis");
-            //this.formsPlot.Plot.YLabel("Vertical Axis");
 
             if (this.dates != null) {
-                this.yMax = this.shows.Max() < this.finals.Max() ? (this.finals.Max() < this.wins.Max() ? this.wins.Max() : this.finals.Max()) : this.shows.Max();
+                this.yMax = this.shows.Max();
 
-                this.MyBarPlot1 = this.formsPlot.Plot.AddBar(this.shows, this.dates, color: this.GetColorWithAlpha(this.chkShows.ForeColor, 255));
-                this.MyBarPlot2 = this.formsPlot.Plot.AddBar(this.finals, this.dates, color: this.GetColorWithAlpha(this.chkFinals.ForeColor, 255));
-                this.MyBarPlot3 = this.formsPlot.Plot.AddBar(this.wins, this.dates, color: this.GetColorWithAlpha(this.chkWins.ForeColor, 255));
+                this.MyBarPlot1 = this.formsPlot.Plot.Add.Bars(this.dates, this.shows);
+                this.MyBarPlot2 = this.formsPlot.Plot.Add.Bars(this.dates, this.finals);
+                this.MyBarPlot3 = this.formsPlot.Plot.Add.Bars(this.dates, this.wins);
+                this.MyBarPlot1.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkShows.ForeColor, 255));
+                this.MyBarPlot2.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkFinals.ForeColor, 255));
+                this.MyBarPlot3.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkWins.ForeColor, 255));
 
-                this.MyScatterPlot1 = this.formsPlot.Plot.AddScatter(this.dates, this.shows, markerSize: 4, color: this.GetColorWithAlpha(this.chkShows.ForeColor, 255), label: Multilingual.GetWord("level_detail_shows"));
-                this.MyScatterPlot2 = this.formsPlot.Plot.AddScatter(this.dates, this.finals, markerSize: 4, color: this.GetColorWithAlpha(this.chkFinals.ForeColor, 255), label: Multilingual.GetWord("level_detail_finals"));
-                this.MyScatterPlot3 = this.formsPlot.Plot.AddScatter(this.dates, this.wins, markerSize: 4, color: this.GetColorWithAlpha(this.chkWins.ForeColor, 255), label: Multilingual.GetWord("level_detail_wins"));
+                this.MyScatterPlot1 = this.formsPlot.Plot.Add.Scatter(this.dates, this.shows, ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkShows.ForeColor, 255)));
+                this.MyScatterPlot2 = this.formsPlot.Plot.Add.Scatter(this.dates, this.finals, ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkFinals.ForeColor, 255)));
+                this.MyScatterPlot3 = this.formsPlot.Plot.Add.Scatter(this.dates, this.wins, ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkWins.ForeColor, 255)));
+                this.MyScatterPlot1.MarkerSize = this.MyScatterPlot2.MarkerSize = this.MyScatterPlot3.MarkerSize = 4;
+                this.MyScatterPlot1.LegendText = Multilingual.GetWord("level_detail_shows");
+                this.MyScatterPlot2.LegendText = Multilingual.GetWord("level_detail_finals");
+                this.MyScatterPlot3.LegendText = Multilingual.GetWord("level_detail_wins");
 
-                this.MyLollipopPlot1 = this.formsPlot.Plot.AddLollipop(this.shows, this.dates, color: this.GetColorWithAlpha(this.chkShows.ForeColor, 255));
-                this.MyLollipopPlot2 = this.formsPlot.Plot.AddLollipop(this.finals, this.dates, color: this.GetColorWithAlpha(this.chkFinals.ForeColor, 255));
-                this.MyLollipopPlot3 = this.formsPlot.Plot.AddLollipop(this.wins, this.dates, color: this.GetColorWithAlpha(this.chkWins.ForeColor, 255));
+                this.MyLollipopPlot1 = this.formsPlot.Plot.Add.Lollipop(this.shows, this.dates);
+                this.MyLollipopPlot2 = this.formsPlot.Plot.Add.Lollipop(this.finals, this.dates);
+                this.MyLollipopPlot3 = this.formsPlot.Plot.Add.Lollipop(this.wins, this.dates);
+                this.MyLollipopPlot1.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkShows.ForeColor, 255));
+                this.MyLollipopPlot2.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkFinals.ForeColor, 255));
+                this.MyLollipopPlot3.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkWins.ForeColor, 255));
 
-                this.formsPlot.Plot.Legend(location: Alignment.UpperRight);
+                this.formsPlot.Plot.Legend.SetBestFontOnEachRender = true;
+                this.formsPlot.Plot.ShowLegend(Alignment.UpperRight);
 
-                this.formsPlot.Plot.YAxis.SetBoundary(-0.9);
-                this.formsPlot.Plot.YAxis.MinimumTickSpacing(1.0);
+                var dateTicks = new ScottPlot.TickGenerators.NumericManual();
+                int tickSpacing = Math.Max(1, (int)Math.Ceiling(this.manualSpacing));
+                for (int i = 0; i < this.dates.Length; i += tickSpacing) {
+                    string label = DateTime.FromOADate(this.dates[i]).ToString(
+                        Multilingual.GetWord("level_date_format"), Utils.GetCultureInfo());
+                    dateTicks.AddMajor(this.dates[i], label);
+                }
+                int lastDateIndex = this.dates.Length - 1;
+                if (lastDateIndex % tickSpacing != 0) {
+                    string label = DateTime.FromOADate(this.dates[lastDateIndex]).ToString(
+                        Multilingual.GetWord("level_date_format"), Utils.GetCultureInfo());
+                    dateTicks.AddMajor(this.dates[lastDateIndex], label);
+                }
+                this.formsPlot.Plot.Axes.Bottom.TickGenerator = dateTicks;
+                this.formsPlot.Plot.Axes.Bottom.TickLabelStyle.Rotation = 45;
+                this.formsPlot.Plot.Axes.Bottom.TickLabelStyle.Alignment = Alignment.UpperLeft;
+                this.formsPlot.Plot.Axes.Bottom.TickLabelStyle.Font = Stats.WinStatsFont;
+                this.formsPlot.Plot.Axes.Bottom.MinimumSize = 120;
+                this.formsPlot.Plot.Axes.Bottom.MajorTickStyle.Length = 12;
 
-                this.formsPlot.Plot.XAxis.DateTimeFormat(true);
-                this.formsPlot.Plot.XAxis.ManualTickSpacing(Math.Max(1.0, this.manualSpacing), ScottPlot.Ticks.DateTimeUnit.Day);
-                this.formsPlot.Plot.XAxis.TickLabelStyle(rotation: 45);
-                //this.formsPlot.Plot.XAxis.SetSizeLimit(min: 50);
-                this.formsPlot.Plot.SetAxisLimits(
-                    yMin: (this.dates.Length / 14D) * -1,
-                    yMax: this.yMax + (this.dates.Length / 14D),
-                    xMin: DateTime.FromOADate(this.dates[0]).AddDays(-4).ToOADate(),
-                    xMax: DateTime.FromOADate(this.dates[this.dates.Length - 1]).AddDays(4).ToOADate()
+                this.formsPlot.Plot.Axes.Left.TickGenerator = new ScottPlot.TickGenerators.NumericAutomatic {
+                    IntegerTicksOnly = true,
+                    MinimumTickSpacing = 1
+                };
+
+                this.formsPlot.Plot.Axes.SetLimits(
+                    left: DateTime.FromOADate(this.dates[0]).AddDays(-1).ToOADate(),
+                    right: DateTime.FromOADate(this.dates[this.dates.Length - 1]).AddDays(1).ToOADate(),
+                    bottom: 0,
+                    top: this.yMax + (this.dates.Length / 14D)
                 );
 
-                this.HighlightedDate = this.formsPlot.Plot.AddPoint(0, 0);
-                this.HighlightedDate.Color = this.Theme == MetroThemeStyle.Light ? Color.Green : Color.Red;
-                this.HighlightedDate.MarkerSize = 9000;
-                this.HighlightedDate.MarkerShape = MarkerShape.verticalBar;
+                this.formsPlot.Plot.Axes.Rules.Add(new ScottPlot.AxisRules.LockedBottom(this.formsPlot.Plot.Axes.Left, 0));
+
+                this.HighlightedDate = this.formsPlot.Plot.Add.Marker(0, 0, MarkerShape.VerticalBar, 9000,
+                    ScottPlot.Color.FromColor(this.Theme == MetroThemeStyle.Dark ? Color.Red : Color.Green));
                 this.HighlightedDate.IsVisible = false;
 
                 this.formsPlot.Refresh();
@@ -106,85 +133,79 @@ namespace FinalBeansStats {
                     this.MyBarPlot1.IsVisible = false;
                     this.MyBarPlot2.IsVisible = false;
                     this.MyBarPlot3.IsVisible = false;
-                    this.MyBarPlot1.Label = null;
-                    this.MyBarPlot2.Label = null;
-                    this.MyBarPlot3.Label = null;
+                    this.MyBarPlot1.LegendText = null;
+                    this.MyBarPlot2.LegendText = null;
+                    this.MyBarPlot3.LegendText = null;
 
                     this.MyLollipopPlot1.IsVisible = this.chkShows.Checked;
                     this.MyLollipopPlot2.IsVisible = this.chkFinals.Checked;
                     this.MyLollipopPlot3.IsVisible = this.chkWins.Checked;
-                    this.MyLollipopPlot1.Label = Multilingual.GetWord("level_detail_shows");
-                    this.MyLollipopPlot2.Label = Multilingual.GetWord("level_detail_finals");
-                    this.MyLollipopPlot3.Label = Multilingual.GetWord("level_detail_wins");
+                    this.MyLollipopPlot1.LegendText = Multilingual.GetWord("level_detail_shows");
+                    this.MyLollipopPlot2.LegendText = Multilingual.GetWord("level_detail_finals");
+                    this.MyLollipopPlot3.LegendText = Multilingual.GetWord("level_detail_wins");
 
-                    this.MyScatterPlot1.Color = this.GetColorWithAlpha(this.chkShows.ForeColor, 0);
-                    this.MyScatterPlot2.Color = this.GetColorWithAlpha(this.chkFinals.ForeColor, 0);
-                    this.MyScatterPlot3.Color = this.GetColorWithAlpha(this.chkWins.ForeColor, 0);
-                    this.MyScatterPlot1.Label = null;
-                    this.MyScatterPlot2.Label = null;
-                    this.MyScatterPlot3.Label = null;
-
-                    //this.HighlightedDate.MarkerShape = MarkerShape.none;
+                    this.MyScatterPlot1.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkShows.ForeColor, 0));
+                    this.MyScatterPlot2.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkFinals.ForeColor, 0));
+                    this.MyScatterPlot3.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkWins.ForeColor, 0));
+                    this.MyScatterPlot1.LegendText = null;
+                    this.MyScatterPlot2.LegendText = null;
+                    this.MyScatterPlot3.LegendText = null;
                 } else if (style == 2) {
                     // BarPlot
                     this.MyBarPlot1.IsVisible = this.chkShows.Checked;
                     this.MyBarPlot2.IsVisible = this.chkFinals.Checked;
                     this.MyBarPlot3.IsVisible = this.chkWins.Checked;
-                    this.MyBarPlot1.Label = Multilingual.GetWord("level_detail_shows");
-                    this.MyBarPlot2.Label = Multilingual.GetWord("level_detail_finals");
-                    this.MyBarPlot3.Label = Multilingual.GetWord("level_detail_wins");
+                    this.MyBarPlot1.LegendText = Multilingual.GetWord("level_detail_shows");
+                    this.MyBarPlot2.LegendText = Multilingual.GetWord("level_detail_finals");
+                    this.MyBarPlot3.LegendText = Multilingual.GetWord("level_detail_wins");
 
                     this.MyLollipopPlot1.IsVisible = false;
                     this.MyLollipopPlot2.IsVisible = false;
                     this.MyLollipopPlot3.IsVisible = false;
-                    this.MyLollipopPlot1.Label = null;
-                    this.MyLollipopPlot2.Label = null;
-                    this.MyLollipopPlot3.Label = null;
+                    this.MyLollipopPlot1.LegendText = null;
+                    this.MyLollipopPlot2.LegendText = null;
+                    this.MyLollipopPlot3.LegendText = null;
 
-                    this.MyScatterPlot1.Color = this.GetColorWithAlpha(this.chkShows.ForeColor, 0);
-                    this.MyScatterPlot2.Color = this.GetColorWithAlpha(this.chkFinals.ForeColor, 0);
-                    this.MyScatterPlot3.Color = this.GetColorWithAlpha(this.chkWins.ForeColor, 0);
-                    this.MyScatterPlot1.Label = null;
-                    this.MyScatterPlot2.Label = null;
-                    this.MyScatterPlot3.Label = null;
-
-                    //this.HighlightedDate.MarkerShape = MarkerShape.none;
+                    this.MyScatterPlot1.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkShows.ForeColor, 0));
+                    this.MyScatterPlot2.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkFinals.ForeColor, 0));
+                    this.MyScatterPlot3.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkWins.ForeColor, 0));
+                    this.MyScatterPlot1.LegendText = null;
+                    this.MyScatterPlot2.LegendText = null;
+                    this.MyScatterPlot3.LegendText = null;
                 } else {
                     // ScatterPlot
                     this.MyBarPlot1.IsVisible = false;
                     this.MyBarPlot2.IsVisible = false;
                     this.MyBarPlot3.IsVisible = false;
-                    this.MyBarPlot1.Label = null;
-                    this.MyBarPlot2.Label = null;
-                    this.MyBarPlot3.Label = null;
+                    this.MyBarPlot1.LegendText = null;
+                    this.MyBarPlot2.LegendText = null;
+                    this.MyBarPlot3.LegendText = null;
 
                     this.MyLollipopPlot1.IsVisible = false;
                     this.MyLollipopPlot2.IsVisible = false;
                     this.MyLollipopPlot3.IsVisible = false;
-                    this.MyLollipopPlot1.Label = null;
-                    this.MyLollipopPlot2.Label = null;
-                    this.MyLollipopPlot3.Label = null;
+                    this.MyLollipopPlot1.LegendText = null;
+                    this.MyLollipopPlot2.LegendText = null;
+                    this.MyLollipopPlot3.LegendText = null;
 
-                    this.MyScatterPlot1.Color = this.GetColorWithAlpha(this.chkShows.ForeColor, 255);
-                    this.MyScatterPlot2.Color = this.GetColorWithAlpha(this.chkFinals.ForeColor, 255);
-                    this.MyScatterPlot3.Color = this.GetColorWithAlpha(this.chkWins.ForeColor, 255);
+                    this.MyScatterPlot1.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkShows.ForeColor, 255));
+                    this.MyScatterPlot2.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkFinals.ForeColor, 255));
+                    this.MyScatterPlot3.Color = ScottPlot.Color.FromColor(this.GetColorWithAlpha(this.chkWins.ForeColor, 255));
                     this.MyScatterPlot1.IsVisible = this.chkShows.Checked;
                     this.MyScatterPlot2.IsVisible = this.chkFinals.Checked;
                     this.MyScatterPlot3.IsVisible = this.chkWins.Checked;
-                    this.MyScatterPlot1.Label = Multilingual.GetWord("level_detail_shows");
-                    this.MyScatterPlot2.Label = Multilingual.GetWord("level_detail_finals");
-                    this.MyScatterPlot3.Label = Multilingual.GetWord("level_detail_wins");
-
-                    //this.HighlightedDate.MarkerShape = MarkerShape.openCircle;
+                    this.MyScatterPlot1.LegendText = Multilingual.GetWord("level_detail_shows");
+                    this.MyScatterPlot2.LegendText = Multilingual.GetWord("level_detail_finals");
+                    this.MyScatterPlot3.LegendText = Multilingual.GetWord("level_detail_wins");
                 }
 
-                this.formsPlot.Plot.SetAxisLimits(
-                    yMin: (this.dates.Length / 14D) * -1,
-                    yMax: this.yMax + (this.dates.Length / 14D),
-                    xMin: DateTime.FromOADate(this.dates[0]).AddDays(-4).ToOADate(),
-                    xMax: DateTime.FromOADate(this.dates[this.dates.Length - 1]).AddDays(4).ToOADate()
+                this.formsPlot.Plot.Axes.SetLimits(
+                    left: DateTime.FromOADate(this.dates[0]).AddDays(-1).ToOADate(),
+                    right: DateTime.FromOADate(this.dates[this.dates.Length - 1]).AddDays(1).ToOADate(),
+                    bottom: 0,
+                    top: this.yMax + (this.dates.Length / 14D)
                 );
-                //this.formsPlot.Plot.AxisZoom(0.9, 0.9);
+
                 this.formsPlot.Refresh();
             });
         }
@@ -200,34 +221,43 @@ namespace FinalBeansStats {
             this.BeginInvoke((MethodInvoker)delegate {
                 this.formsPlot.Plot.Remove(this.tooltip);
 
-                (int nearestDateIndex, double nearestDateX) = this.GetNearestDateColumn(this.formsPlot.GetMouseCoordinates().x);
+                Coordinates mouseCoordinates = this.formsPlot.Plot.GetCoordinates(
+                    new Pixel(e.X, e.Y), this.formsPlot.Plot.Axes.Bottom, this.formsPlot.Plot.Axes.Left);
+                AxisLimits dataLimits = this.formsPlot.Plot.Axes.GetLimits();
+                if (mouseCoordinates.X < dataLimits.Left || mouseCoordinates.X > dataLimits.Right
+                    || mouseCoordinates.Y < dataLimits.Bottom || mouseCoordinates.Y > dataLimits.Top) {
+                    this.HighlightedDate.IsVisible = false;
+                    this.formsPlot.Refresh();
+                    return;
+                }
+
+                (int nearestDateIndex, double nearestDateX) = this.GetNearestDateColumn(mouseCoordinates.X);
 
                 if (nearestDateIndex == -1) return;
 
                 this.HighlightedDate.X = nearestDateX;
-                this.HighlightedDate.Y = Math.Round(this.formsPlot.Plot.GetAxisLimits().YMax / 1.2);
+                this.HighlightedDate.Y = dataLimits.Bottom + (dataLimits.Top - dataLimits.Bottom) * 0.55;
                 this.HighlightedDate.IsVisible = true;
 
-                if (this.HasStatisticalData(nearestDateIndex)) {
-                    string tooltipText = this.BuildStatTooltip(nearestDateIndex);
-                    this.tooltip = this.formsPlot.Plot.AddTooltip(tooltipText, this.HighlightedDate.X, this.HighlightedDate.Y);
-                } else {
-                    string tooltipText = $" {DateTime.FromOADate(this.HighlightedDate.X).ToString(Multilingual.GetWord("level_date_format"), Utils.GetCultureInfo())}{Environment.NewLine}{Environment.NewLine}{Multilingual.GetWord("level_no_statistical_data")}";
-                    this.tooltip = this.formsPlot.Plot.AddTooltip(tooltipText, this.HighlightedDate.X, this.HighlightedDate.Y);
-                }
+                Coordinates tooltipLocation = new Coordinates((dataLimits.Left + dataLimits.Right) / 2, (dataLimits.Bottom + dataLimits.Top) / 2);
+
+                string tooltipText = this.HasStatisticalData(nearestDateIndex)
+                                     ? this.BuildStatTooltip(nearestDateIndex)
+                                     : $" {DateTime.FromOADate(this.HighlightedDate.X).ToString(Multilingual.GetWord("level_date_format"), Utils.GetCultureInfo())}{Environment.NewLine}{Environment.NewLine}{Multilingual.GetWord("level_no_statistical_data")}";
+                tooltipText = tooltipText.Replace("\r\n", "\n").Replace('\r', '\n');
+                this.tooltip = this.formsPlot.Plot.Add.Tooltip(tooltipLocation, tooltipText, tooltipLocation);
 
                 this.SetTooltipStyle();
 
-                //this.HighlightedDate.MarkerShape = (this.graphStyle == 0) ? MarkerShape.openCircle : MarkerShape.none;
-                this.formsPlot.Render();
+                this.formsPlot.Refresh();
             });
         }
 
         private (int index, double x) GetNearestDateColumn(double mouseX) {
             double minDist = double.MaxValue;
             (int index, double x) nearest = (-1, 0);
-            for (int i = 0; i < this.MyScatterPlot1.Xs.Length; i++) {
-                double dateX = this.MyScatterPlot1.Xs[i];
+            for (int i = 0; i < this.dates.Length; i++) {
+                double dateX = this.dates[i];
                 double dist = Math.Sqrt(Math.Pow(mouseX - dateX, 2));
                 if (dist < minDist) {
                     minDist = dist;
@@ -238,21 +268,21 @@ namespace FinalBeansStats {
         }
 
         private bool HasStatisticalData(int idx) {
-            return this.MyScatterPlot1.Ys[idx] > 0 || this.MyScatterPlot2.Ys[idx] > 0 || this.MyScatterPlot3.Ys[idx] > 0;
+            return this.shows[idx] > 0 || this.finals[idx] > 0 || this.wins[idx] > 0;
         }
 
         private string BuildStatTooltip(int idx) {
             var sb = new StringBuilder();
-            sb.Append($" {DateTime.FromOADate(this.MyScatterPlot1.Xs[idx]).ToString(Multilingual.GetWord("level_date_format"), Utils.GetCultureInfo())}{Environment.NewLine}{Environment.NewLine}");
+            sb.Append($" {DateTime.FromOADate(this.dates[idx]).ToString(Multilingual.GetWord("level_date_format"), Utils.GetCultureInfo())}{Environment.NewLine}{Environment.NewLine}");
             if (this.MyScatterPlot1.IsVisible)
-                sb.Append($" - {Multilingual.GetWord("level_detail_shows")} :  ⟪ {this.MyScatterPlot1.Ys[idx]:N0}{Multilingual.GetWord("main_inning")} ⟫{(this.MyScatterPlot2.IsVisible || this.MyScatterPlot3.IsVisible ? Environment.NewLine : "")}");
+                sb.Append($" - {Multilingual.GetWord("level_detail_shows")} :  [ {this.shows[idx]:N0}{Multilingual.GetWord("main_inning")} ]{(this.MyScatterPlot2.IsVisible || this.MyScatterPlot3.IsVisible ? Environment.NewLine : "")}");
             if (this.MyScatterPlot2.IsVisible)
-                sb.Append($" - {Multilingual.GetWord("level_detail_finals")} :  {this.MyScatterPlot2.Ys[idx]:N0}{Multilingual.GetWord("main_inning")}{(this.MyScatterPlot1.Ys[idx] > 0 ? $" - {Math.Truncate(this.MyScatterPlot2.Ys[idx] * 100d / this.MyScatterPlot1.Ys[idx] * 10) / 10}% " : "")}{(this.MyScatterPlot3.IsVisible ? Environment.NewLine : "")}");
+                sb.Append($" - {Multilingual.GetWord("level_detail_finals")} :  {this.finals[idx]:N0}{Multilingual.GetWord("main_inning")}{(this.shows[idx] > 0 ? $" - {Math.Truncate(this.finals[idx] * 100d / this.shows[idx] * 10) / 10}% " : "")}{(this.MyScatterPlot3.IsVisible ? Environment.NewLine : "")}");
             if (this.MyScatterPlot3.IsVisible)
-                sb.Append($" - {Multilingual.GetWord("level_detail_wins")} :  {this.MyScatterPlot3.Ys[idx]:N0}{Multilingual.GetWord(this.MyScatterPlot3.Ys[idx] > 1 ? "level_wins_suffix" : "level_win_suffix")}{(this.MyScatterPlot1.Ys[idx] > 0 ? $" - {Math.Truncate(this.MyScatterPlot3.Ys[idx] * 100d / this.MyScatterPlot1.Ys[idx] * 10) / 10}% " : "")}");
+                sb.Append($" - {Multilingual.GetWord("level_detail_wins")} :  {this.wins[idx]:N0}{Multilingual.GetWord(this.wins[idx] > 1 ? "level_wins_suffix" : "level_win_suffix")}{(this.shows[idx] > 0 ? $" - {Math.Truncate(this.wins[idx] * 100d / this.shows[idx] * 10) / 10}% " : "")}");
 
-            if (this.winsInfo.ContainsKey(this.MyScatterPlot1.Xs[idx])) {
-                sb.Append(BuildWinsInfoTooltip(this.MyScatterPlot1.Xs[idx]));
+            if (this.winsInfo.ContainsKey(this.dates[idx])) {
+                sb.Append(BuildWinsInfoTooltip(this.dates[idx]));
             }
             return sb.ToString();
         }
@@ -267,9 +297,9 @@ namespace FinalBeansStats {
 
             var sb = new StringBuilder();
             if (this.MyScatterPlot3.IsVisible)
-                sb.Append($"{Environment.NewLine} - {Multilingual.GetWord("level_detail_losses")} :  {lossesCount:N0}{Multilingual.GetWord(lossesCount > 1 ? "level_losses_suffix" : "level_loss_suffix")}{(this.MyScatterPlot1.Ys[(int)Array.IndexOf(this.MyScatterPlot1.Xs, dateKey)] > 0 ? $" - {Math.Truncate(lossesCount * 100d / this.MyScatterPlot1.Ys[(int)Array.IndexOf(this.MyScatterPlot1.Xs, dateKey)] * 10) / 10}% " : "")}");
+                sb.Append($"{Environment.NewLine} - {Multilingual.GetWord("level_detail_losses")} :  {lossesCount:N0}{Multilingual.GetWord(lossesCount > 1 ? "level_losses_suffix" : "level_loss_suffix")}{(this.shows[(int)Array.IndexOf(this.dates, dateKey)] > 0 ? $" - {Math.Truncate(lossesCount * 100d / this.shows[(int)Array.IndexOf(this.dates, dateKey)] * 10) / 10}% " : "")}");
 
-            sb.Append($"{Environment.NewLine}{Environment.NewLine}⁘ {Multilingual.GetWord("level_detail_finals_stats")} ⟪ {winsCount}{Multilingual.GetWord(winsCount > 1 ? "level_wins_suffix" : "level_win_suffix")} / {lossesCount}{Multilingual.GetWord(lossesCount > 1 ? "level_losses_suffix" : "level_loss_suffix")} ⟫ - {Math.Truncate(winsCount * 100d / (winsCount + lossesCount) * 10) / 10}%{Environment.NewLine}");
+            sb.Append($"{Environment.NewLine}{Environment.NewLine}¤ {Multilingual.GetWord("level_detail_finals_stats")} [ {winsCount}{Multilingual.GetWord(winsCount > 1 ? "level_wins_suffix" : "level_win_suffix")} / {lossesCount}{Multilingual.GetWord(lossesCount > 1 ? "level_losses_suffix" : "level_loss_suffix")} ] - {Math.Truncate(winsCount * 100d / (winsCount + lossesCount) * 10) / 10}%{Environment.NewLine}");
 
             string prevLevel = string.Empty;
             int prevLength = 0;
@@ -325,13 +355,14 @@ namespace FinalBeansStats {
         }
 
         private void SetTooltipStyle() {
-            this.tooltip.BorderWidth = 1.7f;
-            this.tooltip.BorderColor = Color.FromArgb(239, this.Theme == MetroThemeStyle.Light ? Color.GreenYellow : Color.Crimson);
-            this.tooltip.FillColor = Color.Black;
-            this.tooltip.Font.Color = Color.White;
-            this.tooltip.Font.Family = Overlay.GetMainFontFamilies(Stats.CurrentLanguage);
-            this.tooltip.Font.Size = 15f;
-            this.tooltip.ArrowSize = 5;
+            this.tooltip.LineWidth = 1.7f;
+            this.tooltip.LineColor = ScottPlot.Color.FromColor(Color.FromArgb(239, this.Theme == MetroThemeStyle.Dark ? Color.Crimson : Color.GreenYellow));
+            this.tooltip.FillColor = ScottPlot.Color.FromColor(Color.FromArgb(239, this.Theme == MetroThemeStyle.Dark ? Color.Black : Color.WhiteSmoke));
+            this.tooltip.LabelStyle.ForeColor = ScottPlot.Color.FromColor(Color.FromArgb(239, this.Theme == MetroThemeStyle.Dark ? Color.WhiteSmoke : Color.Black));
+            this.tooltip.LabelAlignment = Alignment.MiddleCenter;
+            this.tooltip.LabelStyle.Font = Stats.WinStatsFont;
+            this.tooltip.LabelStyle.FontSize = 18;
+            this.tooltip.LabelStyle.Padding = Stats.CurrentLanguage == Language.SimplifiedChinese || Stats.CurrentLanguage == Language.TraditionalChinese ? 10 : 0;
         }
 
         private void formsPlot_MouseLeave(object sender, EventArgs e) {
@@ -351,15 +382,20 @@ namespace FinalBeansStats {
             this.chkWins.Theme = theme;
             this.chkFinals.Theme = theme;
             this.chkShows.Theme = theme;
-            this.chkWins.ForeColor = theme == MetroThemeStyle.Light ? Color.Goldenrod : Color.Gold;
-            this.chkFinals.ForeColor = theme == MetroThemeStyle.Light ? Color.DeepPink : Color.DeepPink;
-            this.chkShows.ForeColor = theme == MetroThemeStyle.Light ? Color.RoyalBlue : Color.DodgerBlue;
-            if (theme == MetroThemeStyle.Dark) {
-                this.formsPlot.Plot.Style(ScottPlot.Style.Black);
-                this.formsPlot.Plot.Style(figureBackground: Color.FromArgb(17, 17, 17));
-                this.formsPlot.Plot.Style(dataBackground: Color.FromArgb(17, 17, 17));
-                this.formsPlot.Plot.Style(tick: Color.WhiteSmoke);
-            }
+            this.chkWins.ForeColor = theme == MetroThemeStyle.Dark ? Color.Gold : Color.Goldenrod;
+            this.chkFinals.ForeColor = Color.DeepPink;
+            this.chkShows.ForeColor = theme == MetroThemeStyle.Dark ? Color.DodgerBlue : Color.RoyalBlue;
+            ScottPlot.Color figureColor = ScottPlot.Color.FromColor(theme == MetroThemeStyle.Dark ? Color.FromArgb(17, 17, 17) : Color.White);
+            ScottPlot.Color axesColor = ScottPlot.Color.FromColor(theme == MetroThemeStyle.Dark ? Color.WhiteSmoke : Color.DimGray);
+            this.formsPlot.Plot.SetStyle(new PlotStyle {
+                FigureBackgroundColor = figureColor,
+                DataBackgroundColor = figureColor,
+                AxisColor = axesColor,
+                GridMajorLineColor = ScottPlot.Color.FromColor(theme == MetroThemeStyle.Dark ? Color.FromArgb(64, 64, 64) : Color.LightGray),
+                LegendBackgroundColor = figureColor,
+                LegendFontColor = axesColor,
+                LegendOutlineColor = axesColor
+            });
             this.Theme = theme;
             this.ResumeLayout();
         }

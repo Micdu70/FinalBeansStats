@@ -405,7 +405,11 @@ namespace FinalBeansStats {
 
         private void btnSave_Click(object sender, EventArgs e) {
             this.CurrentSettings.LogPath = this.txtLogPath.Text;
-            Stats.CurrentLanguage = (Language)this.cboMultilingual.SelectedIndex;
+            Language selectedLanguage = (Language)this.cboMultilingual.SelectedIndex;
+            if (Stats.CurrentLanguage != selectedLanguage) {
+                Stats.CurrentLanguage = selectedLanguage;
+                this.StatsForm.SetWinStatsFont();
+            }
             this.CurrentSettings.Multilingual = this.cboMultilingual.SelectedIndex;
             this.CurrentSettings.Theme = this.cboTheme.SelectedIndex;
             Stats.CurrentTheme = this.cboTheme.SelectedIndex == 0 ? MetroThemeStyle.Light : MetroThemeStyle.Dark;

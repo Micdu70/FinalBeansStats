@@ -129,6 +129,67 @@ namespace FinalBeansStats {
         private static DateTime SessionStart = DateTime.UtcNow;
         public static Language CurrentLanguage;
         public static MetroThemeStyle CurrentTheme = MetroThemeStyle.Dark;
+
+        public static SkiaSharp.SKTypeface WinStatsFont;
+
+        public void SetWinStatsFont() {
+            switch (CurrentLanguage) {
+                case Language.SimplifiedChinese:
+                case Language.TraditionalChinese:
+                    WinStatsFont = SkiaSharp.SKTypeface.FromFile(Path.Combine(CURRENTDIR, "NotoSansSC-Regular.otf"));
+                    break;
+                default:
+                    WinStatsFont = SkiaSharp.SKTypeface.FromFile(Path.Combine(CURRENTDIR, "PretendardJP-Medium.ttf"));
+                    break;
+            }
+        }
+
+        private void InitializeOverlayResources() {
+            string[] fontNames = { "TitanOne-Regular.ttf", "PretendardJP-Medium.ttf", "NotoSansSC-Regular.otf" };
+            for (int i = 0; i < fontNames.Length; i++) {
+                if (string.IsNullOrEmpty(fontNames[i]) || File.Exists($"{CURRENTDIR}{fontNames[i]}")) continue;
+                using (Stream fontStream = typeof(Overlay).Assembly.GetManifestResourceStream($"FinalBeansStats.Resources.font.{fontNames[i]}")) {
+                    byte[] fontData = new byte[fontStream.Length];
+                    fontStream.Read(fontData, 0, (int)fontStream.Length);
+                    File.WriteAllBytes($"{CURRENTDIR}{fontNames[i]}", fontData);
+                }
+            }
+
+            for (int i = 0; i < fontNames.Length; i++) {
+                Overlay.DefaultFontCollection.AddFontFile($"{CURRENTDIR}{fontNames[i]}");
+            }
+            Overlay.SetDefaultFont(18, CurrentLanguage);
+
+            if (!Directory.Exists($"{CURRENTDIR}Overlay")) {
+                Directory.CreateDirectory($"{CURRENTDIR}Overlay");
+                using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.background.png")) {
+                    byte[] overlaydata = new byte[overlayStream.Length];
+                    overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
+                    File.WriteAllBytes(Path.Combine($"{CURRENTDIR}Overlay", "background.png"), overlaydata);
+                }
+                using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.tab_unselected.png")) {
+                    byte[] overlaydata = new byte[overlayStream.Length];
+                    overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
+                    File.WriteAllBytes(Path.Combine($"{CURRENTDIR}Overlay", "tab.png"), overlaydata);
+                }
+            } else {
+                if (!File.Exists(Path.Combine($"{CURRENTDIR}Overlay", "background.png"))) {
+                    using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.background.png")) {
+                        byte[] overlaydata = new byte[overlayStream.Length];
+                        overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
+                        File.WriteAllBytes(Path.Combine($"{CURRENTDIR}Overlay", "background.png"), overlaydata);
+                    }
+                }
+                if (!File.Exists(Path.Combine($"{CURRENTDIR}Overlay", "tab.png"))) {
+                    using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.tab_unselected.png")) {
+                        byte[] overlaydata = new byte[overlayStream.Length];
+                        overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
+                        File.WriteAllBytes(Path.Combine($"{CURRENTDIR}Overlay", "tab.png"), overlaydata);
+                    }
+                }
+            }
+        }
+
         public static bool InstalledEmojiFont;
 
         // public static string LastShowNameId = null;
@@ -612,7 +673,7 @@ namespace FinalBeansStats {
                     }
                 } catch {
                     this.CurrentSettings = this.GetDefaultSettings();
-                    CurrentTheme = MetroThemeStyle.Dark;
+                    CurrentTheme = this.CurrentSettings.Theme == 0 ? MetroThemeStyle.Light : MetroThemeStyle.Dark;
                     this.StatsDB.BeginTrans();
                     this.UserSettings.DeleteAll();
                     this.UserSettings.Insert(this.CurrentSettings);
@@ -627,6 +688,8 @@ namespace FinalBeansStats {
                 this.RemoveUselessConfigFile();
             }
 #endif
+
+            this.InitializeOverlayResources();
 
             this.InitializeComponent();
 
@@ -739,6 +802,8 @@ namespace FinalBeansStats {
                 this.EnableInfoStrip(true);
                 this.EnableMainMenu(true);
             }
+
+            this.SetWinStatsFont();
 
             this.InitLogData();
 

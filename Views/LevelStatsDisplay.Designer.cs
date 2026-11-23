@@ -25,7 +25,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LevelStatsDisplay));
-            this.formsPlot = new ScottPlot.FormsPlot();
+            this.formsPlot = new ScottPlot.WinForms.FormsPlot();
             this.picRoundIcon = new System.Windows.Forms.PictureBox();
             this.cboRoundList = new MetroFramework.Controls.MetroComboBox();
             this.lblRoundTime = new System.Windows.Forms.Label();
@@ -312,7 +312,7 @@
         }
 
         #endregion
-        private ScottPlot.FormsPlot formsPlot;
+        private ScottPlot.WinForms.FormsPlot formsPlot;
         private System.Windows.Forms.PictureBox picRoundIcon;
         private MetroFramework.Controls.MetroComboBox cboRoundList;
         private System.Windows.Forms.Label lblRoundTime;

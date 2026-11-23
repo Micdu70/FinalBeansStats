@@ -75,54 +75,8 @@ namespace FinalBeansStats {
         private bool isFixedPositionNe, isFixedPositionNw, isFixedPositionSe, isFixedPositionSw, isPositionLock;
         private bool isFocused, isMouseOver;
 
-        private static readonly PrivateFontCollection DefaultFontCollection = new PrivateFontCollection();
+        internal static readonly PrivateFontCollection DefaultFontCollection = new PrivateFontCollection();
         public static new Font DefaultFont;
-
-        static Overlay() {
-            string[] fontNames = { "TitanOne-Regular.ttf", "PretendardJP-Medium.ttf", "NotoSansSC-Regular.otf" };
-            for (int i = 0; i < fontNames.Length; i++) {
-                if (string.IsNullOrEmpty(fontNames[i]) || File.Exists($"{Stats.CURRENTDIR}{fontNames[i]}")) continue;
-                using (Stream fontStream = typeof(Overlay).Assembly.GetManifestResourceStream($"FinalBeansStats.Resources.font.{fontNames[i]}")) {
-                    byte[] fontData = new byte[fontStream.Length];
-                    fontStream.Read(fontData, 0, (int)fontStream.Length);
-                    File.WriteAllBytes($"{Stats.CURRENTDIR}{fontNames[i]}", fontData);
-                }
-            }
-
-            for (int i = 0; i < fontNames.Length; i++) {
-                DefaultFontCollection.AddFontFile($"{Stats.CURRENTDIR}{fontNames[i]}");
-            }
-            SetDefaultFont(18, Stats.CurrentLanguage);
-
-            if (!Directory.Exists($"{Stats.CURRENTDIR}Overlay")) {
-                Directory.CreateDirectory($"{Stats.CURRENTDIR}Overlay");
-                using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.background.png")) {
-                    byte[] overlaydata = new byte[overlayStream.Length];
-                    overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
-                    File.WriteAllBytes(Path.Combine($"{Stats.CURRENTDIR}Overlay", "background.png"), overlaydata);
-                }
-                using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.tab_unselected.png")) {
-                    byte[] overlaydata = new byte[overlayStream.Length];
-                    overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
-                    File.WriteAllBytes(Path.Combine($"{Stats.CURRENTDIR}Overlay", "tab.png"), overlaydata);
-                }
-            } else {
-                if (!File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", "background.png"))) {
-                    using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.background.png")) {
-                        byte[] overlaydata = new byte[overlayStream.Length];
-                        overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
-                        File.WriteAllBytes(Path.Combine($"{Stats.CURRENTDIR}Overlay", "background.png"), overlaydata);
-                    }
-                }
-                if (!File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", "tab.png"))) {
-                    using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.tab_unselected.png")) {
-                        byte[] overlaydata = new byte[overlayStream.Length];
-                        overlayStream.Read(overlaydata, 0, (int)overlayStream.Length);
-                        File.WriteAllBytes(Path.Combine($"{Stats.CURRENTDIR}Overlay", "tab.png"), overlaydata);
-                    }
-                }
-            }
-        }
 
         public Overlay() {
             this.InitializeComponent();
