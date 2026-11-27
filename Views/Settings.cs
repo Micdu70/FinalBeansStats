@@ -406,9 +406,9 @@ namespace FinalBeansStats {
         private void btnSave_Click(object sender, EventArgs e) {
             this.CurrentSettings.LogPath = this.txtLogPath.Text;
             Language selectedLanguage = (Language)this.cboMultilingual.SelectedIndex;
-            if (Stats.CurrentLanguage != selectedLanguage) {
+            if (selectedLanguage != Stats.CurrentLanguage) {
                 Stats.CurrentLanguage = selectedLanguage;
-                this.StatsForm.SetWinStatsFont();
+                Stats.SetWinStatsFont();
             }
             this.CurrentSettings.Multilingual = this.cboMultilingual.SelectedIndex;
             this.CurrentSettings.Theme = this.cboTheme.SelectedIndex;
@@ -515,11 +515,6 @@ namespace FinalBeansStats {
                                  this.CurrentSettings.HideTimeInfo != this.chkHideTimeInfo.Checked ||
                                  this.CurrentSettings.ShowOverlayTabs != this.chkShowTabs.Checked;
 
-            this.CurrentSettings.HideWinsInfo = this.chkHideWinsInfo.Checked;
-            this.CurrentSettings.HideRoundInfo = this.chkHideRoundInfo.Checked;
-            this.CurrentSettings.HideTimeInfo = this.chkHideTimeInfo.Checked;
-            this.CurrentSettings.ShowOverlayTabs = this.chkShowTabs.Checked;
-
             if (resizeOverlay) {
                 int overlaySetting = this.Overlay.GetDisplaySetting();
                 switch (overlaySetting) {
@@ -531,7 +526,17 @@ namespace FinalBeansStats {
                     case 5: this.CurrentSettings.OverlayWidth = 786 - 242 - 225 - 12; this.CurrentSettings.OverlayFixedWidth = 786 - 242 - 225 - 12; break;
                     case 6: this.CurrentSettings.OverlayWidth = 786 - 242 - 281 - 12; this.CurrentSettings.OverlayFixedWidth = 786 - 242 - 281 - 12; break;
                 }
+                if (this.CurrentSettings.ShowOverlayTabs != this.chkShowTabs.Checked) {
+                    int overlayHeight = this.chkShowTabs.Checked ? 134 : 99;
+                    this.CurrentSettings.OverlayHeight = overlayHeight;
+                    this.CurrentSettings.OverlayFixedHeight = overlayHeight;
+                }
             }
+
+            this.CurrentSettings.HideWinsInfo = this.chkHideWinsInfo.Checked;
+            this.CurrentSettings.HideRoundInfo = this.chkHideRoundInfo.Checked;
+            this.CurrentSettings.HideTimeInfo = this.chkHideTimeInfo.Checked;
+            this.CurrentSettings.ShowOverlayTabs = this.chkShowTabs.Checked;
 
             this.CurrentSettings.AutoUpdate = this.chkAutoUpdate.Checked;
             this.CurrentSettings.SystemTrayIcon = this.chkSystemTrayIcon.Checked;
@@ -715,8 +720,8 @@ namespace FinalBeansStats {
         private void btnSelectFont_Click(object sender, EventArgs e) {
             this.BeginInvoke((MethodInvoker)delegate {
                 this.dlgOverlayFont.Font = string.IsNullOrEmpty(this.overlayFontSerialized)
-                    ? Overlay.GetDefaultFont(24, this.DisplayLang)
-                    : new Font(this.lblOverlayFontExample.Font.FontFamily, lblOverlayFontExample.Font.Size, lblOverlayFontExample.Font.Style, GraphicsUnit.Point, (byte)1);
+                                           ? Overlay.GetDefaultFont(24, this.DisplayLang)
+                                           : new Font(this.lblOverlayFontExample.Font.FontFamily, lblOverlayFontExample.Font.Size, lblOverlayFontExample.Font.Style, GraphicsUnit.Point, (byte)1);
 
                 this.dlgOverlayFont.ShowColor = true;
                 this.dlgOverlayFont.Color = string.IsNullOrEmpty(this.overlayFontColorSerialized) ? Color.White : this.lblOverlayFontExample.ForeColor;
@@ -735,7 +740,7 @@ namespace FinalBeansStats {
                         this.overlayFontSerialized = new FontConverter().ConvertToString(this.lblOverlayFontExample.Font);
                     }
                 } catch {
-                    Messenger.MessageBox($"{Multilingual.GetWord("settings_font_need_to_be_installed_message")}", $"{Multilingual.GetWord("settings_font_need_to_be_installed_caption")}",
+                    Messenger.MessageBox($"{Multilingual.GetWord("settings_font_need_to_be_installed")}", $"{Multilingual.GetWord("settings_font_need_to_be_installed_caption")}",
                         MsgIcon.Info, MessageBoxButtons.OK, Stats.CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                 }
             });

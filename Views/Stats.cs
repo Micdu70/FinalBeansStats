@@ -13,6 +13,7 @@ using System.Linq;
 using System.Net;
 #endif
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ using LiteDB;
 using MetroFramework;
 using MetroFramework.Components;
 using MetroFramework.Controls;
+using SkiaSharp;
 using Trinet.Core.IO.Ntfs;
 
 namespace FinalBeansStats {
@@ -130,36 +132,75 @@ namespace FinalBeansStats {
         public static Language CurrentLanguage;
         public static MetroThemeStyle CurrentTheme = MetroThemeStyle.Dark;
 
-        public static SkiaSharp.SKTypeface WinStatsFont;
+        internal static readonly PrivateFontCollection DefaultFontCollection = new PrivateFontCollection();
+        private static readonly List<GCHandle> DefaultFontMemory = new List<GCHandle>();
+        private static readonly List<string> DefaultFontFiles = new List<string>();
+        private const uint PrivateFont = 0x10;
 
-        public void SetWinStatsFont() {
-            switch (CurrentLanguage) {
-                case Language.SimplifiedChinese:
-                case Language.TraditionalChinese:
-                    WinStatsFont = SkiaSharp.SKTypeface.FromFile(Path.Combine(CURRENTDIR, "NotoSansSC-Regular.otf"));
-                    break;
-                default:
-                    WinStatsFont = SkiaSharp.SKTypeface.FromFile(Path.Combine(CURRENTDIR, "PretendardJP-Medium.ttf"));
-                    break;
+        [DllImport("gdi32.dll", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
+        private static extern bool AddFontResourceExW(string fileName, uint flags, IntPtr reserved);
+
+        [DllImport("gdi32.dll", CharSet = CharSet.Unicode, SetLastError = true, ExactSpelling = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool RemoveFontResourceExW(string fileName, uint flags, IntPtr reserved);
+
+        internal static Stream GetEmbeddedFontStream(string fontFileName) {
+            string resourceName = $"FinalBeansStats.Resources.font.{fontFileName}";
+            return typeof(Stats).Assembly.GetManifestResourceStream(resourceName);
+        }
+
+        internal static void LoadDefaultFonts() {
+            AppDomain.CurrentDomain.ProcessExit += CleanupDefaultFonts;
+
+            string[] fontFileNames = { "TitanOne-Regular.ttf", "PretendardJP-Medium.ttf", "NotoSansSC-Regular.otf" };
+            foreach (string fontFileName in fontFileNames) {
+                string fontFilePath = Path.Combine(CURRENTDIR, fontFileName);
+                byte[] fontData;
+                using (Stream fontStream = GetEmbeddedFontStream(fontFileName))
+                using (MemoryStream memoryStream = new MemoryStream()) {
+                    fontStream.CopyTo(memoryStream);
+                    fontData = memoryStream.ToArray();
+                }
+
+                if (!File.Exists(fontFilePath)) {
+                    File.WriteAllBytes(fontFilePath, fontData);
+                }
+
+                GCHandle fontMemory = GCHandle.Alloc(fontData, GCHandleType.Pinned);
+
+                bool fontAdded = false;
+                try {
+                    fontAdded = AddFontResourceExW(fontFilePath, PrivateFont, IntPtr.Zero);
+                    if (!fontAdded) {
+                        throw new InvalidOperationException($"GDI could not register '{fontFileName}' font.");
+                    }
+
+                    DefaultFontCollection.AddMemoryFont(fontMemory.AddrOfPinnedObject(), fontData.Length);
+                    DefaultFontMemory.Add(fontMemory);
+                    DefaultFontFiles.Add(fontFilePath);
+                } catch (Exception ex) {
+                    if (fontAdded) {
+                        RemoveFontResourceExW(fontFilePath, PrivateFont, IntPtr.Zero);
+                    }
+                    fontMemory.Free();
+                    throw new InvalidOperationException($"Error when loading '{fontFileName}' font.", ex);
+                }
             }
         }
 
-        private void InitializeOverlayResources() {
-            string[] fontNames = { "TitanOne-Regular.ttf", "PretendardJP-Medium.ttf", "NotoSansSC-Regular.otf" };
-            for (int i = 0; i < fontNames.Length; i++) {
-                if (string.IsNullOrEmpty(fontNames[i]) || File.Exists($"{CURRENTDIR}{fontNames[i]}")) continue;
-                using (Stream fontStream = typeof(Overlay).Assembly.GetManifestResourceStream($"FinalBeansStats.Resources.font.{fontNames[i]}")) {
-                    byte[] fontData = new byte[fontStream.Length];
-                    fontStream.Read(fontData, 0, (int)fontStream.Length);
-                    File.WriteAllBytes($"{CURRENTDIR}{fontNames[i]}", fontData);
+        private static void CleanupDefaultFonts(object sender, EventArgs e) {
+            foreach (string fontFilePath in DefaultFontFiles) {
+                if (!RemoveFontResourceExW(fontFilePath, PrivateFont, IntPtr.Zero)) {
+                    Trace.TraceError($"GDI could not unregister private font '{fontFilePath}'.");
                 }
             }
 
-            for (int i = 0; i < fontNames.Length; i++) {
-                Overlay.DefaultFontCollection.AddFontFile($"{CURRENTDIR}{fontNames[i]}");
+            foreach (GCHandle fontMemory in DefaultFontMemory) {
+                if (fontMemory.IsAllocated) fontMemory.Free();
             }
-            Overlay.SetDefaultFont(18, CurrentLanguage);
+        }
 
+        private static void ExtractOverlayResources() {
             if (!Directory.Exists($"{CURRENTDIR}Overlay")) {
                 Directory.CreateDirectory($"{CURRENTDIR}Overlay");
                 using (Stream overlayStream = typeof(Stats).Assembly.GetManifestResourceStream("FinalBeansStats.Resources.overlay.background.png")) {
@@ -188,6 +229,25 @@ namespace FinalBeansStats {
                     }
                 }
             }
+        }
+
+        public static SKTypeface WinStatsFont;
+        public static void SetWinStatsFont() {
+            string fontFileName;
+            if (CurrentLanguage == Language.SimplifiedChinese || CurrentLanguage == Language.TraditionalChinese) {
+                fontFileName = "NotoSansSC-Regular.otf";
+            } else {
+                fontFileName = "PretendardJP-Medium.ttf";
+            }
+
+            SKTypeface newFont;
+            using (Stream fontStream = GetEmbeddedFontStream(fontFileName)) {
+                newFont = SKTypeface.FromStream(fontStream);
+            }
+
+            var oldFont = WinStatsFont;
+            WinStatsFont = newFont;
+            oldFont?.Dispose();
         }
 
         public static bool InstalledEmojiFont;
@@ -651,6 +711,10 @@ namespace FinalBeansStats {
         }
 
         private Stats() {
+            LoadDefaultFonts();
+
+            ExtractOverlayResources();
+
             this.DatabaseMigration();
 
             this.mainWndTitle = $@"     {Multilingual.GetWord("main_finalbeans_stats")} v{Assembly.GetExecutingAssembly().GetName().Version.ToString(2)}";
@@ -664,10 +728,17 @@ namespace FinalBeansStats {
                     CurrentLanguage = (Language)this.CurrentSettings.Multilingual;
                     CurrentTheme = this.CurrentSettings.Theme == 0 ? MetroThemeStyle.Light : MetroThemeStyle.Dark;
                     if (this.CurrentSettings.Version > 0) {
-                        // If "Version" > 0, it means it's an incompatible database (FallGuysStats database)
+                        // If "Version" > 0, it means it's an incompatible database (e.g.: FallGuysStats database)
                         // Dispose the database and exit the program.
                         this.StatsDB.Dispose();
                         Messenger.MessageBox($"{Multilingual.GetWord("message_incompatible_database")}", $"{Multilingual.GetWord("message_incompatible_database_caption")}",
+                            MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
+                        Environment.Exit(0);
+                    } else if (this.CurrentSettings.Version_FB > this.currentSettingsVersionFB) {
+                        // Do not allow to use an outdated version of the program
+                        // Dispose the database and exit the program.
+                        this.StatsDB.Dispose();
+                        Messenger.MessageBox($"{Multilingual.GetWord("message_not_supported_database_version")}", $"{Multilingual.GetWord("message_not_supported_database_version_caption")}",
                             MsgIcon.Error, MessageBoxButtons.OK, CurrentTheme == MetroThemeStyle.Dark, MessageBoxDefaultButton.Button1, this);
                         Environment.Exit(0);
                     }
@@ -688,8 +759,6 @@ namespace FinalBeansStats {
                 this.RemoveUselessConfigFile();
             }
 #endif
-
-            this.InitializeOverlayResources();
 
             this.InitializeComponent();
 
@@ -761,7 +830,6 @@ namespace FinalBeansStats {
                     if (initFinalBeansStats.ShowDialog(this) == DialogResult.OK) {
                         Task initProfilesTask = new Task(() => {
                             CurrentLanguage = initFinalBeansStats.selectedLanguage;
-                            Overlay.SetDefaultFont(18, CurrentLanguage);
                             this.CurrentSettings.PlayerName = initFinalBeansStats.playerName;
                             this.CurrentSettings.Multilingual = (int)initFinalBeansStats.selectedLanguage;
                             this.StatsDB.BeginTrans();
@@ -803,7 +871,9 @@ namespace FinalBeansStats {
                 this.EnableMainMenu(true);
             }
 
-            this.SetWinStatsFont();
+            Overlay.SetDefaultFont(18, CurrentLanguage);
+
+            SetWinStatsFont();
 
             this.InitLogData();
 
@@ -2113,7 +2183,21 @@ namespace FinalBeansStats {
             Rectangle rectangle = this.menuOverlay.Bounds;
             Point position = new Point(rectangle.Left, rectangle.Bottom + 68);
             this.AllocCustomTooltip(this.cmtt_overlay_Draw);
-            this.ShowCustomTooltip($"{Multilingual.GetWord(this.overlay.Visible ? "main_overlay_hide_tooltip" : "main_overlay_show_tooltip")}{Environment.NewLine}{Multilingual.GetWord("main_overlay_shortcut_tooltip")}", this, position);
+            string[] shortcuts = {
+                "main_overlay_profile_change_tooltip",
+                "main_overlay_lock_shortcut_tooltip",
+                "main_overlay_topmost_shortcut_tooltip",
+                "main_overlay_background_shortcut_tooltip",
+                "main_overlay_flip_shortcut_tooltip",
+                "main_overlay_platforms_shortcut_tooltip",
+                "main_overlay_round_color_shortcut_tooltip",
+                "main_overlay_opacity_shortcut_tooltip",
+                "main_overlay_auto_profile_shortcut_tooltip",
+                "main_overlay_reset_size_shortcut_tooltip",
+                "main_overlay_reset_position_shortcut_tooltip"
+            };
+            string message = $"{Multilingual.GetWord(this.overlay.Visible ? "main_overlay_hide_tooltip" : "main_overlay_show_tooltip")}{Environment.NewLine}{string.Join(Environment.NewLine, Array.ConvertAll(shortcuts, Multilingual.GetWord))}";
+            this.ShowCustomTooltip(message, this, position);
         }
 
         private void menuOverlay_MouseLeave(object sender, EventArgs e) {
@@ -4499,83 +4583,125 @@ namespace FinalBeansStats {
         }
 
         private void Stats_KeyDown(object sender, KeyEventArgs e) {
-            switch (e.KeyCode) {
-                case Keys.ControlKey:
-                    // this.ctrlKeyToggle = true;
-                    break;
-                case Keys.ShiftKey:
-                    this.shiftKeyToggle = true;
-                    break;
+            if (e.KeyCode == Keys.ShiftKey) {
+                this.shiftKeyToggle = true;
             }
 
-            switch (e.Control) {
-                case true when e.KeyCode == Keys.M:
-                    this.CurrentSettings.OverlayNotOnTop = !this.CurrentSettings.OverlayNotOnTop;
-                    this.SetOverlayTopMost(!this.CurrentSettings.OverlayNotOnTop);
-                    this.SaveUserSettings();
-                    break;
-                case true when e.KeyCode == Keys.T:
-                    int colorOption = 0;
-                    if (this.overlay.BackColor.ToArgb() == Color.FromArgb(224, 224, 224).ToArgb()) {
-                        colorOption = 1;
-                    } else if (this.overlay.BackColor.ToArgb() == Color.White.ToArgb()) {
-                        colorOption = 2;
-                    } else if (this.overlay.BackColor.ToArgb() == Color.Black.ToArgb()) {
-                        colorOption = 3;
-                    } else if (this.overlay.BackColor.ToArgb() == Color.Magenta.ToArgb()) {
-                        colorOption = 4;
-                    } else if (this.overlay.BackColor.ToArgb() == Color.Red.ToArgb()) {
-                        colorOption = 5;
-                    } else if (this.overlay.BackColor.ToArgb() == Color.Green.ToArgb()) {
-                        colorOption = 6;
-                    } else if (this.overlay.BackColor.ToArgb() == Color.Blue.ToArgb()) {
-                        colorOption = 0;
-                    }
-                    this.overlay.SetBackgroundColor(colorOption);
-                    this.CurrentSettings.OverlayColor = colorOption;
-                    this.SaveUserSettings();
-                    break;
-                case true when e.KeyCode == Keys.F:
-                    if (!this.overlay.IsFixed()) {
-                        this.overlay.FlipDisplay(!this.overlay.flippedImage);
-                        this.CurrentSettings.FlippedDisplay = this.overlay.flippedImage;
+            this.HandleOverlayShortcut(e);
+        }
+
+        public bool HandleOverlayShortcut(KeyEventArgs e) {
+            bool handled = false;
+
+            if (e.Control && e.Shift) {
+                switch (e.KeyCode) {
+                    case Keys.Z:
+                        this.SetAutoChangeProfile(!this.CurrentSettings.AutoChangeProfile);
+                        handled = true;
+                        break;
+                    case Keys.X:
+                        this.overlay.ResetOverlaySize();
+                        handled = true;
+                        break;
+                    case Keys.C:
+                        this.overlay.ResetOverlayLocation();
+                        handled = true;
+                        break;
+                    case Keys.Up:
+                        this.SetOverlayBackgroundOpacity(this.CurrentSettings.OverlayBackgroundOpacity + 5);
+                        handled = true;
+                        break;
+                    case Keys.Down:
+                        this.SetOverlayBackgroundOpacity(this.CurrentSettings.OverlayBackgroundOpacity - 5);
+                        handled = true;
+                        break;
+                }
+            } else if (e.Control) {
+                switch (e.KeyCode) {
+                    case Keys.M:
+                        this.CurrentSettings.OverlayNotOnTop = !this.CurrentSettings.OverlayNotOnTop;
+                        this.SetOverlayTopMost(!this.CurrentSettings.OverlayNotOnTop);
                         this.SaveUserSettings();
-                        this.overlay.UpdateDisplay();
-                    }
-                    break;
-                case true when e.KeyCode == Keys.R:
-                    this.CurrentSettings.ColorByRoundType = !this.CurrentSettings.ColorByRoundType;
-                    this.SaveUserSettings();
-                    this.overlay.UpdateDisplay();
-                    break;
-                case true when e.KeyCode == Keys.C:
-                    this.CurrentSettings.PlayerByConsoleType = !this.CurrentSettings.PlayerByConsoleType;
-                    this.SaveUserSettings();
-                    this.overlay.UpdateDisplay();
-                    break;
-                case false when e.KeyCode == Keys.ControlKey:
-                    // this.ctrlKeyToggle = true;
-                    break;
-                case false when e.KeyCode == Keys.ShiftKey:
-                    this.shiftKeyToggle = true;
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.Z:
-                    this.SetAutoChangeProfile(!this.CurrentSettings.AutoChangeProfile);
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.X:
-                    this.overlay.ResetOverlaySize();
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.C:
-                    this.overlay.ResetOverlayLocation();
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.Up:
-                    this.SetOverlayBackgroundOpacity(this.CurrentSettings.OverlayBackgroundOpacity + 5);
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.Down:
-                    this.SetOverlayBackgroundOpacity(this.CurrentSettings.OverlayBackgroundOpacity - 5);
-                    break;
+                        handled = true;
+                        break;
+                    case Keys.O:
+                        this.ToggleOverlay(this.overlay);
+                        handled = true;
+                        break;
+                    case Keys.L:
+                        this.overlay.TogglePositionLock();
+                        handled = true;
+                        break;
+                    case Keys.T:
+                        int colorOption = this.overlay.BackColor.ToArgb() == Color.FromArgb(224, 224, 224).ToArgb() ? 1
+                            : this.overlay.BackColor.ToArgb() == Color.White.ToArgb() ? 2
+                            : this.overlay.BackColor.ToArgb() == Color.Black.ToArgb() ? 3
+                            : this.overlay.BackColor.ToArgb() == Color.Magenta.ToArgb() ? 4
+                            : this.overlay.BackColor.ToArgb() == Color.Red.ToArgb() ? 5
+                            : this.overlay.BackColor.ToArgb() == Color.Green.ToArgb() ? 6 : 0;
+                        this.overlay.SetBackgroundColor(colorOption);
+                        this.CurrentSettings.OverlayColor = colorOption;
+                        this.SaveUserSettings();
+                        handled = true;
+                        break;
+                    case Keys.F:
+                        if (!this.overlay.IsFixed()) {
+                            this.CurrentSettings.FlippedDisplay = !this.overlay.flippedImage;
+                            this.SaveUserSettings();
+                            this.overlay.UpdateDisplay();
+                        }
+                        handled = true;
+                        break;
+                    case Keys.R:
+                        this.CurrentSettings.ColorByRoundType = !this.CurrentSettings.ColorByRoundType;
+                        this.SaveUserSettings();
+                        handled = true;
+                        break;
+                    case Keys.C:
+                        this.CurrentSettings.PlayerByConsoleType = !this.CurrentSettings.PlayerByConsoleType;
+                        this.SaveUserSettings();
+                        if (this.CurrentSettings.PlayerByConsoleType) {
+                            this.overlay.UpdateDisplay();
+                        }
+                        handled = true;
+                        break;
+                }
+            } else if (e.Shift) {
+                if (e.KeyCode == Keys.Down || e.KeyCode == Keys.Left || e.KeyCode == Keys.P) {
+                    this.SelectAdjacentProfile(false);
+                    handled = true;
+                } else if (e.KeyCode == Keys.Up || e.KeyCode == Keys.Right) {
+                    this.SelectAdjacentProfile(true);
+                    handled = true;
+                }
+            } else if (e.KeyCode == Keys.P) {
+                this.SelectAdjacentProfile(true);
+                handled = true;
+            } else if (e.KeyCode >= Keys.D1 && e.KeyCode <= Keys.D9) {
+                int profileIndex = (int)e.KeyCode - (int)Keys.D0;
+                if (profileIndex <= this.ProfileMenuItems.Count) {
+                    this.menuStats_Click(this.ProfileMenuItems[profileIndex - 1], EventArgs.Empty);
+                    handled = true;
+                }
             }
-            e.SuppressKeyPress = true;
+
+            if (handled) {
+                e.SuppressKeyPress = true;
+            }
+            return handled;
+        }
+
+        private void SelectAdjacentProfile(bool next) {
+            int profileCount = this.ProfileMenuItems.Count;
+            if (profileCount <= 1) return;
+
+            for (int i = 0; i < profileCount; i++) {
+                if (!this.ProfileMenuItems[i].Checked) continue;
+
+                int nextIndex = next ? (i + 1) % profileCount : (i - 1 + profileCount) % profileCount;
+                this.menuStats_Click(this.ProfileMenuItems[nextIndex], EventArgs.Empty);
+                return;
+            }
         }
 
         private void lblCurrentProfileIcon_Click(object sender, EventArgs e) {
@@ -4729,6 +4855,7 @@ namespace FinalBeansStats {
 
         public void menuStats_Click(object sender, EventArgs e) {
             try {
+                int previousProfile = this.currentProfile;
                 ToolStripMenuItem button = sender as ToolStripMenuItem;
                 if (Equals(button, this.menuCustomRangeStats) || Equals(button, this.trayCustomRangeStats)) {
                     if (this.isStartingUp) {
@@ -5000,6 +5127,7 @@ namespace FinalBeansStats {
                 this.ClearTotals();
 
                 int profile = this.currentProfile;
+                bool profileChanged = profile != previousProfile;
 
                 List<RoundInfo> rounds;
                 if (this.menuCustomRangeStats.Checked) {
@@ -5039,11 +5167,13 @@ namespace FinalBeansStats {
                     this.SaveUserSettings();
                 }
 
-                this.overlay.UpdateDisplay();
-
                 this.loadingExisting = true;
                 this.LogFile_OnParsedLogLines(rounds);
                 this.loadingExisting = false;
+
+                if (profileChanged && !this.isStartingUp && this.CurrentSettings.ShowOverlayTabs) {
+                    this.overlay.UpdateDisplay();
+                }
             } catch (Exception ex) {
                 MetroMessageBox.Show(this, ex.ToString(), $"{Multilingual.GetWord("message_program_error_caption")}", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -5211,7 +5341,6 @@ namespace FinalBeansStats {
             } else {
                 this.overlay.ShowInTaskbar = !topMost;
             }
-            this.overlay.UpdateDisplay();
         }
 
         public void SetAutoChangeProfile(bool autoChangeProfile) {
@@ -5228,7 +5357,6 @@ namespace FinalBeansStats {
             this.CurrentSettings.OverlayBackgroundOpacity = opacity;
             this.overlay.Opacity = opacity / 100d;
             this.SaveUserSettings();
-            this.overlay.UpdateDisplay();
         }
 
         private void SetMinimumSize() {

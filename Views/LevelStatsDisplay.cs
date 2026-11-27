@@ -34,8 +34,10 @@ namespace FinalBeansStats {
 
         private void RoundStatsDisplay_Load(object sender, EventArgs e) {
             this.SetTheme(Stats.CurrentTheme);
-            this.ChangeLanguage();
+            this.ApplyFonts();
 
+            this.cboRoundList.DrawMode = DrawMode.OwnerDrawFixed;
+            this.cboRoundList.DrawItem += this.cboRoundList_DrawItem;
             this.cboRoundList.DataSource = new BindingSource(this.levelList, null);
             this.cboRoundList.DisplayMember = "Value";
             this.cboRoundList.ValueMember = "Key";
@@ -149,9 +151,9 @@ namespace FinalBeansStats {
 
             this.radialGauges = this.formsPlot.Plot.Add.RadialGaugePlot(values);
             this.radialGauges.Colors = new[] {
-                ScottPlot.Color.FromColor(Color.FromArgb(31, 119, 180)), ScottPlot.Color.FromColor(Color.FromArgb(255, 215, 0)),
-                ScottPlot.Color.FromColor(Color.FromArgb(192, 192, 192)), ScottPlot.Color.FromColor(Color.FromArgb(205, 127, 50)),
-                ScottPlot.Color.FromColor(Color.FromArgb(255, 20, 147)), ScottPlot.Color.FromColor(Color.FromArgb(128, 0, 128))
+                ScottPlot.Color.FromColor(Color.FromArgb(30, 120, 180)), ScottPlot.Color.FromColor(Color.FromArgb(235, 200, 0)),
+                ScottPlot.Color.FromColor(Color.FromArgb(190, 190, 190)), ScottPlot.Color.FromColor(Color.FromArgb(205, 130, 50)),
+                ScottPlot.Color.FromColor(Color.FromArgb(255, 20, 150)), ScottPlot.Color.FromColor(Color.FromArgb(160, 0, 160))
             };
             this.radialGauges.OrderInsideOut = false;
             this.radialGauges.SpaceFraction = .1;
@@ -213,6 +215,14 @@ namespace FinalBeansStats {
             }
         }
 
+        private void cboRoundList_DrawItem(object sender, DrawItemEventArgs e) {
+            e.DrawBackground();
+            string text = e.Index >= 0 ? this.cboRoundList.GetItemText(this.cboRoundList.Items[e.Index]) : this.cboRoundList.Text;
+            TextRenderer.DrawText(e.Graphics, text, this.cboRoundList.Font, e.Bounds, e.ForeColor,
+                TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+            e.DrawFocusRectangle();
+        }
+
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData) {
             if (keyData == Keys.Tab) { SendKeys.Send("%"); }
             if (keyData == Keys.Escape) {
@@ -222,7 +232,7 @@ namespace FinalBeansStats {
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        private void ChangeLanguage() {
+        private void ApplyFonts() {
             this.lblRoundTime.Font = Overlay.GetDefaultFont(18, Stats.CurrentLanguage);
             this.lblBestRecord.Font = Overlay.GetDefaultFont(18, Stats.CurrentLanguage);
             this.lblWorstRecord.Font = Overlay.GetDefaultFont(18, Stats.CurrentLanguage);

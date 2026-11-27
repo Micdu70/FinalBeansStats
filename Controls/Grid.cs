@@ -534,82 +534,11 @@ namespace FinalBeansStats {
         }
 
         protected override bool ProcessDialogKey(Keys keyData) {
-            /*if (ProcessKeyStroke(keyData)) {
-                return true;
-            }*/
-
             return base.ProcessDialogKey(keyData);
         }
 
         protected override bool ProcessDataGridViewKey(KeyEventArgs e) {
-            /*if (ProcessKeyStroke(e.KeyData)) {
-                return true;
-            }*/
-
             return base.ProcessDataGridViewKey(e);
-        }
-
-        private bool ProcessKeyStroke(Keys keyData) {
-            if (keyData == Keys.Tab) {
-                int iCol = this.CurrentCell.ColumnIndex + 1;
-                while (iCol < Columns.Count) {
-                    DataGridViewColumn col = Columns[iCol];
-                    if (!col.ReadOnly && col.Visible) {
-                        break;
-                    }
-                    iCol++;
-                }
-
-                if (iCol < Columns.Count) {
-                    this.CurrentCell = Rows[this.CurrentCell.RowIndex].Cells[iCol];
-                } else {
-                    for (iCol = 0; iCol <= this.CurrentCell.ColumnIndex; iCol++) {
-                        DataGridViewColumn col = Columns[iCol];
-                        if (!col.ReadOnly && col.Visible) {
-                            break;
-                        }
-                    }
-
-                    if (iCol <= this.CurrentCell.ColumnIndex) {
-                        if (this.CurrentCell.RowIndex + 1 < Rows.Count) {
-                            this.CurrentCell = Rows[this.CurrentCell.RowIndex + 1].Cells[iCol];
-                        } else {
-                            this.CurrentCell = Rows[0].Cells[iCol];
-                        }
-                    }
-                }
-                return true;
-            } else if ((keyData & Keys.Shift) != 0 && (keyData & Keys.Tab) != 0) {
-                int iCol = this.CurrentCell.ColumnIndex - 1;
-                while (iCol >= 0) {
-                    DataGridViewColumn col = Columns[iCol];
-                    if (!col.ReadOnly && col.Visible) {
-                        break;
-                    }
-                    iCol--;
-                }
-
-                if (iCol >= 0) {
-                    this.CurrentCell = Rows[this.CurrentCell.RowIndex].Cells[iCol];
-                } else {
-                    for (iCol = Columns.Count - 1; iCol >= this.CurrentCell.ColumnIndex; iCol--) {
-                        DataGridViewColumn col = Columns[iCol];
-                        if (!col.ReadOnly && col.Visible) {
-                            break;
-                        }
-                    }
-
-                    if (iCol >= this.CurrentCell.ColumnIndex) {
-                        if (this.CurrentCell.RowIndex - 1 >= 0) {
-                            this.CurrentCell = Rows[this.CurrentCell.RowIndex - 1].Cells[iCol];
-                        } else {
-                            this.CurrentCell = Rows[0].Cells[iCol];
-                        }
-                    }
-                }
-                return true;
-            }
-            return false;
         }
 
         public void Setup(string column, int index, int width = -1, string header = null, DataGridViewContentAlignment align = DataGridViewContentAlignment.MiddleCenter) {
@@ -661,9 +590,7 @@ namespace FinalBeansStats {
             this.ExportItemCsv.Name = "exportItemCSV";
             this.ExportItemCsv.Size = new Size(134, 22);
             this.ExportItemCsv.Text = Multilingual.GetWord("main_export_csv");
-            this.ExportItemCsv.ShowShortcutKeys = true;
             this.ExportItemCsv.Image = Properties.Resources.export;
-            this.ExportItemCsv.ShortcutKeys = Keys.Control | Keys.S;
             this.ExportItemCsv.Click += this.exportItemCSV_Click;
             // 
             // exportItemHTML
@@ -671,9 +598,7 @@ namespace FinalBeansStats {
             this.ExportItemHtml.Name = "exportItemHTML";
             this.ExportItemHtml.Size = new Size(134, 22);
             this.ExportItemHtml.Text = Multilingual.GetWord("main_export_html");
-            this.ExportItemHtml.ShowShortcutKeys = true;
             this.ExportItemHtml.Image = Properties.Resources.export;
-            this.ExportItemHtml.ShortcutKeys = Keys.Control | Keys.E;
             this.ExportItemHtml.Click += this.exportItemHTML_Click;
             // 
             // exportItemBBCODE
@@ -681,9 +606,7 @@ namespace FinalBeansStats {
             this.ExportItemBbcode.Name = "exportItemBBCODE";
             this.ExportItemBbcode.Size = new Size(134, 22);
             this.ExportItemBbcode.Text = Multilingual.GetWord("main_export_bbcode");
-            this.ExportItemBbcode.ShowShortcutKeys = true;
             this.ExportItemBbcode.Image = Properties.Resources.export;
-            this.ExportItemBbcode.ShortcutKeys = Keys.Control | Keys.B;
             this.ExportItemBbcode.Click += this.exportItemBBCODE_Click;
             // 
             // exportItemMD
@@ -691,9 +614,7 @@ namespace FinalBeansStats {
             this.ExportItemMd.Name = "exportItemMD";
             this.ExportItemMd.Size = new Size(134, 22);
             this.ExportItemMd.Text = Multilingual.GetWord("main_export_markdown");
-            this.ExportItemMd.ShowShortcutKeys = true;
             this.ExportItemMd.Image = Properties.Resources.export;
-            this.ExportItemMd.ShortcutKeys = Keys.Control | Keys.M;
             this.ExportItemMd.Click += this.exportItemMD_Click;
             // 
             // saveFile

@@ -1399,6 +1399,7 @@
             // 
             // tileProgram
             // 
+            this.tileProgram.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tileProgram.ActiveControl = null;
             this.tileProgram.BackColor = System.Drawing.Color.LightGray;
             this.tileProgram.Location = new System.Drawing.Point(12, 73);
@@ -1465,6 +1466,7 @@
             // 
             // tileDisplay
             // 
+            this.tileDisplay.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tileDisplay.ActiveControl = null;
             this.tileDisplay.BackColor = System.Drawing.Color.LightGray;
             this.tileDisplay.Location = new System.Drawing.Point(12, 124);
@@ -1534,6 +1536,7 @@
             // 
             // tileOverlay
             // 
+            this.tileOverlay.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tileOverlay.ActiveControl = null;
             this.tileOverlay.BackColor = System.Drawing.Color.LightGray;
             this.tileOverlay.Location = new System.Drawing.Point(12, 175);
@@ -1548,6 +1551,7 @@
             // 
             // tileFinalBeans
             // 
+            this.tileFinalBeans.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tileFinalBeans.ActiveControl = null;
             this.tileFinalBeans.BackColor = System.Drawing.Color.LightGray;
             this.tileFinalBeans.Location = new System.Drawing.Point(12, 226);
@@ -1579,9 +1583,10 @@
             // 
             // tileAbout
             // 
+            this.tileAbout.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tileAbout.ActiveControl = null;
             this.tileAbout.BackColor = System.Drawing.Color.LightGray;
-            this.tileAbout.Location = new System.Drawing.Point(12, 379);
+            this.tileAbout.Location = new System.Drawing.Point(12, 586);
             this.tileAbout.Name = "tileAbout";
             this.tileAbout.Size = new System.Drawing.Size(193, 45);
             this.tileAbout.TabIndex = 17;

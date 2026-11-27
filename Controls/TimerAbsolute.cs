@@ -22,13 +22,13 @@ namespace FinalBeansStats {
             this.m_dueTime = DateTime.Now.AddMilliseconds(interval);
             // Timer tick is 1 second
             this.Interval = 1000;
-            base.Start();
+            Start();
         }
 
         private void ElapsedAction(object sender, ElapsedEventArgs e) {
             if (DateTime.Now >= m_dueTime) {
                 this.callback(sender, e);
-                base.Stop();
+                Stop();
             }
         }
     }

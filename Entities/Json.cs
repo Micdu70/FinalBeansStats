@@ -147,7 +147,7 @@ namespace FinalBeansStats {
         }
         public JsonObject this[string key] {
             get {
-                return Fields.TryGetValue(key, out JsonObject value) ? value : JsonObject.EMPTY;
+                return Fields.TryGetValue(key, out JsonObject value) ? value : EMPTY;
             }
         }
         public override string Value() { return ToString(); }

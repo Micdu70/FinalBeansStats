@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -36,6 +37,8 @@ namespace FinalBeansStats {
         private string levelId;
         private string levelName;
         private int levelTimeLimit;
+        private string levelTimeLimitRoundId;
+        private List<LevelTimeLimit> levelTimeLimitCacheSource;
         private LevelStats levelStats;
         private LevelType levelType;
         private BestRecordType recordType;
@@ -50,6 +53,14 @@ namespace FinalBeansStats {
         private string backgroundResourceNameCache, tabResourceNameCache;
         private byte transitionCounter;
         private TransparentLabel targetLabel;
+        private bool hasAppliedFonts;
+        private string appliedSerializedFont;
+        private Font appliedDefaultFont;
+        private Font appliedCustomFont;
+        private Font appliedProfileFont;
+        private bool hasAppliedFontColor;
+        private string appliedSerializedFontColor;
+        private Color appliedFontColor;
 
         private bool isPositionButtonMouseEnter;
         private readonly Image positionNeOffBlur = Utils.ImageOpacity(Properties.Resources.position_ne_off_icon, 0.4F);
@@ -75,11 +86,43 @@ namespace FinalBeansStats {
         private bool isFixedPositionNe, isFixedPositionNw, isFixedPositionSe, isFixedPositionSw, isPositionLock;
         private bool isFocused, isMouseOver;
 
-        internal static readonly PrivateFontCollection DefaultFontCollection = new PrivateFontCollection();
         public static new Font DefaultFont;
+        private static FontFamily[] embeddedFontFamilies;
+        private static FontFamily fallbackFontFamily;
 
         public Overlay() {
             this.InitializeComponent();
+            this.Disposed += this.Overlay_Disposed;
+        }
+
+        private void Overlay_Disposed(object sender, EventArgs e) {
+            this.appliedCustomFont?.Dispose();
+            this.appliedProfileFont?.Dispose();
+            this.DrawGraphics?.Dispose();
+            this.DrawImage?.Dispose();
+            this.Background?.Dispose();
+            this.customizedBackground?.Dispose();
+            this.customizedTab?.Dispose();
+            this.positionNeOffBlur.Dispose();
+            this.positionNwOffBlur.Dispose();
+            this.positionSeOffBlur.Dispose();
+            this.positionSwOffBlur.Dispose();
+            this.positionNeOffFocus.Dispose();
+            this.positionNwOffFocus.Dispose();
+            this.positionSeOffFocus.Dispose();
+            this.positionSwOffFocus.Dispose();
+            this.positionNeOnBlur.Dispose();
+            this.positionNwOnBlur.Dispose();
+            this.positionSeOnBlur.Dispose();
+            this.positionSwOnBlur.Dispose();
+            this.positionNeOnFocus.Dispose();
+            this.positionNwOnFocus.Dispose();
+            this.positionSeOnFocus.Dispose();
+            this.positionSwOnFocus.Dispose();
+            this.positionLockBlur.Dispose();
+            this.positionLockFocus.Dispose();
+            this.positionUnlockBlur.Dispose();
+            this.positionUnlockFocus.Dispose();
         }
 
         private void Overlay_Load(object sender, EventArgs e) {
@@ -163,41 +206,111 @@ namespace FinalBeansStats {
             return (this.StatsForm.CurrentSettings.HideWinsInfo ? 4 : 0) + (this.StatsForm.CurrentSettings.HideRoundInfo ? 2 : 0) + (this.StatsForm.CurrentSettings.HideTimeInfo ? 1 : 0);
         }
 
-        private static void SetFonts(Control control, float customSize = -1, Font font = null) {
-            if (font == null) {
-                font = customSize <= 0 ? DefaultFont : new Font(GetDefaultFontFamilies(), customSize, FontStyle.Regular, GraphicsUnit.Pixel);
+        private static void SetFonts(Control control, Font font, Font profileFont) {
+            if (!ReferenceEquals(control.Font, font)) {
+                control.Font = font;
             }
-
-            control.Font = font;
             foreach (Control ctr in control.Controls) {
-                if (string.Equals(ctr.Name, "lblProfile")) { ctr.Font = GetMainFont(font.Size, FontStyle.Bold); continue; }
-                ctr.Font = font;
-                if (ctr.HasChildren) {
-                    SetFonts(ctr, customSize, font);
+                Font controlFont = string.Equals(ctr.Name, "lblProfile") ? profileFont : font;
+                if (!ReferenceEquals(ctr.Font, controlFont)) {
+                    ctr.Font = controlFont;
+                }
+                if (!string.Equals(ctr.Name, "lblProfile") && ctr.HasChildren) {
+                    SetFonts(ctr, font, profileFont);
                 }
             }
         }
 
-        private void SetDefaultFontColor() {
-            this.ForeColor = Color.White;
+        private void ApplyFonts(string serializedFont) {
+            if (this.hasAppliedFonts && string.Equals(serializedFont, this.appliedSerializedFont, StringComparison.Ordinal) &&
+                (!string.IsNullOrEmpty(serializedFont) || ReferenceEquals(DefaultFont, this.appliedDefaultFont))) {
+                return;
+            }
+
+            Font customFont = string.IsNullOrEmpty(serializedFont)
+                ? null
+                : new FontConverter().ConvertFromString(serializedFont) as Font;
+            Font font = customFont ?? DefaultFont;
+            Font profileFont = GetMainFont(font.Size, FontStyle.Bold);
+
+            SetFonts(this, font, profileFont);
+
+            this.appliedCustomFont?.Dispose();
+            this.appliedProfileFont?.Dispose();
+            this.appliedSerializedFont = serializedFont;
+            this.appliedDefaultFont = DefaultFont;
+            this.appliedCustomFont = customFont;
+            this.appliedProfileFont = profileFont;
+            this.hasAppliedFonts = true;
         }
-        private void SetFontColor(Color color) {
-            this.ForeColor = color;
+
+        private void ApplyFontColor(string serializedFontColor) {
+            if (this.hasAppliedFontColor && string.Equals(serializedFontColor, this.appliedSerializedFontColor, StringComparison.Ordinal) &&
+                this.ForeColor.Equals(this.appliedFontColor)) {
+                return;
+            }
+
+            Color fontColor = string.IsNullOrEmpty(serializedFontColor)
+                ? Color.White
+                : (Color)new ColorConverter().ConvertFromString(serializedFontColor);
+            if (!this.ForeColor.Equals(fontColor)) {
+                this.ForeColor = fontColor;
+            }
+
+            this.appliedSerializedFontColor = serializedFontColor;
+            this.appliedFontColor = fontColor;
+            this.hasAppliedFontColor = true;
         }
         public static void SetDefaultFont(float emSize, Language lang) {
-            DefaultFont = new Font(GetDefaultFontFamilies(lang), emSize, (lang == Language.English || lang == Language.French || lang == Language.Spanish) ? FontStyle.Regular : FontStyle.Bold, GraphicsUnit.Pixel);
+            DefaultFont = new Font(GetFont(lang), emSize, (lang == Language.English || lang == Language.French || lang == Language.Spanish) ? FontStyle.Regular : FontStyle.Bold, GraphicsUnit.Pixel);
         }
         public static Font GetDefaultFont(float emSize, Language lang) {
-            return new Font(GetDefaultFontFamilies(lang), emSize, (lang == Language.English || lang == Language.French || lang == Language.Spanish) ? FontStyle.Regular : FontStyle.Bold, GraphicsUnit.Pixel);
+            return new Font(GetFont(lang), emSize, (lang == Language.English || lang == Language.French || lang == Language.Spanish) ? FontStyle.Regular : FontStyle.Bold, GraphicsUnit.Pixel);
         }
-        public static FontFamily GetDefaultFontFamilies(Language lang = Language.English) {
-            return (lang == Language.English || lang == Language.French || lang == Language.Spanish) ? DefaultFontCollection.Families[2] : (lang == Language.SimplifiedChinese || lang == Language.TraditionalChinese) ? DefaultFontCollection.Families[0] : DefaultFontCollection.Families[1];
+        private static FontFamily GetEmbeddedFont(string fontFamilyName) {
+            FontFamily[] fontFamilies = embeddedFontFamilies;
+            if (fontFamilies == null || fontFamilies.Length == 0) {
+                fontFamilies = Stats.DefaultFontCollection.Families;
+                if (fontFamilies.Length > 0) {
+                    embeddedFontFamilies = fontFamilies;
+                }
+            }
+
+            foreach (FontFamily fontFamily in fontFamilies) {
+                if (string.Equals(fontFamily.Name, fontFamilyName, StringComparison.OrdinalIgnoreCase)) {
+                    return fontFamily;
+                }
+            }
+
+            if (fallbackFontFamily == null) {
+                fallbackFontFamily = new FontFamily("Segoe UI");
+            }
+            return fallbackFontFamily;
+        }
+        public static FontFamily GetFont(Language lang = Language.English) {
+            string fontFamilyName;
+            if (lang == Language.English || lang == Language.French || lang == Language.Spanish) {
+                fontFamilyName = "Titan One";
+            } else if (lang == Language.SimplifiedChinese || lang == Language.TraditionalChinese) {
+                fontFamilyName = "Noto Sans SC Medium";
+            } else {
+                fontFamilyName = "Pretendard JP Medium";
+            }
+
+            return GetEmbeddedFont(fontFamilyName);
+        }
+        public static FontFamily GetMainFontFamily(Language lang) {
+            string fontFamilyName;
+            if (lang == Language.SimplifiedChinese || lang == Language.TraditionalChinese) {
+                fontFamilyName = "Noto Sans SC Medium";
+            } else {
+                fontFamilyName = "Pretendard JP Medium";
+            }
+
+            return GetEmbeddedFont(fontFamilyName);
         }
         public static Font GetMainFont(float emSize, FontStyle fontStyle = FontStyle.Regular, Language lang = Language.English) {
-            return new Font(GetMainFontFamilies(lang), emSize, fontStyle, GraphicsUnit.Pixel);
-        }
-        public static FontFamily GetMainFontFamilies(Language lang) {
-            return (lang == Language.SimplifiedChinese || lang == Language.TraditionalChinese) ? DefaultFontCollection.Families[0] : DefaultFontCollection.Families[1];
+            return new Font(GetMainFontFamily(lang), emSize, fontStyle, GraphicsUnit.Pixel);
         }
         public bool IsFocused() {
             return this.isFocused;
@@ -358,30 +471,55 @@ namespace FinalBeansStats {
                     }
                     this.UpdateDisplay();
                 } else if (sender.Equals(this.picPositionLock)) {
-                    if (this.isPositionLock) {
-                        this.picPositionLock.Image = this.positionUnlockFocus;
-                        this.isPositionLock = false;
-                        this.Cursor = Cursors.SizeAll;
-                        this.StatsForm.CurrentSettings.OverlayFixedPosition = string.Empty;
-                        this.StatsForm.CurrentSettings.OverlayFixedPositionX = null;
-                        this.StatsForm.CurrentSettings.OverlayFixedPositionY = null;
-                        this.StatsForm.CurrentSettings.FixedFlippedDisplay = false;
-                        this.SetVisiblePositionMenu(true);
-                    } else {
-                        this.picPositionLock.Image = this.positionLockFocus;
-                        this.isPositionLock = true;
-                        this.Cursor = Cursors.Default;
-                        this.StatsForm.CurrentSettings.OverlayFixedPositionX = this.Location.X;
-                        this.StatsForm.CurrentSettings.OverlayFixedPositionY = this.Location.Y;
-                        this.StatsForm.CurrentSettings.OverlayFixedWidth = this.Width;
-                        this.StatsForm.CurrentSettings.OverlayFixedHeight = this.Height;
-                        this.StatsForm.CurrentSettings.OverlayFixedPosition = "free";
-                        this.StatsForm.CurrentSettings.FixedFlippedDisplay = this.flippedImage;
-                        this.SetVisiblePositionMenu(false);
-                    }
+                    this.TogglePositionLockState();
                     this.UpdateDisplay();
                 }
                 this.StatsForm.SaveUserSettings();
+            }
+        }
+
+        public void TogglePositionLock() {
+            this.TogglePositionLockState();
+            this.UpdateDisplay();
+            this.StatsForm.SaveUserSettings();
+        }
+
+        private void TogglePositionLockState() {
+            if (this.isPositionLock) {
+                this.picPositionLock.Image = this.positionUnlockFocus;
+                this.isPositionLock = false;
+                this.Cursor = Cursors.SizeAll;
+                this.StatsForm.CurrentSettings.OverlayFixedPosition = string.Empty;
+                this.StatsForm.CurrentSettings.OverlayFixedPositionX = null;
+                this.StatsForm.CurrentSettings.OverlayFixedPositionY = null;
+                this.StatsForm.CurrentSettings.FixedFlippedDisplay = false;
+                this.SetVisiblePositionMenu(this.isFocused);
+            } else if (this.isFixedPositionNe || this.isFixedPositionNw || this.isFixedPositionSe || this.isFixedPositionSw) {
+                this.SetFixedPosition(false, false, false, false, false);
+                this.StatsForm.CurrentSettings.OverlayLocationX = this.Location.X;
+                this.StatsForm.CurrentSettings.OverlayLocationY = this.Location.Y;
+                this.StatsForm.CurrentSettings.OverlayFixedPosition = string.Empty;
+                this.StatsForm.CurrentSettings.OverlayFixedPositionX = null;
+                this.StatsForm.CurrentSettings.OverlayFixedPositionY = null;
+                this.StatsForm.CurrentSettings.FixedFlippedDisplay = false;
+                this.FlipDisplay(this.StatsForm.CurrentSettings.FlippedDisplay);
+                this.Cursor = Cursors.SizeAll;
+                this.picPositionLock.Image = this.positionUnlockFocus;
+                this.SetBlurPositionMenu();
+                this.SetVisiblePositionMenu(this.isFocused);
+                this.SetVisiblePositionLockButton(this.isFocused);
+            } else {
+                this.picPositionLock.Image = this.positionLockFocus;
+                this.isPositionLock = true;
+                this.Cursor = Cursors.Default;
+                this.StatsForm.CurrentSettings.OverlayFixedPositionX = this.Location.X;
+                this.StatsForm.CurrentSettings.OverlayFixedPositionY = this.Location.Y;
+                this.StatsForm.CurrentSettings.OverlayFixedWidth = this.Width;
+                this.StatsForm.CurrentSettings.OverlayFixedHeight = this.Height;
+                this.StatsForm.CurrentSettings.OverlayFixedPosition = "free";
+                this.StatsForm.CurrentSettings.FixedFlippedDisplay = this.flippedImage;
+                this.SetVisiblePositionMenu(false);
+                this.SetVisiblePositionLockButton(this.isFocused);
             }
         }
 
@@ -928,7 +1066,7 @@ namespace FinalBeansStats {
                                                       : (Stats.IsConnectedToServer && Stats.LastServerPing >= 200 && 999 >= Stats.LastServerPing) ? -6
                                                       : (Stats.IsConnectedToServer && Stats.LastServerPing > 999) ? -9 : 0;
 
-                            if (!string.Equals(this.Font.FontFamily.Name, GetDefaultFontFamilies().Name)) {
+                            if (!string.Equals(this.Font.FontFamily.Name, GetFont().Name)) {
                                 this.lblCountryIcon.ImageX += 7;
                                 this.lblPingIcon.ImageX += 6;
                             }
@@ -1183,7 +1321,13 @@ namespace FinalBeansStats {
                     }
 
                     lock (this.StatsForm.LevelTimeLimitCache) {
-                        this.levelTimeLimit = this.StatsForm.LevelTimeLimitCache.Find(l => string.Equals(l.LevelId, this.lastRound.RoundId))?.Duration ?? 0;
+                        List<LevelTimeLimit> cache = this.StatsForm.LevelTimeLimitCache;
+                        if (!ReferenceEquals(cache, this.levelTimeLimitCacheSource) ||
+                            !string.Equals(this.lastRound.RoundId, this.levelTimeLimitRoundId, StringComparison.Ordinal)) {
+                            this.levelTimeLimit = cache.Find(l => string.Equals(l.LevelId, this.lastRound.RoundId))?.Duration ?? 0;
+                            this.levelTimeLimitCacheSource = cache;
+                            this.levelTimeLimitRoundId = this.lastRound.RoundId;
+                        }
                     }
 
                     this.SetDurationLabel(this.levelTimeLimit, currentUtc, overlaySetting);
@@ -1197,6 +1341,9 @@ namespace FinalBeansStats {
             lock (DefaultFont) {
                 this.DrawGraphics.Clear(Color.Transparent);
                 this.DrawGraphics.DrawImage(this.Background, 0, 0);
+                this.DrawGraphics.SmoothingMode = SmoothingMode.HighQuality;
+                this.DrawGraphics.InterpolationMode = InterpolationMode.HighQualityBilinear;
+                this.DrawGraphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
                 foreach (Control control in this.Controls) {
                     if (control is TransparentLabel label) {
@@ -1255,116 +1402,11 @@ namespace FinalBeansStats {
         }
 
         private void Overlay_KeyDown(object sender, KeyEventArgs e) {
-            switch (e.KeyCode) {
-                case Keys.ControlKey:
-                    // this.ctrlKeyToggle = true;
-                    break;
-                case Keys.ShiftKey:
-                    this.shiftKeyToggle = true;
-                    break;
+            if (e.KeyCode == Keys.ShiftKey) {
+                this.shiftKeyToggle = true;
             }
 
-            switch (e.Control) {
-                case true when e.KeyCode == Keys.M:
-                    this.StatsForm.CurrentSettings.OverlayNotOnTop = !this.StatsForm.CurrentSettings.OverlayNotOnTop;
-                    this.StatsForm.SetOverlayTopMost(!this.StatsForm.CurrentSettings.OverlayNotOnTop);
-                    this.StatsForm.SaveUserSettings();
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.Z:
-                    this.StatsForm.SetAutoChangeProfile(!this.StatsForm.CurrentSettings.AutoChangeProfile);
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.X:
-                    this.ResetOverlaySize();
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.C:
-                    this.ResetOverlayLocation();
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.Up:
-                    this.StatsForm.SetOverlayBackgroundOpacity(this.StatsForm.CurrentSettings.OverlayBackgroundOpacity + 5);
-                    break;
-                case true when e.Shift && e.KeyCode == Keys.Down:
-                    this.StatsForm.SetOverlayBackgroundOpacity(this.StatsForm.CurrentSettings.OverlayBackgroundOpacity - 5);
-                    break;
-                case true when e.KeyCode == Keys.O:
-                    this.StatsForm.ToggleOverlay(this);
-                    break;
-                case true when e.KeyCode == Keys.T:
-                    int colorOption = 0;
-                    if (BackColor.ToArgb() == Color.FromArgb(224, 224, 224).ToArgb()) {
-                        colorOption = 1;
-                    } else if (BackColor.ToArgb() == Color.White.ToArgb()) {
-                        colorOption = 2;
-                    } else if (BackColor.ToArgb() == Color.Black.ToArgb()) {
-                        colorOption = 3;
-                    } else if (BackColor.ToArgb() == Color.Magenta.ToArgb()) {
-                        colorOption = 4;
-                    } else if (BackColor.ToArgb() == Color.Red.ToArgb()) {
-                        colorOption = 5;
-                    } else if (BackColor.ToArgb() == Color.Green.ToArgb()) {
-                        colorOption = 6;
-                    } else if (BackColor.ToArgb() == Color.Blue.ToArgb()) {
-                        colorOption = 0;
-                    }
-                    this.SetBackgroundColor(colorOption);
-                    this.StatsForm.CurrentSettings.OverlayColor = colorOption;
-                    this.StatsForm.SaveUserSettings();
-                    break;
-                case true when e.KeyCode == Keys.F:
-                    if (!this.IsFixed()) {
-                        this.FlipDisplay(!this.flippedImage);
-                        this.StatsForm.CurrentSettings.FlippedDisplay = this.flippedImage;
-                        this.StatsForm.SaveUserSettings();
-                        this.UpdateDisplay();
-                    }
-                    break;
-                case true when e.KeyCode == Keys.R:
-                    this.StatsForm.CurrentSettings.ColorByRoundType = !this.StatsForm.CurrentSettings.ColorByRoundType;
-                    this.StatsForm.SaveUserSettings();
-                    this.UpdateDisplay();
-                    break;
-                case true when e.KeyCode == Keys.C:
-                    this.StatsForm.CurrentSettings.PlayerByConsoleType = !this.StatsForm.CurrentSettings.PlayerByConsoleType;
-                    this.StatsForm.SaveUserSettings();
-                    this.UpdateDisplay();
-                    break;
-                case false when e.Shift && (e.KeyCode == Keys.Up || e.KeyCode == Keys.Left || e.KeyCode == Keys.P):
-                    if (this.StatsForm.ProfileMenuItems.Count > 1) {
-                        for (int i = 0; i < this.StatsForm.ProfileMenuItems.Count; i++) {
-                            ToolStripItem item = this.StatsForm.ProfileMenuItems[i];
-                            if (!(item is ToolStripMenuItem menuItem)) continue;
-                            if (menuItem.Checked && i > 0) {
-                                this.StatsForm.menuStats_Click(this.StatsForm.ProfileMenuItems[i - 1], EventArgs.Empty);
-                                break;
-                            } else if (menuItem.Checked && i == 0) {
-                                this.StatsForm.menuStats_Click(this.StatsForm.ProfileMenuItems[this.StatsForm.ProfileMenuItems.Count - 1], EventArgs.Empty);
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                case false when (e.Shift && (e.KeyCode == Keys.Down || e.KeyCode == Keys.Right)) || e.KeyCode == Keys.P:
-                    if (this.StatsForm.ProfileMenuItems.Count > 1) {
-                        for (int i = 0; i < this.StatsForm.ProfileMenuItems.Count; i++) {
-                            ToolStripItem item = this.StatsForm.ProfileMenuItems[i];
-                            if (!(item is ToolStripMenuItem menuItem)) continue;
-                            if (menuItem.Checked && i + 1 < this.StatsForm.ProfileMenuItems.Count) {
-                                this.StatsForm.menuStats_Click(this.StatsForm.ProfileMenuItems[i + 1], EventArgs.Empty);
-                                break;
-                            } else if (menuItem.Checked && i + 1 >= this.StatsForm.ProfileMenuItems.Count) {
-                                this.StatsForm.menuStats_Click(this.StatsForm.ProfileMenuItems[0], EventArgs.Empty);
-                                break;
-                            }
-                        }
-                    }
-                    break;
-                case false when e.KeyCode == Keys.D1 || e.KeyCode == Keys.D2 || e.KeyCode == Keys.D3 || e.KeyCode == Keys.D4 || e.KeyCode == Keys.D5 || e.KeyCode == Keys.D6 || e.KeyCode == Keys.D7 || e.KeyCode == Keys.D8 || e.KeyCode == Keys.D9:
-                    int index = Convert.ToInt32(((char)e.KeyValue).ToString());
-                    if (index <= this.StatsForm.ProfileMenuItems.Count) {
-                        this.StatsForm.menuStats_Click(this.StatsForm.ProfileMenuItems[index - 1], EventArgs.Empty);
-                    }
-                    break;
-            }
-            e.SuppressKeyPress = true;
+            this.StatsForm.HandleOverlayShortcut(e);
         }
 
         public void ResetOverlaySize() {
@@ -1796,19 +1838,8 @@ namespace FinalBeansStats {
                     break;
             }
 
-            if (!string.IsNullOrEmpty(serializedFont)) {
-                FontConverter fontConverter = new FontConverter();
-                SetFonts(this, -1, fontConverter.ConvertFromString(serializedFont) as Font);
-            } else {
-                SetFonts(this);
-            }
-
-            if (!string.IsNullOrEmpty(serializedFontColor)) {
-                ColorConverter colorConverter = new ColorConverter();
-                this.SetFontColor((Color)colorConverter.ConvertFromString(serializedFontColor));
-            } else {
-                this.SetDefaultFontColor();
-            }
+            this.ApplyFonts(serializedFont);
+            this.ApplyFontColor(serializedFontColor);
 
             if (width.HasValue) {
                 this.Width = width.Value;
@@ -1888,8 +1919,7 @@ namespace FinalBeansStats {
 
         private int GetCountNumeric(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if (0x30 <= ch && ch <= 0x39) count++;
             }
             return count;
@@ -1897,8 +1927,7 @@ namespace FinalBeansStats {
 
         private int GetCountSpace(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if (0x20 == ch) count++;
             }
             return count;
@@ -1906,8 +1935,7 @@ namespace FinalBeansStats {
 
         private int GetCountBigSignCharacter(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x23 <= ch && ch <= 0x26)
                     || 0x2B == ch
                     || (0x3C <= ch && ch <= 0x40)
@@ -1919,8 +1947,7 @@ namespace FinalBeansStats {
 
         private int GetCountSmallSignCharacter(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x21 <= ch && ch <= 0x22)
                     || (0x27 <= ch && ch <= 0x2A)
                     || (0x2C <= ch && ch <= 0x2F)
@@ -1934,8 +1961,7 @@ namespace FinalBeansStats {
 
         private int GetCountKorAlphabet(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0xAC00 <= ch && ch <= 0xD7A3) //Korean
                     || (0x3131 <= ch && ch <= 0x318E) //Korean
                    ) count++;
@@ -1945,8 +1971,7 @@ namespace FinalBeansStats {
 
         private int GetCountJpnAlphabet(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x3040 <= ch && ch <= 0x309F) //Japanese
                     || (0x30A0 <= ch && ch <= 0x30FF) //Japanese
                     || (0x3400 <= ch && ch <= 0x4DBF) //Japanese
@@ -1959,8 +1984,7 @@ namespace FinalBeansStats {
 
         private int GetCountEngLowercase(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if (0x61 <= ch && ch <= 0x7A) count++;
             }
             return count;
@@ -1968,8 +1992,7 @@ namespace FinalBeansStats {
 
         private int GetCountAmpersand(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if (0x26 == ch) count++;
             }
             return count;
@@ -1980,7 +2003,7 @@ namespace FinalBeansStats {
         }
 
         private int GetOverlayProfileOffset(string s) {
-            int sizeOfText = TextRenderer.MeasureText(s, new Font(this.lblProfile.Font.FontFamily, this.lblProfile.Font.Size, FontStyle.Regular, this.lblProfile.Font.Unit)).Width;
+            int sizeOfText = this.lblProfile.MeasureTextWidth(s);
             return sizeOfText + (this.GetCountAmpersand(s) * 14) - 22;
         }
 
@@ -1997,7 +2020,9 @@ namespace FinalBeansStats {
                     } else {
                         if (overlayCustomized) {
                             if (!string.Equals(this.BackgroundResourceName, this.backgroundResourceNameCache) && File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png"))) {
-                                this.customizedBackground = new Bitmap(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png"));
+                                Bitmap replacement = new Bitmap(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png"));
+                                this.customizedBackground?.Dispose();
+                                this.customizedBackground = replacement;
                                 this.backgroundResourceNameCache = this.BackgroundResourceName;
                             }
                             background = File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.BackgroundResourceName}.png")) ? this.customizedBackground : Properties.Resources.background_rave_royale;
@@ -2014,7 +2039,9 @@ namespace FinalBeansStats {
                         } else {
                             if (overlayCustomized) {
                                 if (!string.Equals(this.TabResourceName, this.tabResourceNameCache) && File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png"))) {
-                                    this.customizedTab = new Bitmap(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png"));
+                                    Bitmap replacement = new Bitmap(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png"));
+                                    this.customizedTab?.Dispose();
+                                    this.customizedTab = replacement;
                                     this.tabResourceNameCache = this.TabResourceName;
                                 }
                                 tab = File.Exists(Path.Combine($"{Stats.CURRENTDIR}Overlay", $"{this.TabResourceName}.png")) ? this.customizedTab : Properties.Resources.tab_unselected_rave_royale;

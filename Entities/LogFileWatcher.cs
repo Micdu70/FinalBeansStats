@@ -410,7 +410,7 @@ namespace FinalBeansStats {
             */
         }
 
-        private bool IsModeException(string roundId, string showId) {
+        private bool IsModeException(string roundId/*, string showId*/) {
             return roundId.IndexOf("round_1v1_button_basher_event_only", StringComparison.OrdinalIgnoreCase) != -1
                    || roundId.IndexOf("round_lava_event_only_slime_climb", StringComparison.OrdinalIgnoreCase) != -1
                    || roundId.IndexOf("round_slimeclimb_2_event_only", StringComparison.OrdinalIgnoreCase) != -1
@@ -829,7 +829,7 @@ namespace FinalBeansStats {
 
                         if (this.IsRealFinalRound(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
                             logRound.Info.IsFinal = true;
-                        } else if (this.IsModeException(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
+                        } else if (this.IsModeException(logRound.Info.RoundId/*, logRound.Info.ShowNameId*/)) {
                             logRound.Info.IsFinal = this.IsModeFinalException(logRound.Info.RoundId);
                         } else {
                             logRound.Info.IsFinal = this.StatsForm.StatLookup.TryGetValue(logRound.Info.Name, out LevelStats levelStats) && levelStats.IsFinal;
@@ -951,7 +951,7 @@ namespace FinalBeansStats {
 
                         if (this.IsRealFinalRound(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
                             logRound.Info.IsFinal = true;
-                        } else if (this.IsModeException(logRound.Info.RoundId, logRound.Info.ShowNameId)) {
+                        } else if (this.IsModeException(logRound.Info.RoundId/*, logRound.Info.ShowNameId*/)) {
                             logRound.Info.IsFinal = this.IsModeFinalException(logRound.Info.RoundId);
                         } else {
                             logRound.Info.IsFinal = this.StatsForm.StatLookup.TryGetValue(logRound.Info.Name, out LevelStats levelStats) && levelStats.IsFinal;

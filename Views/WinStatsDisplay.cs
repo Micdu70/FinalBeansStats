@@ -22,7 +22,6 @@ namespace FinalBeansStats {
             this.Opacity = 0;
         }
 
-        private double yMax;
         private Scatter MyScatterPlot1, MyScatterPlot2, MyScatterPlot3;
         private BarPlot MyBarPlot1, MyBarPlot2, MyBarPlot3;
         private LollipopPlot MyLollipopPlot1, MyLollipopPlot2, MyLollipopPlot3;
@@ -33,9 +32,9 @@ namespace FinalBeansStats {
             this.SetTheme(Stats.CurrentTheme);
             this.ChangeLanguage();
 
-            if (this.dates != null) {
-                this.yMax = this.shows.Max();
+            this.formsPlot.UserInputProcessor.DoubleLeftClickBenchmark(false);
 
+            if (this.dates != null) {
                 this.MyBarPlot1 = this.formsPlot.Plot.Add.Bars(this.dates, this.shows);
                 this.MyBarPlot2 = this.formsPlot.Plot.Add.Bars(this.dates, this.finals);
                 this.MyBarPlot3 = this.formsPlot.Plot.Add.Bars(this.dates, this.wins);
@@ -85,13 +84,6 @@ namespace FinalBeansStats {
                     IntegerTicksOnly = true,
                     MinimumTickSpacing = 1
                 };
-
-                this.formsPlot.Plot.Axes.SetLimits(
-                    left: DateTime.FromOADate(this.dates[0]).AddDays(-1).ToOADate(),
-                    right: DateTime.FromOADate(this.dates[this.dates.Length - 1]).AddDays(1).ToOADate(),
-                    bottom: 0,
-                    top: this.yMax + (this.dates.Length / 14D)
-                );
 
                 this.formsPlot.Plot.Axes.Rules.Add(new ScottPlot.AxisRules.LockedBottom(this.formsPlot.Plot.Axes.Left, 0));
 
@@ -198,14 +190,7 @@ namespace FinalBeansStats {
                     this.MyScatterPlot2.LegendText = Multilingual.GetWord("level_detail_finals");
                     this.MyScatterPlot3.LegendText = Multilingual.GetWord("level_detail_wins");
                 }
-
-                this.formsPlot.Plot.Axes.SetLimits(
-                    left: DateTime.FromOADate(this.dates[0]).AddDays(-1).ToOADate(),
-                    right: DateTime.FromOADate(this.dates[this.dates.Length - 1]).AddDays(1).ToOADate(),
-                    bottom: 0,
-                    top: this.yMax + (this.dates.Length / 14D)
-                );
-
+                this.formsPlot.Plot.Axes.AutoScale();
                 this.formsPlot.Refresh();
             });
         }
@@ -356,7 +341,7 @@ namespace FinalBeansStats {
 
         private void SetTooltipStyle() {
             this.tooltip.LineWidth = 1.7f;
-            this.tooltip.LineColor = ScottPlot.Color.FromColor(Color.FromArgb(239, this.Theme == MetroThemeStyle.Dark ? Color.Crimson : Color.GreenYellow));
+            this.tooltip.LineColor = ScottPlot.Color.FromColor(Color.FromArgb(239, this.Theme == MetroThemeStyle.Dark ? Color.Crimson : Color.DarkGreen));
             this.tooltip.FillColor = ScottPlot.Color.FromColor(Color.FromArgb(239, this.Theme == MetroThemeStyle.Dark ? Color.Black : Color.WhiteSmoke));
             this.tooltip.LabelStyle.ForeColor = ScottPlot.Color.FromColor(Color.FromArgb(239, this.Theme == MetroThemeStyle.Dark ? Color.WhiteSmoke : Color.Black));
             this.tooltip.LabelAlignment = Alignment.MiddleCenter;
@@ -445,6 +430,7 @@ namespace FinalBeansStats {
             } else {
                 this.MyScatterPlot3.IsVisible = this.chkWins.Checked;
             }
+            this.formsPlot.Plot.Axes.AutoScale();
             this.formsPlot.Refresh();
         }
 
@@ -461,6 +447,7 @@ namespace FinalBeansStats {
             } else {
                 this.MyScatterPlot2.IsVisible = this.chkFinals.Checked;
             }
+            this.formsPlot.Plot.Axes.AutoScale();
             this.formsPlot.Refresh();
         }
 
@@ -477,6 +464,7 @@ namespace FinalBeansStats {
             } else {
                 this.MyScatterPlot1.IsVisible = this.chkShows.Checked;
             }
+            this.formsPlot.Plot.Axes.AutoScale();
             this.formsPlot.Refresh();
         }
 

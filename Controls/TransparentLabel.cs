@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Windows.Forms;
 
 namespace FinalBeansStats {
@@ -26,106 +25,158 @@ namespace FinalBeansStats {
         public Color PingColor { get; set; }
         public Image RoundIcon { get; set; }
         public int OverlaySetting { get; set; }
+        private Font roundNameFont;
+        private Font platformTextFont;
+        private Font profileMeasureFont;
+        private SolidBrush foregroundBrush;
+        private SolidBrush accentBrush;
+        private SolidBrush shapeBrush;
+        private Pen accentPen;
+        private Pen shapePen;
+        private StringFormat platformStringFormat;
+        private StringFormat textStringFormat;
+        private GraphicsPath shapePath;
+        private GraphicsPath textPath;
+
+        private Font GetCachedFont(ref Font cachedFont, float size, FontStyle style, GraphicsUnit unit = GraphicsUnit.Pixel) {
+            Font baseFont = this.Font;
+            if (cachedFont != null && cachedFont.Size == size && cachedFont.Style == style && cachedFont.Unit == unit &&
+                string.Equals(cachedFont.FontFamily.Name, baseFont.FontFamily.Name, StringComparison.OrdinalIgnoreCase)) {
+                return cachedFont;
+            }
+
+            Font replacement = new Font(baseFont.FontFamily, size, style, unit);
+            cachedFont?.Dispose();
+            cachedFont = replacement;
+            return cachedFont;
+        }
+
+        private static SolidBrush GetCachedBrush(ref SolidBrush brush, Color color) {
+            if (brush == null) {
+                brush = new SolidBrush(color);
+            } else if (!brush.Color.Equals(color)) {
+                brush.Color = color;
+            }
+            return brush;
+        }
+
+        private static Pen GetCachedPen(ref Pen pen, Color color) {
+            if (pen == null) {
+                pen = new Pen(color);
+            } else if (!pen.Color.Equals(color)) {
+                pen.Color = color;
+            }
+            return pen;
+        }
+
+        public int MeasureTextWidth(string text) {
+            Font font = this.GetCachedFont(ref this.profileMeasureFont, this.Font.Size, FontStyle.Regular, this.Font.Unit);
+            return TextRenderer.MeasureText(text, font).Width;
+        }
+
+        protected override void Dispose(bool disposing) {
+            if (disposing) {
+                this.roundNameFont?.Dispose();
+                this.platformTextFont?.Dispose();
+                this.profileMeasureFont?.Dispose();
+                this.foregroundBrush?.Dispose();
+                this.accentBrush?.Dispose();
+                this.shapeBrush?.Dispose();
+                this.accentPen?.Dispose();
+                this.shapePen?.Dispose();
+                this.platformStringFormat?.Dispose();
+                this.textStringFormat?.Dispose();
+                this.shapePath?.Dispose();
+                this.textPath?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
         public void Draw(Graphics g) {
             if (!this.DrawVisible) return;
 
-            using (SolidBrush brBack = new SolidBrush(this.BackColor)) {
-                using (SolidBrush brFore = new SolidBrush(this.ForeColor)) {
-                    g.SmoothingMode = SmoothingMode.HighQuality;
-                    g.InterpolationMode = InterpolationMode.HighQualityBilinear;
-                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-                    if (this.PlatformIcon != null) {
-                        StringFormat stringFormat = new StringFormat {
-                            Alignment = StringAlignment.Far,
-                            LineAlignment = StringAlignment.Center
-                        };
-                        g.DrawImage(this.PlatformIcon, this.ImageX, this.ImageY, this.ImageWidth == 0 ? this.PlatformIcon.Width : this.ImageWidth, this.ImageHeight == 0 ? this.PlatformIcon.Height : this.ImageHeight);
-                        if (this.TextRight != null) {
-                            g.DrawString(this.TextRight, new Font(this.Font.FontFamily, this.Font.Size * 0.77f, this.Font.Style, GraphicsUnit.Pixel), brFore, new RectangleF(this.ClientRectangle.X + 5, this.ClientRectangle.Y - 3, this.ClientRectangle.Width, this.ClientRectangle.Height), stringFormat);
-                        }
-                    } else {
-                        StringFormat stringFormat = new StringFormat {
-                            Alignment = StringAlignment.Near
-                        };
-                        switch (this.TextAlign) {
-                            case ContentAlignment.BottomLeft:
-                            case ContentAlignment.BottomCenter:
-                            case ContentAlignment.BottomRight:
-                                stringFormat.LineAlignment = StringAlignment.Far;
-                                break;
-                            case ContentAlignment.MiddleLeft:
-                            case ContentAlignment.MiddleCenter:
-                            case ContentAlignment.MiddleRight:
-                                stringFormat.LineAlignment = StringAlignment.Center;
-                                break;
-                            case ContentAlignment.TopLeft:
-                            case ContentAlignment.TopCenter:
-                            case ContentAlignment.TopRight:
-                                stringFormat.LineAlignment = StringAlignment.Near;
-                                break;
-                        }
-                        switch (this.TextAlign) {
-                            case ContentAlignment.TopCenter:
-                            case ContentAlignment.MiddleCenter:
-                            case ContentAlignment.BottomCenter:
-                                if (string.IsNullOrEmpty(this.TextRight)) {
-                                    stringFormat.Alignment = StringAlignment.Center;
-                                }
-                                break;
-                        }
-
-                        if (!string.IsNullOrEmpty(this.Text)) {
-                            this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, this.Font.Style, this.Font.Size * this.GetFontSizeFactor(), this.Text, stringFormat);
-                            if ((string.Equals(this.Name, "lblPlayers") && (this.OverlaySetting == 0 || this.OverlaySetting == 1 || this.OverlaySetting == 4 || this.OverlaySetting == 5)) ||
-                                (string.Equals(this.Name, "lblFastest") && this.OverlaySetting == 2) ||
-                                (string.Equals(this.Name, "lblFinals") && this.OverlaySetting == 3) ||
-                                (string.Equals(this.Name, "lblDuration") && this.OverlaySetting == 6)) {
-                            }
-                        }
-
-                        if (this.Image != null) {
-                            if (string.Equals(this.Name, "lblPingIcon")) {
-                                this.FillRoundedRectangleF(g, null, new SolidBrush(this.PingColor), this.ImageX - 2, this.ImageY - 3, (this.ImageWidth == 0 ? this.Image.Width : this.ImageWidth) + 4, (this.ImageHeight == 0 ? this.Image.Height : this.ImageHeight) + 5, 6f);
-                            }
-                            g.DrawImage(this.Image, this.ImageX, this.ImageY, this.ImageWidth == 0 ? this.Image.Width : this.ImageWidth, this.ImageHeight == 0 ? this.Image.Height : this.ImageHeight);
-                        }
-
-                        if (!string.IsNullOrEmpty(this.TextRight)) {
-                            stringFormat.Alignment = StringAlignment.Far;
-                            if (string.Equals(this.Name, "lblRound")) {
-                                Font fontForLongText = this.GetFontForRoundName(this.TextRight);
-                                if (!this.LevelColor.IsEmpty) {
-                                    float widthOfText = g.MeasureString(this.TextRight, fontForLongText).Width;
-                                    //float widthOfText = TextRenderer.MeasureText(this.TextRight, fontForLongText).Width;
-                                    RectangleF roundRect = this.FillRoundedRectangleF(g, new Pen(this.LevelColor), new SolidBrush(this.LevelColor), (this.ClientRectangle.Width - widthOfText), this.ClientRectangle.Y, widthOfText, 22f, 16f);
-                                    if (this.RoundIcon != null) {
-                                        this.FillRoundedRectangleF(g, new Pen(this.LevelTrueColor), new SolidBrush(this.LevelTrueColor), (roundRect.X - 7f) - this.ImageWidth, this.ClientRectangle.Y, this.ImageWidth + 2, 22f, 8f);
-                                        g.DrawImage(this.RoundIcon, (roundRect.X - 6f) - this.ImageWidth, this.ClientRectangle.Y, this.ImageWidth, this.ImageHeight);
-                                    }
-                                    brFore.Color = this.LevelColor.IsEmpty ? this.ForeColor : Color.White;
-                                    stringFormat.Alignment = StringAlignment.Near;
-                                    this.DrawOutlineText(g, new RectangleF(roundRect.X + 0.2f, ClientRectangle.Y, this.ClientRectangle.Width, this.ClientRectangle.Height), null, brFore, fontForLongText.FontFamily, fontForLongText.Style, fontForLongText.Size, this.TextRight, stringFormat);
-                                } else {
-                                    brFore.Color = this.LevelColor.IsEmpty ? this.ForeColor : Color.White;
-                                    this.DrawOutlineText(g, this.ClientRectangle, null, brFore, fontForLongText.FontFamily, fontForLongText.Style, fontForLongText.Size, this.TextRight, stringFormat);
-                                }
-                                //g.DrawString(this.TextRight, this.GetFontForRoundName(this.TextRight), brFore, this.ClientRectangle, stringFormat);
-                            } else if (string.Equals(this.Name, "lblPlayers")) {
-                                if (this.TextRight.EndsWith(" ms", StringComparison.OrdinalIgnoreCase)) {
-                                    this.DrawOutlineText(g, this.ClientRectangle, new Pen(this.PingColor), new SolidBrush(this.PingColor), this.Font.FontFamily, this.Font.Style, this.Font.Size * this.GetFontSizeFactor(), this.TextRight, stringFormat);
-                                    this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, FontStyle.Regular, this.Font.Size * this.GetFontSizeFactor(), this.TextRight, stringFormat);
-                                } else {
-                                    this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, this.Font.Style, this.Font.Size * this.GetFontSizeFactor(), this.TextRight, stringFormat);
-                                }
-                            } else {
-                                this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, this.Font.Style, this.Font.Size * this.GetFontSizeFactor(), this.TextRight, stringFormat);
-                                //g.DrawString(this.TextRight, this.Font, brFore, this.ClientRectangle, stringFormat);
-                            }
-                        }
-                    }
+            SolidBrush brFore = GetCachedBrush(ref this.foregroundBrush, this.ForeColor);
+            if (this.PlatformIcon != null) {
+                StringFormat stringFormat = this.platformStringFormat ?? (this.platformStringFormat = new StringFormat());
+                stringFormat.Alignment = StringAlignment.Far;
+                stringFormat.LineAlignment = StringAlignment.Center;
+                g.DrawImage(this.PlatformIcon, this.ImageX, this.ImageY, this.ImageWidth == 0 ? this.PlatformIcon.Width : this.ImageWidth, this.ImageHeight == 0 ? this.PlatformIcon.Height : this.ImageHeight);
+                if (this.TextRight != null) {
+                    Font font = this.GetCachedFont(ref this.platformTextFont, this.Font.Size * 0.77f, this.Font.Style);
+                    g.DrawString(this.TextRight, font, brFore, new RectangleF(this.ClientRectangle.X + 5, this.ClientRectangle.Y - 3, this.ClientRectangle.Width, this.ClientRectangle.Height), stringFormat);
                 }
+                return;
+            }
+
+            StringFormat textFormat = this.textStringFormat ?? (this.textStringFormat = new StringFormat());
+            textFormat.Alignment = StringAlignment.Near;
+            switch (this.TextAlign) {
+                case ContentAlignment.BottomLeft:
+                case ContentAlignment.BottomCenter:
+                case ContentAlignment.BottomRight:
+                    textFormat.LineAlignment = StringAlignment.Far;
+                    break;
+                case ContentAlignment.MiddleLeft:
+                case ContentAlignment.MiddleCenter:
+                case ContentAlignment.MiddleRight:
+                    textFormat.LineAlignment = StringAlignment.Center;
+                    break;
+                case ContentAlignment.TopLeft:
+                case ContentAlignment.TopCenter:
+                case ContentAlignment.TopRight:
+                    textFormat.LineAlignment = StringAlignment.Near;
+                    break;
+            }
+            switch (this.TextAlign) {
+                case ContentAlignment.TopCenter:
+                case ContentAlignment.MiddleCenter:
+                case ContentAlignment.BottomCenter:
+                    if (string.IsNullOrEmpty(this.TextRight)) {
+                        textFormat.Alignment = StringAlignment.Center;
+                    }
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(this.Text)) {
+                this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, this.Font.Style, this.Font.Size * this.GetFontSizeFactor(), this.Text, textFormat);
+            }
+
+            if (this.Image != null) {
+                if (string.Equals(this.Name, "lblPingIcon")) {
+                    this.FillRoundedRectangleF(g, null, GetCachedBrush(ref this.shapeBrush, this.PingColor), this.ImageX - 2, this.ImageY - 3, (this.ImageWidth == 0 ? this.Image.Width : this.ImageWidth) + 4, (this.ImageHeight == 0 ? this.Image.Height : this.ImageHeight) + 5, 6f);
+                }
+                g.DrawImage(this.Image, this.ImageX, this.ImageY, this.ImageWidth == 0 ? this.Image.Width : this.ImageWidth, this.ImageHeight == 0 ? this.Image.Height : this.ImageHeight);
+            }
+
+            if (string.IsNullOrEmpty(this.TextRight)) return;
+
+            textFormat.Alignment = StringAlignment.Far;
+            if (string.Equals(this.Name, "lblRound")) {
+                Font fontForLongText = this.GetCachedFont(ref this.roundNameFont, this.Font.Size * this.GetFontSizeFactorForRoundName(this.TextRight), this.Font.Style);
+                if (!this.LevelColor.IsEmpty) {
+                    float widthOfText = g.MeasureString(this.TextRight, fontForLongText).Width;
+                    RectangleF roundRect = this.FillRoundedRectangleF(g, GetCachedPen(ref this.shapePen, this.LevelColor), GetCachedBrush(ref this.shapeBrush, this.LevelColor), this.ClientRectangle.Width - widthOfText, this.ClientRectangle.Y, widthOfText, 22f, 16f);
+                    if (this.RoundIcon != null) {
+                        this.FillRoundedRectangleF(g, GetCachedPen(ref this.shapePen, this.LevelTrueColor), GetCachedBrush(ref this.shapeBrush, this.LevelTrueColor), (roundRect.X - 7f) - this.ImageWidth, this.ClientRectangle.Y, this.ImageWidth + 2, 22f, 8f);
+                        g.DrawImage(this.RoundIcon, (roundRect.X - 6f) - this.ImageWidth, this.ClientRectangle.Y, this.ImageWidth, this.ImageHeight);
+                    }
+                    brFore.Color = this.LevelColor.IsEmpty ? this.ForeColor : Color.White;
+                    textFormat.Alignment = StringAlignment.Near;
+                    this.DrawOutlineText(g, new RectangleF(roundRect.X + 0.2f, ClientRectangle.Y, this.ClientRectangle.Width, this.ClientRectangle.Height), null, brFore, fontForLongText.FontFamily, fontForLongText.Style, fontForLongText.Size, this.TextRight, textFormat);
+                } else {
+                    brFore.Color = this.LevelColor.IsEmpty ? this.ForeColor : Color.White;
+                    this.DrawOutlineText(g, this.ClientRectangle, null, brFore, fontForLongText.FontFamily, fontForLongText.Style, fontForLongText.Size, this.TextRight, textFormat);
+                }
+            } else if (string.Equals(this.Name, "lblPlayers")) {
+                float fontSize = this.Font.Size * this.GetFontSizeFactor();
+                if (this.TextRight.EndsWith(" ms", StringComparison.OrdinalIgnoreCase)) {
+                    this.DrawOutlineText(g, this.ClientRectangle, GetCachedPen(ref this.accentPen, this.PingColor), GetCachedBrush(ref this.accentBrush, this.PingColor), this.Font.FontFamily, this.Font.Style, fontSize, this.TextRight, textFormat);
+                    this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, FontStyle.Regular, fontSize, this.TextRight, textFormat);
+                } else {
+                    this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, this.Font.Style, fontSize, this.TextRight, textFormat);
+                }
+            } else {
+                this.DrawOutlineText(g, this.ClientRectangle, null, brFore, this.Font.FontFamily, this.Font.Style, this.Font.Size * this.GetFontSizeFactor(), this.TextRight, textFormat);
             }
         }
 
@@ -187,10 +238,6 @@ namespace FinalBeansStats {
             return factor > 1f ? 1f : factor;
         }
 
-        private Font GetFontForRoundName(string text) {
-            return new Font(this.Font.FontFamily, this.Font.Size * this.GetFontSizeFactorForRoundName(text), this.Font.Style, GraphicsUnit.Pixel);
-        }
-
         private float GetFontSizeFactorForRoundName(string text) {
             float factor = 1f,
                   factorOffsetForSpace = 0, factorOffsetForEngUppercase = 0, factorOffsetForEngLowercase = 0, factorOffsetForKorCharacter = 0,
@@ -202,7 +249,7 @@ namespace FinalBeansStats {
                 bool isLangGroup1 = lang == Language.English || lang == Language.French || lang == Language.Spanish;
                 bool isLangGroup2 = lang == Language.Korean || lang == Language.Japanese;
                 bool isLangGroup3 = lang == Language.SimplifiedChinese || lang == Language.TraditionalChinese;
-                if (isLangGroup1 && string.Equals(this.Font.FontFamily.Name, Overlay.GetDefaultFontFamilies(Language.English).Name)) {
+                if (isLangGroup1 && string.Equals(this.Font.FontFamily.Name, Overlay.GetFont(Language.English).Name)) {
                     factorOffsetForSpace = this.LevelColor.IsEmpty ? (lang == 0 ? 0.05f : 0.045f) : 0.065f;
                     factorOffsetForEngUppercase = this.LevelColor.IsEmpty ? (lang == 0 ? 0.0307f : 0.0278f) : 0.034f;
                     factorOffsetForEngLowercase = this.LevelColor.IsEmpty ? (lang == 0 ? 0.0333f : 0.0302f) : 0.037f;
@@ -211,7 +258,7 @@ namespace FinalBeansStats {
                     factorOffsetForChineseCharacter = this.LevelColor.IsEmpty ? (lang == 0 ? 0.017f : 0.015f) : 0.0192f;
                     factorOffsetForSignCharacter = this.LevelColor.IsEmpty ? (lang == 0 ? 0.0284f : 0.0257f) : 0.0315f;
                     factorOffsetForNumeric = this.LevelColor.IsEmpty ? (lang == 0 ? 0.0312f : 0.0282f) : 0.0345f;
-                } else if (isLangGroup2 && string.Equals(this.Font.FontFamily.Name, Overlay.GetDefaultFontFamilies(Language.Korean).Name)) {
+                } else if (isLangGroup2 && string.Equals(this.Font.FontFamily.Name, Overlay.GetFont(Language.Korean).Name)) {
                     factorOffsetForSpace = this.LevelColor.IsEmpty ? (lang == Language.Korean ? 0.067f : 0.055f) : 0.073f;
                     factorOffsetForEngUppercase = this.LevelColor.IsEmpty ? (lang == Language.Korean ? 0.034f : 0.029f) : 0.034f;
                     factorOffsetForEngLowercase = this.LevelColor.IsEmpty ? (lang == Language.Korean ? 0.043f : 0.0372f) : 0.0427f;
@@ -220,7 +267,7 @@ namespace FinalBeansStats {
                     factorOffsetForChineseCharacter = this.LevelColor.IsEmpty ? (lang == Language.Korean ? 0.021f : 0.0175f) : 0.0217f;
                     factorOffsetForSignCharacter = this.LevelColor.IsEmpty ? (lang == Language.Korean ? 0.0315f : 0.0267f) : 0.0315f;
                     factorOffsetForNumeric = this.LevelColor.IsEmpty ? (lang == Language.Korean ? 0.046f : 0.0397f) : 0.046f;
-                } else if (isLangGroup3 && string.Equals(this.Font.FontFamily.Name, Overlay.GetDefaultFontFamilies(Language.SimplifiedChinese).Name)) {
+                } else if (isLangGroup3 && string.Equals(this.Font.FontFamily.Name, Overlay.GetFont(Language.SimplifiedChinese).Name)) {
                     factorOffsetForSpace = this.LevelColor.IsEmpty ? 0.08f : 0.065f;
                     factorOffsetForEngUppercase = this.LevelColor.IsEmpty ? 0.0366f : 0.0277f;
                     factorOffsetForEngLowercase = this.LevelColor.IsEmpty ? 0.0459f : 0.035f;
@@ -318,35 +365,34 @@ namespace FinalBeansStats {
         }
 
         private RectangleF FillRoundedRectangleF(Graphics g, Pen pen, Brush brush, float x, float y, float width, float height, float radius) {
-            using (GraphicsPath path = new GraphicsPath()) {
-                RectangleF rect = new RectangleF(x, y, radius, radius);
-                path.AddArc(rect, 180, 90);
-                rect.X = x + width - radius;
-                path.AddArc(rect, 270, 90);
-                rect.Y = y + height - radius;
-                path.AddArc(rect, 0, 90);
-                rect.X = x;
-                path.AddArc(rect, 90, 90);
-                path.CloseFigure();
-                g.FillPath(brush, path);
-                if (pen != null) { g.DrawPath(pen, path); }
-                return rect;
-            }
+            GraphicsPath path = this.shapePath ?? (this.shapePath = new GraphicsPath());
+            path.Reset();
+            RectangleF rect = new RectangleF(x, y, radius, radius);
+            path.AddArc(rect, 180, 90);
+            rect.X = x + width - radius;
+            path.AddArc(rect, 270, 90);
+            rect.Y = y + height - radius;
+            path.AddArc(rect, 0, 90);
+            rect.X = x;
+            path.AddArc(rect, 90, 90);
+            path.CloseFigure();
+            g.FillPath(brush, path);
+            if (pen != null) { g.DrawPath(pen, path); }
+            return rect;
         }
 
         private void DrawOutlineText(Graphics g, RectangleF layoutRect, Pen outlinePen, Brush fillBrush, FontFamily fontFamily, FontStyle fontStyle, float fontSize, string text, StringFormat stringFormat) {
-            using (GraphicsPath path = new GraphicsPath()) {
-                path.AddString(text, fontFamily, (int)fontStyle, fontSize, layoutRect, stringFormat);
-                path.CloseFigure();
-                g.FillPath(fillBrush, path);
-                if (outlinePen != null) g.DrawPath(outlinePen, path);
-            }
+            GraphicsPath path = this.textPath ?? (this.textPath = new GraphicsPath());
+            path.Reset();
+            path.AddString(text, fontFamily, (int)fontStyle, fontSize, layoutRect, stringFormat);
+            path.CloseFigure();
+            g.FillPath(fillBrush, path);
+            if (outlinePen != null) g.DrawPath(outlinePen, path);
         }
 
         private int GetCountKorCharacter(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0xAC00 <= ch && ch <= 0xD7A3)
                     || (0x3131 <= ch && ch <= 0x318E)
                    ) count++;
@@ -356,8 +402,7 @@ namespace FinalBeansStats {
 
         private int GetCountJpnCharacter(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x3040 <= ch && ch <= 0x309F) //Hiragana
                     || (0x30A0 <= ch && ch <= 0x30FF) //Katakana
                                                       //|| (0x3400 <= ch && ch <= 0x4DBF) //CJK Unified Ideographs Extension A (6592EA)
@@ -370,8 +415,7 @@ namespace FinalBeansStats {
 
         private int GetCountChineseCharacter(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if (ch >= 0x4e00 && ch <= 0x9fff) count++;
             }
             return count;
@@ -379,8 +423,7 @@ namespace FinalBeansStats {
 
         private int GetCountEngUppercase(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x41 <= ch && ch <= 0x5A)) count++;
             }
             return count;
@@ -388,8 +431,7 @@ namespace FinalBeansStats {
 
         private int GetCountEngLowercase(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x61 <= ch && ch <= 0x7A)) count++;
             }
             return count;
@@ -397,8 +439,7 @@ namespace FinalBeansStats {
 
         private int GetCountRusUppercase(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x410 <= ch && ch <= 0x42F)) count++;
             }
             return count;
@@ -406,8 +447,7 @@ namespace FinalBeansStats {
 
         private int GetCountRusLowercase(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x430 <= ch && ch <= 0x44F)) count++;
             }
             return count;
@@ -415,8 +455,7 @@ namespace FinalBeansStats {
 
         private int GetCountSpace(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if (0x20 == ch) count++;
             }
             return count;
@@ -424,8 +463,7 @@ namespace FinalBeansStats {
 
         private int GetCountSignCharacter(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if ((0x21 <= ch && ch <= 0x2F)
                     || (0x3A <= ch && ch <= 0x40)
                     || (0x5B <= ch && ch <= 0x60)
@@ -437,8 +475,7 @@ namespace FinalBeansStats {
 
         private int GetCountNumeric(string s) {
             int count = 0;
-            char[] charArr = s.ToCharArray();
-            foreach (char ch in charArr) {
+            foreach (char ch in s) {
                 if (0x30 <= ch && ch <= 0x39) count++;
             }
             return count;
